@@ -3368,6 +3368,10 @@ img { display: block; max-width: 100%; }
 /* ════════════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════════════ */
+/* iOS Safari auto-zoom prevention: inputs must be ≥16px font-size */
+@media (max-width: 1024px) {
+  .search-input, .prod-search-input, .rename-input { font-size: 1rem; }
+}
 @media (max-width: 768px) {
   /* ── Nav: refined ice glass with chunkier pills ── */
   .site-nav {

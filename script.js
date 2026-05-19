@@ -154,21 +154,21 @@ const T = {
     nav_myroutine:'My Routine',nav_device:'Device Guide',nav_conflict:'Conflict Checker',nav_emergency:'Emergency',
     home_label:'Your Personalised Skin Journey',
     hero_tagline:'Skin intelligence, beautifully phased.',
-    hero_sub:'Personalised routines for sensitive, acne-prone, mature, and barrier-compromised skin. 188 products from 49 worldwide brands, fully analysed.',
+    hero_sub:'Personalised routines for sensitive, acne-prone, mature, and barrier-compromised skin. 213 products from 51 worldwide brands, fully analysed.',
     home_sub:'Personalised routines for sensitive, acne-prone, mature, and barrier-compromised skin. Explore worldwide skincare brands, analyse ingredients, and get a science-backed routine made for you.',
     home_features_label:'Everything you need',
     home_journey_eyebrow:'✦ Everything you need ✦',
     home_journey_title:'Your complete <em>skin journey</em>',
-    pill_barrier:'🛡 Barrier-First',pill_aging:'✨ Anti-Aging Support',pill_worldwide:'🌍 Worldwide Brands',pill_brands:'🌍 49 Brands · 188 Products',pill_device:'💡 Medicube Booster Pro',pill_ff:'🌿 Fragrance-Free Focus',
+    pill_barrier:'🛡 Barrier-First',pill_aging:'✨ Anti-Aging Support',pill_worldwide:'🌍 Worldwide Brands',pill_brands:'🌍 51 Brands · 213 Products',pill_device:'💡 Medicube Booster Pro',pill_ff:'🌿 Fragrance-Free Focus',
     btn_browse:'Browse Products',btn_build:'Build My Routine',
-    feat_library:'Product Library',feat_library_desc:'188 products across 49 worldwide brands with full INCI ingredient lists, safety flags, and concern analysis.',
+    feat_library:'Product Library',feat_library_desc:'213 products across 51 worldwide brands with full INCI ingredient lists, safety flags, and concern analysis.',
     feat_builder:'Routine Builder',feat_builder_desc:'Quiz-based personalised routine generator with phased skincare schedules and day-by-day protocols.',
     feat_saved:'My Routines',feat_saved_desc:'Save, manage, export, and import your personalised skincare routines across devices.',
     feat_device:'Device Guide',feat_device_desc:'Medicube Booster Pro pairing guide for every phase, mode, and skin type.',
     feat_conflict:'Conflict Checker',feat_conflict_desc:'Check ingredient combinations before using them together on your skin.',
     feat_emergency:'Emergency Routine',feat_emergency_desc:'Instant barrier repair protocol when your skin suddenly flares or reacts.',
     home_disclaimer:'⚠️ Always patch test · Verify ingredient lists on your physical carton · This is a guide, not medical advice',
-    library_sub:'188 products · 49 brands worldwide · Full INCI ingredient lists · A–Z by brand',
+    library_sub:'213 products · 51 brands worldwide · Full INCI ingredient lists · A–Z by brand',
     notice_db_title:'Demo Database Active.',
     notice_db_body:'To load your own product database, use the import function or provide a JSON/JS data file. Products will automatically populate all sections.',
     filter_category:'Category',filter_concern:'Concern',filter_formula:'Formula',filter_actives:'Active Ingredients',
@@ -383,6 +383,14 @@ const T = {
     analyses_organised_phased:'phased',
     analyses_organised_simple:'a',
     analyses_organised_body:'Phase 1 focuses on barrier repair. Actives introduced in Phase 3+ only.',
+    analysis_sensitive_actives:'Too Many Actives for Sensitive Skin',
+    analyses_sensitive_actives_body:'{n} strong actives selected. For sensitive skin, introduce only 1 active at a time and always prioritise barrier repair first.',
+    analysis_retinoid_barrier:'Retinoid with Compromised Barrier',
+    analyses_retinoid_barrier_body:'Your barrier needs recovery first. Start retinoids only after barrier is repaired — use Barrier Repair phase for at least 2–4 weeks first.',
+    analysis_multi_retinoid:'Multiple Retinoids Detected',
+    analyses_multi_retinoid_body:'Never use more than one retinoid at a time. Remove one retinoid product to avoid severe irritation and over-exfoliation.',
+    analysis_barrier_support:'Add Barrier Support',
+    analyses_barrier_support_body:'You have active treatments but no barrier-supporting product (ceramides, centella, panthenol). Always pair actives with barrier support.',
     /* Day plan goals */
     dpgoal_deep_hyd_barrier:'Deep hydration + barrier sealing',
     dpgoal_device_hydration:'Device-boosted hydration',
@@ -424,14 +432,14 @@ const T = {
     nav_myroutine:'รูทีนของฉัน',nav_device:'คู่มืออุปกรณ์',nav_conflict:'ตรวจสอบส่วนผสม',nav_emergency:'ฉุกเฉิน',
     home_label:'การดูแลผิวส่วนตัวของคุณ',
     hero_tagline:'วิทยาศาสตร์ผิว สวยงามในทุกเฟส',
-    hero_sub:'รูทีนดูแลผิวเฉพาะบุคคลสำหรับผิวแพ้ง่าย ผิวเป็นสิว ผิวผู้ใหญ่ และเกราะผิวบกพร่อง · 188 ผลิตภัณฑ์จาก 49 แบรนด์ทั่วโลก พร้อมการวิเคราะห์เต็มรูปแบบ',
+    hero_sub:'รูทีนดูแลผิวเฉพาะบุคคลสำหรับผิวแพ้ง่าย ผิวเป็นสิว ผิวผู้ใหญ่ และเกราะผิวบกพร่อง · 213 ผลิตภัณฑ์จาก 51 แบรนด์ทั่วโลก พร้อมการวิเคราะห์เต็มรูปแบบ',
     home_sub:'รูทีนดูแลผิวส่วนตัวสำหรับผิวแพ้ง่าย สิว ผิวผู้ใหญ่ และผิวที่ขาดน้ำ ค้นหาแบรนด์สกินแคร์ทั่วโลก วิเคราะห์ส่วนผสม และรับรูทีนที่เหมาะกับคุณ',
     home_features_label:'ทุกสิ่งที่คุณต้องการ',
     home_journey_eyebrow:'✦ ทุกสิ่งที่คุณต้องการ ✦',
     home_journey_title:'<em>เส้นทางผิวสวย</em>ครบทุกขั้น',
-    pill_barrier:'🛡 เน้นซ่อมแซมผิว',pill_aging:'✨ ต้านริ้วรอย',pill_worldwide:'🌍 แบรนด์ทั่วโลก',pill_brands:'🌍 49 แบรนด์ · 188 ผลิตภัณฑ์',pill_device:'💡 Medicube Booster Pro',pill_ff:'🌿 ปราศจากน้ำหอม',
+    pill_barrier:'🛡 เน้นซ่อมแซมผิว',pill_aging:'✨ ต้านริ้วรอย',pill_worldwide:'🌍 แบรนด์ทั่วโลก',pill_brands:'🌍 51 แบรนด์ · 213 ผลิตภัณฑ์',pill_device:'💡 Medicube Booster Pro',pill_ff:'🌿 ปราศจากน้ำหอม',
     btn_browse:'ดูผลิตภัณฑ์',btn_build:'สร้างรูทีนของฉัน',
-    feat_library:'คลังผลิตภัณฑ์',feat_library_desc:'188 ผลิตภัณฑ์จาก 49 แบรนด์ทั่วโลก พร้อมรายการส่วนผสม INCI ครบถ้วน สัญลักษณ์ความปลอดภัย และการวิเคราะห์ปัญหาผิว',
+    feat_library:'คลังผลิตภัณฑ์',feat_library_desc:'213 ผลิตภัณฑ์จาก 51 แบรนด์ทั่วโลก พร้อมรายการส่วนผสม INCI ครบถ้วน สัญลักษณ์ความปลอดภัย และการวิเคราะห์ปัญหาผิว',
     feat_builder:'สร้างรูทีน',feat_builder_desc:'เครื่องสร้างรูทีนเฉพาะบุคคลแบบควิซ พร้อมตารางเป็นเฟสและโปรโตคอลรายวัน',
     feat_saved:'รูทีนของฉัน',feat_saved_desc:'บันทึก จัดการ ส่งออก และนำเข้ารูทีนดูแลผิวเฉพาะบุคคลข้ามอุปกรณ์',
     feat_device:'คู่มืออุปกรณ์',feat_device_desc:'คู่มือจับคู่ Medicube Booster Pro สำหรับทุกเฟส ทุกโหมด และทุกประเภทผิว',
@@ -658,6 +666,14 @@ const T = {
     analyses_organised_phased:'แบบเป็นเฟส',
     analyses_organised_simple:'',
     analyses_organised_body:'เฟส 1 เน้นซ่อมแซมเกราะผิว สารออกฤทธิ์เริ่มใช้ตั้งแต่เฟส 3 เป็นต้นไป',
+    analysis_sensitive_actives:'สารออกฤทธิ์มากเกินไปสำหรับผิวแพ้ง่าย',
+    analyses_sensitive_actives_body:'เลือกสารออกฤทธิ์แรง {n} ชนิด สำหรับผิวแพ้ง่าย ควรแนะนำสารออกฤทธิ์ทีละชนิด และเน้นซ่อมแซมเกราะผิวก่อนเสมอ',
+    analysis_retinoid_barrier:'ใช้เรตินอยด์ขณะเกราะผิวอ่อนแอ',
+    analyses_retinoid_barrier_body:'เกราะผิวต้องการการฟื้นฟูก่อน ควรเริ่มใช้เรตินอยด์หลังจากซ่อมแซมเกราะผิวแล้วเท่านั้น — ใช้เฟสซ่อมแซมเกราะผิวอย่างน้อย 2–4 สัปดาห์ก่อน',
+    analysis_multi_retinoid:'ตรวจพบเรตินอยด์หลายชนิด',
+    analyses_multi_retinoid_body:'อย่าใช้เรตินอยด์มากกว่าหนึ่งชนิดพร้อมกัน ลบผลิตภัณฑ์เรตินอยด์หนึ่งชิ้นออกเพื่อป้องกันการระคายเคืองรุนแรงและการผลัดเซลล์มากเกินไป',
+    analysis_barrier_support:'เพิ่มผลิตภัณฑ์บำรุงเกราะผิว',
+    analyses_barrier_support_body:'คุณมีสารออกฤทธิ์แต่ไม่มีผลิตภัณฑ์บำรุงเกราะผิว (เซราไมด์ เซนเทลลา แพนทีนอล) ควรจับคู่สารออกฤทธิ์กับผลิตภัณฑ์ซ่อมแซมเกราะผิวเสมอ',
     /* Day plan goals */
     dpgoal_deep_hyd_barrier:'เติมความชุ่มชื้นลึก + ปิดกั้นเกราะผิว',
     dpgoal_device_hydration:'เพิ่มความชุ่มชื้นด้วยอุปกรณ์',
@@ -780,7 +796,7 @@ function filterProducts(){
   const q=(document.getElementById('lib-search')||{}).value||''; const ql=q.toLowerCase();
   return PRODUCT_DB.filter(p=>{
     if(activeFilters.category.length&&!activeFilters.category.includes(p.category))return false;
-    if(activeFilters.concern.length&&!activeFilters.concern.some(c=>p.concerns.includes(c)))return false;
+    if(activeFilters.concern.length&&!activeFilters.concern.some(c=>prodConcernTags(p).includes(c)))return false;
     if(activeFilters.formula.length){ for(const f of activeFilters.formula){ if(f==='fragrance-free'&&!p.fragranceFree)return false; if(f==='alcohol-free'&&!p.alcoholFree)return false; if(f==='eo-free'&&!p.eoFree)return false; } }
     if(activeFilters.active.length&&!activeFilters.active.some(a=>p.activeIngredients&&p.activeIngredients.includes(a)))return false;
     if(ql){ const s=[p.brand,p.name,p.category,...(p.concerns||[]),...(p.keyIngredients||[]),...(p.activeIngredients||[]),...(p.formula||[])].join(' ').toLowerCase(); if(!s.includes(ql))return false; }
@@ -1304,7 +1320,9 @@ function renderRoutineResultBody(rd){
 function renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHighSens){
   const c1IsBalm=c1&&(c1.subcategory==='cleansing balm'||c1.subcategory==='cleansing oil');
   const waterCleanse=c2||(!c1IsBalm&&c1?c1:null);
-  const makeupSerum=selected.find(p=>p.makeupPrep&&(p.category==='serum'||p.category==='essence'))||serum||essence;
+  const makeupSerum=selected.find(p=>p.makeupPrep&&(p.category==='serum'||p.category==='essence'))
+    ||(serum&&!hasRetinoid(serum)&&!hasExfoliantAcid(serum)?serum:null)
+    ||(essence&&!hasRetinoid(essence)&&!hasExfoliantAcid(essence)?essence:null);
   const panelSt='background:var(--off-white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px';
 
   /* Barrier Repair Phase */
@@ -1318,13 +1336,18 @@ function renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHigh
     ${moist?bs('n',prodEmoji(moist),moist.brand,moist.name,t('morning_moist_note')):''}
     ${!spf?`<div class="info-box amber">${t('missing_spf_note')}</div>`:bs('n',prodEmoji(spf),spf.brand,spf.name,t('morning_spf_note'))}`;
 
+  // Morning-safe filtering — retinoids and strong acid serums belong at night only
+  const morningToner=toner&&!hasExfoliantAcid(toner)?toner:null;
+  const morningEssence=essence&&!hasRetinoid(essence)&&!hasExfoliantAcid(essence)?essence:null;
+  const morningSerum=serum&&!hasRetinoid(serum)&&!hasExfoliantAcid(serum)?serum:null;
+
   /* Normal Phase */
   let nn=0;const ns=(tp,e,b,n,note)=>makeStep(tp,++nn,e,b,n,note);
   const normalHtml=`
     ${waterCleanse?ns('n',prodEmoji(waterCleanse),waterCleanse.brand,waterCleanse.name,t('morning_cleanser_optional')):ns('re','💧','',t('water_rinse'),t('no_cleanser_note'))}
-    ${toner?ns('n',prodEmoji(toner),toner.brand,toner.name,t('morning_toner_note')):''}
-    ${essence?ns('n',prodEmoji(essence),essence.brand,essence.name,''):''}
-    ${serum?ns('n',prodEmoji(serum),serum.brand,serum.name,''):''}
+    ${morningToner?ns('n',prodEmoji(morningToner),morningToner.brand,morningToner.name,t('morning_toner_note')):''}
+    ${morningEssence?ns('n',prodEmoji(morningEssence),morningEssence.brand,morningEssence.name,''):''}
+    ${morningSerum?ns('n',prodEmoji(morningSerum),morningSerum.brand,morningSerum.name,''):''}
     ${moist?ns('n',prodEmoji(moist),moist.brand,moist.name,t('morning_moist_note')):''}
     ${!spf?`<div class="info-box amber">${t('missing_spf_note')}</div>`:ns('n',prodEmoji(spf),spf.brand,spf.name,t('morning_spf_note'))}`;
 
@@ -1332,7 +1355,7 @@ function renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHigh
   let mn=0;const mns=(tp,e,b,n,note)=>makeStep(tp,++mn,e,b,n,note);
   const makeupHtml=`
     ${waterCleanse?mns('n',prodEmoji(waterCleanse),waterCleanse.brand,waterCleanse.name,t('morning_makeup_cleanser_note')):mns('re','💧','',t('water_rinse'),t('morning_makeup_cleanser_note'))}
-    ${toner?mns('n',prodEmoji(toner),toner.brand,toner.name,t('morning_toner_note')):''}
+    ${morningToner?mns('n',prodEmoji(morningToner),morningToner.brand,morningToner.name,t('morning_toner_note')):''}
     ${makeupSerum?mns('n',prodEmoji(makeupSerum),makeupSerum.brand,makeupSerum.name,t('morning_makeup_serum_note')):''}
     ${moist?mns('n',prodEmoji(moist),moist.brand,moist.name,t('morning_makeup_moist_note')):''}
     ${!spf?`<div class="info-box amber">${t('missing_spf_note')}</div>`:mns('n',prodEmoji(spf),spf.brand,spf.name,t('morning_spf_note'))}
@@ -1410,6 +1433,20 @@ function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,moist2,deviceG
     else if(isPeel)avoidList=[t('avoid_retinal_label'),t('avoid_aha_toner'),t('avoid_air_shot_label'),t('avoid_acne_gel_label')];
     else if(isRec)avoidList=[t('avoid_all_actives'),t('avoid_all_device_modes')];
     else avoidList=[t('avoid_actives'),t('avoid_device_phase1')];
+    // Day-safe product filtering — one active focus per night, no stacking
+    const dayToner=(isRec||isRet||isAHA||isBHA||isPeel)
+      ?(toner&&isBarrierSafeProduct(toner)?toner:null)
+      :toner;
+    const dayEssence=isRec
+      ?null
+      :(isRet||isAHA||isBHA||isPeel)
+        ?(essence&&isBarrierSafeProduct(essence)?essence:null)
+        :(essence&&!isStrongActive(essence)?essence:null);
+    const daySerum=isRec
+      ?null
+      :(isRet||isAHA||isBHA||isPeel)
+        ?(serum&&isBarrierSafeProduct(serum)?serum:null)
+        :(serum&&!isStrongActive(serum)?serum:null);
     let stepNum=0;
     const sn=(type='n')=>`<div class="rs-num ${type}">${++stepNum}</div>`;
     return `
@@ -1432,11 +1469,11 @@ function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,moist2,deviceG
             ${isRec?`<div class="routine-step r-recovery">${sn('re')}<div class="rs-emoji">💧</div><div class="rs-body"><div class="rs-name">${t('water_rinse')}</div><div class="rs-note">${t('no_cleanser_note')}</div></div></div>`:waterCleanser?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(waterCleanser)}</div><div class="rs-body"><div class="rs-brand">${waterCleanser.brand}</div><div class="rs-name">${waterCleanser.name}</div></div></div>`:`<div class="routine-step">${sn()}<div class="rs-emoji">🧴</div><div class="rs-body"><div class="rs-name">${t('step_cleanser_reminder')}</div></div></div>`}
             ${isPeel&&peel?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(peel)}</div><div class="rs-body"><div class="rs-brand">${peel.brand}</div><div class="rs-name">${peel.name}</div><div class="rs-note">${t('step_peel_note')}</div></div></div>`:''}
             ${isDev&&(dp.deviceModes||[]).includes('air')?`<div class="routine-step r-device">${sn('dv')}<div class="rs-emoji">💡</div><div class="rs-body"><div class="rs-brand">Medicube Booster Pro</div><div class="rs-name">Air Shot <span class="mode-tag air">Air Shot</span></div><div class="rs-note">${t('step_air_note')} ${isMature||isHighSens?t('step_air_mature_note'):''}</div></div></div>`:''}
-            ${(toner&&(isRec?isBarrierSafeProduct(toner):true))?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(toner)}</div><div class="rs-body"><div class="rs-brand">${toner.brand}</div><div class="rs-name">${toner.name}</div><div class="rs-note">${t('step_toner_note')}</div></div></div>`:''}
+            ${dayToner?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(dayToner)}</div><div class="rs-body"><div class="rs-brand">${dayToner.brand}</div><div class="rs-name">${dayToner.name}</div><div class="rs-note">${t('step_toner_note')}</div></div></div>`:''}
             ${isDev&&(dp.deviceModes||[]).includes('booster')?`<div class="routine-step r-device">${sn('dv')}<div class="rs-emoji">💡</div><div class="rs-body"><div class="rs-brand">Medicube Booster Pro</div><div class="rs-name">Booster Mode <span class="mode-tag booster">Booster</span></div><div class="rs-note">${t('step_booster_note')}</div></div></div>`:''}
-            ${essence&&!isRec?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(essence)}</div><div class="rs-body"><div class="rs-brand">${essence.brand}</div><div class="rs-name">${essence.name}</div></div></div>`:''}
+            ${dayEssence?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(dayEssence)}</div><div class="rs-body"><div class="rs-brand">${dayEssence.brand}</div><div class="rs-name">${dayEssence.name}</div></div></div>`:''}
             ${isDev&&(dp.deviceModes||[]).some(m=>['mc','derma'].includes(m))?`<div class="routine-step r-device">${sn('dv')}<div class="rs-emoji">💡</div><div class="rs-body"><div class="rs-brand">Medicube Booster Pro</div><div class="rs-name">${(dp.deviceModes||[]).includes('mc')?'MC Mode <span class="mode-tag mc">MC</span>':''} ${(dp.deviceModes||[]).includes('derma')?'+ Derma Shot <span class="mode-tag derma">Derma</span>':''}</div><div class="rs-note">${tFmt('step_mcderma_note',{gel:deviceGel?deviceGel.name:t('step_pdrn_gel')})}</div></div></div>`:''}
-            ${serum&&!isRec?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(serum)}</div><div class="rs-body"><div class="rs-brand">${serum.brand}</div><div class="rs-name">${serum.name}</div></div></div>`:''}
+            ${daySerum?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(daySerum)}</div><div class="rs-body"><div class="rs-brand">${daySerum.brand}</div><div class="rs-name">${daySerum.name}</div></div></div>`:''}
             ${isAHA&&aha?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(aha)}</div><div class="rs-body"><div class="rs-brand">${aha.brand}</div><div class="rs-name">${aha.name}</div><div class="rs-note">${t('step_aha_note')}</div></div></div>`:''}
             ${isBHA&&bha?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(bha)}</div><div class="rs-body"><div class="rs-brand">${bha.brand}</div><div class="rs-name">${bha.name}</div><div class="rs-note">${t('step_bha_note')}</div></div></div>`:''}
             ${isRet&&retinal?`
@@ -1536,16 +1573,16 @@ function analyzeRoutine(selected,answers){
   const actives=selected.filter(p=>isStrongActive(p));
   if(actives.length>2&&isBarrierDamaged)analyses.push({type:'danger',icon:'🚨',title:t('analysis_too_many'),body:tFmt('analyses_too_many_body',{n:actives.length})});
   // Sensitive skin + multiple actives
-  if(isHighSens&&actives.length>1)analyses.push({type:'danger',icon:'🚨',title:'Too Many Actives for Sensitive Skin',body:`You have ${actives.length} strong actives selected. For sensitive skin, introduce only 1 active at a time and always prioritise barrier repair first.`});
+  if(isHighSens&&actives.length>1)analyses.push({type:'danger',icon:'🚨',title:t('analysis_sensitive_actives'),body:tFmt('analyses_sensitive_actives_body',{n:actives.length})});
   // Damaged barrier + retinoids
   const retinoidProds=selected.filter(p=>hasRetinoid(p));
-  if(isBarrierDamaged&&retinoidProds.length>0)analyses.push({type:'warn',icon:'⚠️',title:'Retinoid with Compromised Barrier',body:'Your barrier needs recovery first. Start retinoids only after barrier is repaired — use Barrier Repair phase for at least 2–4 weeks first.'});
+  if(isBarrierDamaged&&retinoidProds.length>0)analyses.push({type:'warn',icon:'⚠️',title:t('analysis_retinoid_barrier'),body:t('analyses_retinoid_barrier_body')});
   // Multiple retinoids stacked
-  if(retinoidProds.length>1)analyses.push({type:'danger',icon:'🚨',title:'Multiple Retinoids Detected',body:'Never use more than one retinoid at a time. Remove one retinoid product to avoid severe irritation and over-exfoliation.'});
+  if(retinoidProds.length>1)analyses.push({type:'danger',icon:'🚨',title:t('analysis_multi_retinoid'),body:t('analyses_multi_retinoid_body')});
   // Mature skin note
   if(isMature)analyses.push({type:'ok',icon:'🌿',title:t('analysis_mature_note'),body:t('analyses_mature_body')});
   // Barrier support check — if actives present but no barrier support product
-  if(actives.length>0&&!selected.some(p=>isBarrierSupportProduct(p)))analyses.push({type:'warn',icon:'💧',title:'Add Barrier Support',body:'You have active treatments but no barrier-supporting product (ceramides, centella, panthenol). Always pair actives with barrier support.'});
+  if(actives.length>0&&!selected.some(p=>isBarrierSupportProduct(p)))analyses.push({type:'warn',icon:'💧',title:t('analysis_barrier_support'),body:t('analyses_barrier_support_body')});
   if(selected.some(p=>!p.verified))analyses.push({type:'warn',icon:'⚠️',title:t('analyses_unverified_title'),body:t('analyses_unverified_body')});
   analyses.push({type:'ok',icon:'✅',title:tFmt('analyses_organised_title',{n:selected.length,mode:selected.length?t('analyses_organised_phased'):t('analyses_organised_simple')}),body:t('analyses_organised_body')});
   return analyses;
@@ -1616,7 +1653,7 @@ function renderPersonalizedEmergencyHTML(rd){
   const hasCalmingSerum=sel.some(p=>(p.activeIngredients||[]).includes('centella')||((p.ingredients||'').toLowerCase().match(/centella|panthenol|madecassoside/)));
   const usesDevice=a.usesDevice===t('o_yes');
   const isHighSens=a.sensitivity===t('o_high');
-  const isBarrier=a.barrier===t('o_very_damaged')||a.barrier===t('o_slightly')||(a.skinTypes||[]).includes(t('o_barrier'));
+  const isBarrier=a.barrierCondition===t('o_very_damaged')||a.barrierCondition===t('o_slightly')||(a.skinTypes||[]).includes(t('o_barrier'));
   const tooManyActives=stopProducts.length>=3;
   let conflictsCount=0;
   try{conflictsCount=(typeof detectConflicts==='function'?(detectConflicts(sel)||[]).length:0);}catch(e){conflictsCount=0;}
@@ -2150,7 +2187,7 @@ function renderRecommendationCard(r){
       ${ingMissing?`<div class="rec-card-verify">${t('rec_verify_inci')}</div>`:''}
       <div class="rec-card-actions">
         <button class="btn btn-rose btn-sm" onclick="addRecommendedProduct(${p.id})">${t('rec_btn_add')}</button>
-        <button class="btn btn-ghost btn-sm" onclick="showProductModal(${p.id})">${t('rec_btn_view')}</button>
+        <button class="btn btn-ghost btn-sm" onclick="openProductModal(${p.id})">${t('rec_btn_view')}</button>
       </div>
     </div>`;
 }
