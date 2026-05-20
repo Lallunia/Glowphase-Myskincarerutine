@@ -1396,7 +1396,7 @@ function renderRoutineResultBody(rd){
   const isHighSens=a.sensitivity===t('o_high');
   const isBarrierHealthy=a.barrierCondition===t('o_healthy');
   const isDrySkin=(a.skinTypes||[]).some(s=>[t('o_dry'),t('o_very_dry')].includes(s));
-  const isDamagedBarrier=a.barrierCondition===t('o_damaged')||a.barrierCondition===t('o_severely_damaged');
+  const isDamagedBarrier=a.barrierCondition===t('o_slightly')||a.barrierCondition===t('o_very_damaged');
   const needsExtraOcclusion=isDrySkin||isDamagedBarrier;
   const isSimplePref=a.complexity===t('o_simple');
   const _varSeed=parseInt((rd.id||Date.now().toString()).slice(-2))||0;
@@ -1589,7 +1589,7 @@ function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,moist2,deviceG
   const plan=DAY_PLANS[pid]||DAY_PLANS.p1;
   const _rpA=answers||{};
   const _rpIsDry=(_rpA.skinTypes||[]).some(s=>[t('o_dry'),t('o_very_dry')].includes(s));
-  const _rpDamagedBarrier=_rpA.barrierCondition===t('o_damaged')||_rpA.barrierCondition===t('o_severely_damaged');
+  const _rpDamagedBarrier=_rpA.barrierCondition===t('o_slightly')||_rpA.barrierCondition===t('o_very_damaged');
   const _rpNeedsExtraOcclusion=_rpIsDry||_rpDamagedBarrier;
   const _rpIsSimple=_rpA.complexity===t('o_simple');
 const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
@@ -1623,7 +1623,7 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     // Day-safe product filtering — one active focus per night, no stacking
     // Phase 1 (Barrier Repair): ALL days use isBarrierSafeProduct — no exceptions
     const dayToner=isRec
-      ?(toner&&!hasExfoliantAcid(toner)?toner:null)  // Recovery: calming toners only — no AHA/BHA/PHA
+      ?(toner&&isBarrierSafeProduct(toner)?toner:null)  // Recovery: barrier-safe toners only — no AHA/BHA/PHA/vitamin C
       :(isBarrierPhase||isRet||isAHA||isBHA||isPeel)
         ?(toner&&isBarrierSafeProduct(toner)?toner:null)
         :(toner&&!hasExfoliantAcid(toner)?toner:null);  // Normal nights: acid-free toners only
@@ -1680,7 +1680,7 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
               <div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(retinal)}</div><div class="rs-body"><div class="rs-brand">${retinal.brand}</div><div class="rs-name">${retinal.name}</div><div class="rs-note">${t('step_retinal_note')}</div></div></div>
               <div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-name">${t('step_sandwich_2_name')}</div><div class="rs-note">${t('step_sandwich_2_note')}</div></div></div>
             `:(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-brand">${moist.brand}</div><div class="rs-name">${moist.name}</div></div></div>`:''}
-            ${isRec&&!isBarrierPhase&&moist2&&!_rpIsSimple?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(moist2)}</div><div class="rs-body"><div class="rs-brand">${moist2.brand}</div><div class="rs-name">${moist2.name}</div></div></div>`:''}
+            ${isRec&&!isBarrierPhase&&moist2&&!_rpIsSimple&&!sleepingPack?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(moist2)}</div><div class="rs-body"><div class="rs-brand">${moist2.brand}</div><div class="rs-name">${moist2.name}</div></div></div>`:''}
             ${_retinoidDayEye?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(_retinoidDayEye)}</div><div class="rs-body"><div class="rs-brand">${_retinoidDayEye.brand}</div><div class="rs-name">${_retinoidDayEye.name}</div><div class="rs-note">${t('step_eye_note')}</div></div></div>`:''}
             ${sleepingPack&&!isBarrierRecovery&&(!_rpIsSimple||_rpNeedsExtraOcclusion)&&(!_rpIsModerate||_rpNeedsExtraOcclusion)?`<div class="routine-step">${sn()}<div class="rs-emoji">🌙</div><div class="rs-body"><div class="rs-brand">${sleepingPack.brand}</div><div class="rs-name">${sleepingPack.name}</div></div></div>`:''}
             <div class="avoid-box"><div class="avoid-title">${t('avoid_tonight')}</div><div class="avoid-chips">${avoidList.map(a=>`<span class="avoid-chip">${a}</span>`).join('')}</div></div>
