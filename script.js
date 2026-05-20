@@ -186,7 +186,95 @@ function scoreProductForUser(p, a) {
     if (hasStrongVitaminC(p)) score -= 2;
   }
 
+  // Skin type texture match — prefer formulas suited to skin type
+  const _desc = (p.description || '').toLowerCase();
+  const _st = a.skinTypes || [];
+  if (_st.some(s => s === t('o_oily') || s === t('o_acneprone') || s === t('o_combo'))) {
+    if (/gel|lightweight|light weight|oil.?free|water.?based|watery|fluid|matte/.test(_desc)) score += 2;
+    if (/rich|heavy|occlusive|thick|balm|butter|ointment|intensive/.test(_desc)) score -= 1;
+  }
+  if (_st.some(s => s === t('o_dry'))) {
+    if (/rich|cream|intensive|nourishing|barrier|occlusive|thick/.test(_desc)) score += 2;
+  }
+  // Sensitive skin: penalise known irritants in ingredient list; reward gentle formulas
+  if (_st.some(s => s === t('o_sensitive')) || a.sensitivity === t('o_high')) {
+    if (/fragrance.?free|unscented|gentle|soothing|calming/.test(_desc)) score += 1;
+    if (/fragrance|parfum/.test(ing) && !/fragrance.?free/.test(ing)) score -= 2;
+    if (/denatured alcohol|alcohol denat/.test(ing)) score -= 2;
+  }
+  // Mature skin: prefer peptide-rich and anti-aging ingredient profiles
+  if (_st.some(s => s === t('o_mature'))) {
+    if (/peptide|adenosine|collagen|egf|growth factor|bakuchiol/.test(ing)) score += 2;
+  }
+  // Damaged barrier: extra bonus for products that actively support the barrier
+  if (goals.includes(t('g_barrier')) || _st.includes(t('o_barrier')) || a.barrierCondition === t('o_slightly') || a.barrierCondition === t('o_very_damaged')) {
+    if (isBarrierSupportProduct(p)) score += 2;
+  }
+
   return score;
+}
+
+// Score bonus for a product's fitness to a specific phase type and product category.
+// Adds on top of scoreProductForUser() to rank candidates for each day's phase type.
+// phaseType: 'recovery' | 'barrier' | 'active' | 'device' | 'normal'
+// category:  'toner' | 'essence' | 'serum'
+function scoreProductForPhase(p, phaseType, category, a) {
+  if (!p) return 0;
+  let s = 0;
+  const ing = ((p.ingredients || '') + ' ' + (p.activeIngredients || []).join(' ')).toLowerCase();
+  if (phaseType === 'recovery' || phaseType === 'barrier') {
+    // Recovery / barrier repair: strongly prefer calming, barrier-safe products
+    if (isBarrierSafeProduct(p)) s += 3;
+    if (hasCalmingIngredient(p)) s += 2;
+    if (isBarrierSupportProduct(p)) s += 2;
+    if (category === 'serum') {
+      if (!p.daytimeOnly) s += 1;
+      if (isNightSuitableSerum(p)) s += 2;
+    }
+    if (hasExfoliantAcid(p)) s -= 6;
+    if (hasRetinoid(p)) s -= 6;
+    if (hasStrongVitaminC(p)) s -= 3;
+  } else if (phaseType === 'active') {
+    // Active nights (retinal / AHA): pair with calming, barrier-supporting layers
+    if (hasCalmingIngredient(p)) s += 2;
+    if (isBarrierSafeProduct(p)) s += 2;
+    if (category === 'serum') {
+      if (!p.daytimeOnly) s += 1;
+      if (isNightSuitableSerum(p)) s += 2;
+    }
+    if (hasExfoliantAcid(p)) s -= 4; // avoid stacking extra actives
+  } else if (phaseType === 'device') {
+    // Device nights: hydration-boosting ingredients work best with device amplification
+    if (/hyaluronic|sodium hyaluronate|glycerin|beta.?glucan|polyglutamic/.test(ing)) s += 2;
+    if (hasCalmingIngredient(p)) s += 1;
+    if (category === 'serum') {
+      if (!p.daytimeOnly) s += 1;
+      if (isNightSuitableSerum(p)) s += 1;
+    }
+  } else {
+    // Normal nights: light preference for calming and night-suitable layers
+    if (hasCalmingIngredient(p)) s += 1;
+    if (category === 'serum') {
+      if (!p.daytimeOnly) s += 1;
+      if (isNightSuitableSerum(p)) s += 1;
+    }
+  }
+  return s;
+}
+
+// Select the best product for a specific day using day-index-based rotation within the score tier.
+// Scores each candidate by goal-fit + phase-fit, takes the top tier (within 2 pts of best),
+// then rotates within that tier using dayIndex (0–6) so different days can get different products.
+function selectBestForDay(candidates, a, dayIndex, phaseType, category) {
+  if (!candidates || !candidates.length) return null;
+  if (candidates.length === 1) return candidates[0];
+  const scored = candidates.map(p => ({
+    p,
+    s: scoreProductForUser(p, a) + scoreProductForPhase(p, phaseType, category, a)
+  })).sort((x, y) => y.s - x.s);
+  const topScore = scored[0].s;
+  const tier = scored.filter(x => x.s >= topScore - 2);
+  return tier[dayIndex % tier.length].p;
 }
 
 // Calming/barrier-repair ingredient check — used for smart night serum selection.
@@ -1395,8 +1483,8 @@ function renderRoutineResultBody(rd){
   const isMature=(a.skinTypes||[]).includes(t('o_mature'));
   const isHighSens=a.sensitivity===t('o_high');
   const isBarrierHealthy=a.barrierCondition===t('o_healthy');
-  const isDrySkin=(a.skinTypes||[]).some(s=>[t('o_dry'),t('o_very_dry')].includes(s));
-  const isDamagedBarrier=a.barrierCondition===t('o_slightly')||a.barrierCondition===t('o_very_damaged');
+  const isDrySkin=(a.skinTypes||[]).some(s=>s===t('o_dry'));
+  const isDamagedBarrier=a.barrierCondition===t('o_slightly')||a.barrierCondition===t('o_very_damaged')||(a.skinTypes||[]).includes(t('o_barrier'));
   const needsExtraOcclusion=isDrySkin||isDamagedBarrier;
   const isSimplePref=a.complexity===t('o_simple');
   const _varSeed=parseInt((rd.id||Date.now().toString()).slice(-2))||0;
@@ -1432,9 +1520,17 @@ function renderRoutineResultBody(rd){
     const tier=scored.filter(x=>x.s>=topScore-2);
     return tier[_varSeed%tier.length].p;
   })();
-  const moist=bestByCategory('moisturizer');
-  const moist2=[...selected.filter(p=>normalizedCategory(p)==='moisturizer')].sort((x,y)=>scoreProductForUser(y,a)-scoreProductForUser(x,a)).find(p=>p!==moist)||null;
-  const sleepingPack=selected.find(p=>p.subcategory==='sleeping mask')||null;
+  // Dry skin: prefer rich/heavy moisturizers by boosting their score
+  const moist=(()=>{
+    const _mc=selected.filter(p=>normalizedCategory(p)==='moisturizer'||p.subcategory==='moisturizer');
+    if(!_mc.length)return null;
+    if(_mc.length===1)return _mc[0];
+    const scored=_mc.map(p=>({p,s:scoreProductForUser(p,a)+(isDrySkin&&isHeavyMoisturizer(p)?3:0)})).sort((x,y)=>y.s-x.s);
+    const topScore=scored[0].s;
+    const tier=scored.filter(x=>x.s>=topScore-2);
+    return tier[_varSeed%tier.length].p;
+  })();
+const sleepingPack=selected.find(p=>p.subcategory==='sleeping mask')||null;
   const spf=byCategory('sunscreen')||selected.find(p=>isSunscreenProduct(p));
   const deviceGel=byCategory('device gel')||selected.find(p=>!!p.medicubeMode)||null;
   const eye=bestByCategory('eye')||bestByCategory('eye cream')||selected.find(p=>p.category==='eye cream'||p.subcategory==='eye cream');
@@ -1466,6 +1562,30 @@ function renderRoutineResultBody(rd){
     return tier[_varSeed%tier.length].p;
   })();
   const peel=selected.find(p=>normalizedCategory(p)==='exfoliant');
+  // Pre-compute per-day toner/essence/serum for each phase plan using selectBestForDay().
+  // This drives day-by-day product rotation: Mon–Sun each score independently by phase type,
+  // so users see a variety of their suitable products across the week rather than the same pick daily.
+  // moist is intentionally kept fixed (retinal sandwich requires consistent moisturizer every day).
+  const _dpDayKeys=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const _dpTonerCands=_safeToners.length?_safeToners:allToners;
+  const _dpEssenceCands=selected.filter(p=>normalizedCategory(p)==='essence'||p.subcategory==='essence');
+  const _dpSerumCands=selected.filter(p=>normalizedCategory(p)==='serum');
+  const _dayProducts={};
+  ['p1','p2','p3','p4'].forEach(pid=>{
+    const _dpPlan=DAY_PLANS[pid]||DAY_PLANS.p1;
+    _dayProducts[pid]={};
+    _dpDayKeys.forEach((d,di)=>{
+      const _dpDay=_dpPlan[d];
+      const _phType=_dpDay.recovery?'recovery':(_dpDay.retinal||_dpDay.aha)?'active':(_dpDay.device&&usesDevice)?'device':(pid==='p1'?'barrier':'normal');
+      _dayProducts[pid][d]={
+        toner:selectBestForDay(_dpTonerCands,a,di,_phType,'toner'),
+        essence:selectBestForDay(_dpEssenceCands,a,di,_phType,'essence'),
+        serum:selectBestForDay(_dpSerumCands,a,di,_phType,'serum')
+      };
+    });
+  });
+  // Attach computed rotation map to answers so renderPhase() can read per-day picks
+  const _answersWithDayProducts=Object.assign({},a,{_dayProducts});
   const numPhases=rd.phases||(needsAntiAging?4:(hasActives?3:2));
   const phaseIds=['p1','p2','p3','p4'].slice(0,numPhases);
   const conflicts=detectConflicts(selected);
@@ -1480,10 +1600,10 @@ function renderRoutineResultBody(rd){
       ${renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHighSens,eye,a)}
       <div class="info-box" style="margin-top:18px;margin-bottom:6px;font-weight:600">${t('night_routine')}</div>
       <div class="phase-nav" id="routine-phase-nav">${phaseIds.map((pid,i)=>`<button class="phase-tab ${i===0?'active':''}" data-phase="${pid}" onclick="switchRoutinePhase('${pid}',this)">${tFmt('result_phase_label',{n:i+1})}</button>`).join('')}</div>
-      ${renderPhase('p1',selected,c1,c2,toner,essence,nightSerum,moist,moist2,deviceGel,usesDevice,false,false,false,false,isMature,isHighSens,'active',isBarrierHealthy,eye,sleepingPack,a)}
-      ${numPhases>=2?renderPhase('p2',selected,c1,c2,toner,essence,nightSerum,moist,moist2,deviceGel,usesDevice,bha,false,false,false,isMature,isHighSens,'',false,eye,sleepingPack,a):''}
-      ${numPhases>=3?renderPhase('p3',selected,c1,c2,toner,essence,nightSerum,moist,moist2,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,a):''}
-      ${numPhases>=4?renderPhase('p4',selected,c1,c2,toner,essence,nightSerum,moist,moist2,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,a):''}
+      ${renderPhase('p1',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,false,false,false,false,isMature,isHighSens,'active',isBarrierHealthy,eye,sleepingPack,_answersWithDayProducts)}
+      ${numPhases>=2?renderPhase('p2',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,false,false,false,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
+      ${numPhases>=3?renderPhase('p3',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
+      ${numPhases>=4?renderPhase('p4',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
     </div>`;
 }
 
@@ -1494,7 +1614,7 @@ function renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHigh
   const _mpIsSimple=answers&&answers.complexity===t('o_simple');
   const c1IsBalm=c1&&(c1.subcategory==='cleansing balm'||c1.subcategory==='cleansing oil');
   const waterCleanse=c2||(!c1IsBalm&&c1?c1:null);
-  const makeupSerum=selected.find(p=>p.makeupPrep&&(p.category==='serum'||p.category==='essence'))
+  const makeupSerum=selected.find(p=>p.makeupPrep&&(p.category==='serum'||p.category==='essence')&&!hasRetinoid(p)&&!hasExfoliantAcid(p))
     ||(serum&&!hasRetinoid(serum)&&!hasExfoliantAcid(serum)?serum:null)
     ||(essence&&!hasRetinoid(essence)&&!hasExfoliantAcid(essence)?essence:null);
   const panelSt='background:var(--off-white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px';
@@ -1585,11 +1705,11 @@ const DAY_PLANS={
 };
 const DAY_NAMES={Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday'};
 
-function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,moist2,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers){
+function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers){
   const plan=DAY_PLANS[pid]||DAY_PLANS.p1;
   const _rpA=answers||{};
-  const _rpIsDry=(_rpA.skinTypes||[]).some(s=>[t('o_dry'),t('o_very_dry')].includes(s));
-  const _rpDamagedBarrier=_rpA.barrierCondition===t('o_slightly')||_rpA.barrierCondition===t('o_very_damaged');
+  const _rpIsDry=(_rpA.skinTypes||[]).some(s=>s===t('o_dry'));
+  const _rpDamagedBarrier=_rpA.barrierCondition===t('o_slightly')||_rpA.barrierCondition===t('o_very_damaged')||(_rpA.skinTypes||[]).includes(t('o_barrier'));
   const _rpNeedsExtraOcclusion=_rpIsDry||_rpDamagedBarrier;
   const _rpIsSimple=_rpA.complexity===t('o_simple');
 const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
@@ -1605,6 +1725,11 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
   }).join('');
   const dayPanels=days.map(d=>{
     const dp=plan[d];
+    // Per-day rotation: read pre-computed toner/essence/serum for this day, fall back to fixed values
+    const _phDayProds=(_rpA._dayProducts&&_rpA._dayProducts[pid]&&_rpA._dayProducts[pid][d])||{};
+    const _effToner=_phDayProds.toner!==undefined?_phDayProds.toner:toner;
+    const _effEssence=_phDayProds.essence!==undefined?_phDayProds.essence:essence;
+    const _effSerum=_phDayProds.serum!==undefined?_phDayProds.serum:serum;
     const isRec=dp.recovery,isDev=dp.device&&usesDevice,isRet=dp.retinal&&retinal,isBHA=dp.bha&&bha,isPeel=dp.peel&&peel,isAHA=dp.aha&&aha;
     const isBarrierPhase=pid==='p1';
     const isBarrierRecovery=isRec&&isBarrierPhase;
@@ -1623,24 +1748,24 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     // Day-safe product filtering — one active focus per night, no stacking
     // Phase 1 (Barrier Repair): ALL days use isBarrierSafeProduct — no exceptions
     const dayToner=isRec
-      ?(toner&&isBarrierSafeProduct(toner)?toner:null)  // Recovery: barrier-safe toners only — no AHA/BHA/PHA/vitamin C
+      ?(_effToner&&isBarrierSafeProduct(_effToner)?_effToner:null)  // Recovery: barrier-safe toners only — no AHA/BHA/PHA/vitamin C
       :(isBarrierPhase||isRet||isAHA||isBHA||isPeel)
-        ?(toner&&isBarrierSafeProduct(toner)?toner:null)
-        :(toner&&!hasExfoliantAcid(toner)?toner:null);  // Normal nights: acid-free toners only
+        ?(_effToner&&isBarrierSafeProduct(_effToner)?_effToner:null)
+        :(_effToner&&!hasExfoliantAcid(_effToner)?_effToner:null);  // Normal nights: acid-free toners only
     const dayEssence=isRec
-      ?(essence&&isBarrierSafeProduct(essence)?essence:null)  // Recovery: barrier-safe essences only
+      ?(_effEssence&&isBarrierSafeProduct(_effEssence)?_effEssence:null)  // Recovery: barrier-safe essences only
       :(isBarrierPhase||isRet||isAHA||isBHA||isPeel)
-        ?(essence&&isBarrierSafeProduct(essence)?essence:null)
-        :(essence&&!isStrongActive(essence)?essence:null);
+        ?(_effEssence&&isBarrierSafeProduct(_effEssence)?_effEssence:null)
+        :(_effEssence&&!isStrongActive(_effEssence)?_effEssence:null);
     // On barrier-phase nights: suppress ampoule-weight serums when paired with
     // a heavy occlusive moisturizer — prevents the "2 moisturizers" sensation.
     // Lightweight hydrating/calming serums are always allowed alongside a rich cream.
-    const serumBlockedByHeavyMoist=isBarrierPhase&&isHeavyMoisturizer(moist)&&isAmpouleWeightSerum(serum);
+    const serumBlockedByHeavyMoist=isBarrierPhase&&isHeavyMoisturizer(moist)&&isAmpouleWeightSerum(_effSerum);
     const daySerum=isRec
       ?null
       :(isBarrierPhase||isRet||isAHA||isBHA||isPeel)
-        ?(serum&&isBarrierSafeProduct(serum)&&isNightSuitableSerum(serum)&&!serumBlockedByHeavyMoist?serum:null)
-        :(serum&&!isStrongActive(serum)&&isNightSuitableSerum(serum)?serum:null);
+        ?(_effSerum&&isBarrierSafeProduct(_effSerum)&&isNightSuitableSerum(_effSerum)&&!serumBlockedByHeavyMoist?_effSerum:null)
+        :(_effSerum&&!isStrongActive(_effSerum)&&isNightSuitableSerum(_effSerum)?_effSerum:null);
     // Eye cream evening: barrier-safe on recovery/barrier days; no retinoid eye creams on retinal nights; no acid eye creams on AHA/BHA nights
     const _normalDayEye=eye&&!hasRetinoid(eye)?(isRec||isBarrierPhase)?(isBarrierSafeProduct(eye)?eye:null):(isAHA||isBHA)?(!hasExfoliantAcid(eye)?eye:null):isRet?null:eye:null;
     const _retinoidDayEye=eye&&hasRetinoid(eye)&&isRet&&!isBarrierRecovery?eye:null;
@@ -1680,7 +1805,6 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
               <div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(retinal)}</div><div class="rs-body"><div class="rs-brand">${retinal.brand}</div><div class="rs-name">${retinal.name}</div><div class="rs-note">${t('step_retinal_note')}</div></div></div>
               <div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-name">${t('step_sandwich_2_name')}</div><div class="rs-note">${t('step_sandwich_2_note')}</div></div></div>
             `:(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-brand">${moist.brand}</div><div class="rs-name">${moist.name}</div></div></div>`:''}
-            ${isRec&&!isBarrierPhase&&moist2&&!_rpIsSimple&&!sleepingPack?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(moist2)}</div><div class="rs-body"><div class="rs-brand">${moist2.brand}</div><div class="rs-name">${moist2.name}</div></div></div>`:''}
             ${_retinoidDayEye?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(_retinoidDayEye)}</div><div class="rs-body"><div class="rs-brand">${_retinoidDayEye.brand}</div><div class="rs-name">${_retinoidDayEye.name}</div><div class="rs-note">${t('step_eye_note')}</div></div></div>`:''}
             ${sleepingPack&&!isBarrierRecovery&&(!_rpIsSimple||_rpNeedsExtraOcclusion)&&(!_rpIsModerate||_rpNeedsExtraOcclusion)?`<div class="routine-step">${sn()}<div class="rs-emoji">🌙</div><div class="rs-body"><div class="rs-brand">${sleepingPack.brand}</div><div class="rs-name">${sleepingPack.name}</div></div></div>`:''}
             <div class="avoid-box"><div class="avoid-title">${t('avoid_tonight')}</div><div class="avoid-chips">${avoidList.map(a=>`<span class="avoid-chip">${a}</span>`).join('')}</div></div>
