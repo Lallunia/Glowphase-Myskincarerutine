@@ -1710,6 +1710,15 @@ function renderRoutineResult(c){
   attachDayInteractions();
 }
 
+/* Returns the bha/retinal/aha/peel active-ingredient flags for a given phase.
+   p1 = Barrier Repair → no actives; p2 adds BHA; p3/p4 add retinal, AHA, peel.
+   data is the object stored in window._glowPhaseData[cardId]. */
+function _getPhaseActives(data,pid){
+  if(pid==='p1')return{bha:false,retinal:false,aha:false,peel:false};
+  if(pid==='p2')return{bha:data.bha,retinal:false,aha:false,peel:false};
+  return{bha:data.bha,retinal:data.retinalProd,aha:data.aha,peel:data.peel};
+}
+
 /* Pure renderer — turns a routineData object into the full result HTML.
    Used by BOTH the Routine Builder (after generation) AND My Routine (saved view).
    This is what guarantees a saved routine displays identically to a freshly-built one.
@@ -1829,8 +1838,17 @@ const sleepingPack=selected.find(p=>p.subcategory==='sleeping mask')||null;
   const conflicts=detectConflicts(selected);
   const analyses=analyzeRoutine(selected,a);
 
+  // Store all computed params keyed by cardId so switchRoutinePhase/selectDay can re-render
+  // without recomputing products from scratch. Only one phase + one day panel live in DOM at once.
+  const cardId='gc-'+(rd.id||'draft');
+  if(!window._glowPhaseData)window._glowPhaseData={};
+  window._glowPhaseData[cardId]={
+    selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,
+    bha,retinalProd,aha,peel,isMature,isHighSens,isBarrierHealthy,
+    eye,sleepingPack,_answersWithDayProducts,numPhases,phaseIds
+  };
   return `
-    <div class="builder-card">
+    <div class="builder-card" data-card-id="${cardId}">
       <div class="builder-step-hd"><div class="step-badge">✓</div><div><div class="step-title">${rd.name||t('result_name_default')}</div><div class="step-sub">${tFmt('result_based_on',{n:selected.length})}</div></div></div>
       ${isMature?`<div class="info-box blue" style="margin-bottom:14px">🌿 <strong>${t('result_mature_label')}</strong> ${t('result_mature_body')}</div>`:''}
       <div class="analysis-wrap">${analyses.map(an=>`<div class="analysis-item"><div class="a-head ${an.type}">${an.icon} ${an.title}</div><div class="a-body">${an.body}</div></div>`).join('')}${conflicts.length?`<div class="analysis-item"><div class="a-head danger">⚠️ ${t('analysis_conflicts')}</div><div class="a-body">${conflicts.map(x=>`<div style="margin-bottom:5px">🚫 <strong>${x.combo}</strong> — ${x.reason}</div>`).join('')}</div></div>`:`<div class="analysis-item"><div class="a-head ok">✅ ${t('analysis_ok')}</div><div class="a-body">${t('result_no_conflict_body')}</div></div>`}</div>
@@ -1838,10 +1856,7 @@ const sleepingPack=selected.find(p=>p.subcategory==='sleeping mask')||null;
       ${renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHighSens,eye,a)}
       <div class="info-box" style="margin-top:18px;margin-bottom:6px;font-weight:600">${t('night_routine')}</div>
       <div class="phase-nav" id="routine-phase-nav">${phaseIds.map((pid,i)=>`<button class="phase-tab ${i===0?'active':''}" data-phase="${pid}" onclick="switchRoutinePhase('${pid}',this)">${tFmt('result_phase_label',{n:i+1})}</button>`).join('')}</div>
-      ${renderPhase('p1',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,false,false,false,false,isMature,isHighSens,'active',isBarrierHealthy,eye,sleepingPack,_answersWithDayProducts)}
-      ${numPhases>=2?renderPhase('p2',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,false,false,false,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
-      ${numPhases>=3?renderPhase('p3',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
-      ${numPhases>=4?renderPhase('p4',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,bha,retinalProd,aha,peel,isMature,isHighSens,'',false,eye,sleepingPack,_answersWithDayProducts):''}
+      <div class="active-phase-area">${renderPhase('p1',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,false,false,false,false,isMature,isHighSens,'active',isBarrierHealthy,eye,sleepingPack,_answersWithDayProducts,'Mon')}</div>
     </div>`;
 }
 
@@ -1922,18 +1937,28 @@ function switchMorningPhase(mid,btn){
 }
 
 function switchRoutinePhase(pid,btn){
-  // Scope the lookup to the routine card that contains this tab.
-  // Same routine IDs (rp-p1, etc.) can appear in both Builder and My Routine DOMs;
-  // falling back to document.getElementById would activate the wrong (hidden) panel.
-  const scope=btn?btn.closest('.builder-card'):null;
-  if(!scope)return; // bail — no global side-effects without a scope
-  scope.querySelectorAll('.phase-panel').forEach(p=>p.classList.remove('active'));
+  const card=btn?btn.closest('.builder-card'):null;
+  if(!card)return;
+  const cardId=card.dataset.cardId;
   // Only deactivate night-phase tabs — must NOT touch morning phase tabs (barrier/normal/makeup)
   // which also carry the .phase-tab class but live inside .morning-phase-nav.
-  scope.querySelectorAll('.phase-nav:not(.morning-phase-nav) .phase-tab').forEach(b=>b.classList.remove('active'));
-  const panel=scope.querySelector('.phase-panel[data-pid="'+pid+'"]');
-  if(panel)panel.classList.add('active');
+  card.querySelectorAll('.phase-nav:not(.morning-phase-nav) .phase-tab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+  if(!data)return;
+  const pa=_getPhaseActives(data,pid);
+  const isOptional=pid==='p1'&&data.isBarrierHealthy;
+  const phaseArea=card.querySelector('.active-phase-area');
+  if(!phaseArea)return;
+  // Re-render only the selected phase into the active-phase-area — no other phases touch the DOM.
+  phaseArea.innerHTML=renderPhase(
+    pid,data.selected,data.c1,data.c2,
+    data.toner,data.essence,data.nightSerum,data.moist,
+    data.deviceGel,data.usesDevice,
+    pa.bha,pa.retinal,pa.aha,pa.peel,
+    data.isMature,data.isHighSens,'active',isOptional,
+    data.eye,data.sleepingPack,data._answersWithDayProducts,'Mon'
+  );
 }
 
 /* ═══ PHASE RENDER ═══ */
@@ -1945,7 +1970,7 @@ const DAY_PLANS={
 };
 const DAY_NAMES={Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday'};
 
-function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers){
+function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers,selectedDay){
   const plan=DAY_PLANS[pid]||DAY_PLANS.p1;
   const _rpA=answers||{};
   const _rpIsDry=(_rpA.skinTypes||[]).some(s=>s===t('o_dry'));
@@ -1963,7 +1988,7 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     else if(dp.device&&usesDevice)cls+=' device-day';
     return `<button class="${cls} ${d==='Mon'?'active':''}" data-phase="${pid}" data-day="${d}" onclick="selectDay('${pid}','${d}',this)">${d}${dp.recovery?' 🌿':((dp.retinal||dp.aha)?' 🌙':(dp.device&&usesDevice?' 💡':''))}</button>`;
   }).join('');
-  const dayPanels=days.map(d=>{
+  const dayPanels=[selectedDay||'Mon'].map(d=>{
     const dp=plan[d];
     // Per-day rotation: read pre-computed toner/essence/serum for this day, fall back to fixed values
     const _phDayProds=(_rpA._dayProducts&&_rpA._dayProducts[pid]&&_rpA._dayProducts[pid][d])||{};
@@ -2039,7 +2064,7 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     let stepNum=0;
     const sn=(type='n')=>`<div class="rs-num ${type}">${++stepNum}</div>`;
     return `
-      <div class="day-panel ${d==='Mon'?'active':''}" id="dp-${pid}-${d}" data-day="${d}">
+      <div class="day-panel active" data-day="${d}">
         <div class="day-card">
           <div class="day-card-head ${cardType}">
             <div><div class="day-name">${tDayName(d)}</div><div class="day-goal">🎯 ${tDayGoal(dp.goal)}</div></div>
@@ -2078,7 +2103,18 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
         </div>
       </div>`;
   }).join('');
-  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-panels-container" id="dpc-${pid}">${dayPanels}</div></div>`;
+  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
+}
+
+/* Render a single day-panel HTML string by delegating to renderPhase with
+   selectedDay set, then extracting the .day-content-area inner content.
+   Used by selectDay() to replace only the day panel without re-rendering the
+   full phase header and day navigation. */
+function _renderDayPanelHtml(d,pid,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,eye,sleepingPack,answers){
+  const tmp=document.createElement('div');
+  tmp.innerHTML=renderPhase(pid,null,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,'active',false,eye,sleepingPack,answers,d);
+  const area=tmp.querySelector('.day-content-area');
+  return area?area.innerHTML:'';
 }
 
 /* ═══ DAY INTERACTION ═══ */
@@ -2099,18 +2135,26 @@ function dayClickHandler(e){
   selectDay(btn.dataset.phase,btn.dataset.day,btn);
 }
 function selectDay(pid,day,btn){
-  // Scope to the phase-panel (or builder-card as fallback) that contains this button.
-  // Both builder and my-routine can have identical IDs in the DOM simultaneously;
-  // scoped querySelector finds the correct element without document.getElementById fallbacks.
-  const scope=btn?btn.closest('.phase-panel')||btn.closest('.builder-card'):null;
-  if(!scope)return; // bail — no global side-effects without a scope
-  const container=scope.querySelector('.day-panels-container');
-  if(container)container.querySelectorAll('.day-panel').forEach(p=>p.classList.remove('active'));
-  const nav=scope.querySelector('.day-nav');
-  if(nav)nav.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
-  const panel=scope.querySelector('.day-panel[data-day="'+day+'"]');
-  if(panel)panel.classList.add('active');
+  const card=btn?btn.closest('.builder-card'):null;
+  if(!card)return;
+  const cardId=card.dataset.cardId;
+  // Update day nav buttons within the currently rendered phase panel
+  const phasePanel=card.querySelector('.phase-panel');
+  if(phasePanel){
+    phasePanel.querySelectorAll('.day-nav .day-btn').forEach(b=>b.classList.remove('active'));
+  }
   if(btn)btn.classList.add('active');
+  const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+  if(!data)return;
+  const pa=_getPhaseActives(data,pid);
+  // Replace only the day-content-area — phase header and day nav stay intact.
+  const dayContent=card.querySelector('.day-content-area');
+  if(!dayContent)return;
+  dayContent.innerHTML=_renderDayPanelHtml(
+    day,pid,data.c1,data.c2,data.toner,data.essence,data.nightSerum,data.moist,
+    data.deviceGel,data.usesDevice,pa.bha,pa.retinal,pa.aha,pa.peel,
+    data.isMature,data.isHighSens,data.eye,data.sleepingPack,data._answersWithDayProducts
+  );
 }
 function makeStep(type,num,emoji,brand,name,note){
   const colors={n:'linear-gradient(135deg,#c9897a,#a86b5e)',re:'linear-gradient(135deg,#8aaa92,#5a7f64)',dv:'linear-gradient(135deg,#7898c0,#5a7898)',ac:'linear-gradient(135deg,#9878c0,#7a60a8)',rt:'linear-gradient(135deg,#c8a040,#a07820)'};
