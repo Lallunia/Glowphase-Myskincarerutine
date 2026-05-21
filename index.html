@@ -142,7 +142,7 @@
       To load your own product database, use the import function or provide a JSON/JS data file.
     </div>
     <div class="search-wrap">
-      <input class="search-input" id="lib-search" type="text" placeholder="Search brand, product, ingredient, active..." oninput="renderLibrary()">
+      <input class="search-input" id="lib-search" type="text" placeholder="Search brand, product, ingredient, active..." data-i18n-placeholder="lib_search_ph" oninput="renderLibrary()">
       <button class="btn btn-ghost btn-sm" onclick="resetLibrary()">Reset</button>
       <button class="btn btn-rose btn-sm" onclick="showPage('builder',null)">Build Routine</button>
     </div>
@@ -298,7 +298,7 @@
     <div class="builder-card">
       <div class="label-xs">Select products to check</div>
       <div class="search-wrap" style="margin-bottom:12px">
-        <input class="search-input" id="conflict-search" type="text" placeholder="Search products..." oninput="renderConflictGrid()">
+        <input class="search-input" id="conflict-search" type="text" placeholder="Search products..." data-i18n-placeholder="conflict_search_ph" oninput="renderConflictGrid()">
       </div>
       <div class="prod-picker-grid" id="conflict-grid"></div>
       <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
@@ -320,7 +320,7 @@
 <div class="overlay" id="rename-modal">
   <div class="modal" style="max-width:380px;padding:30px">
     <div style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:16px;color:var(--ink)">Rename Routine</div>
-    <input class="rename-input" id="rename-input" type="text" placeholder="Routine name...">
+    <input class="rename-input" id="rename-input" type="text" placeholder="Routine name..." data-i18n-placeholder="rename_ph">
     <div style="display:flex;gap:8px">
       <button class="btn btn-rose" onclick="confirmRename()">Save</button>
       <button class="btn btn-ghost" onclick="closeRenameModal()">Cancel</button>
