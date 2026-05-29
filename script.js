@@ -2717,7 +2717,7 @@ function renderRoutineResultBody(rd){
   const essence=bestByCategory('essence');
   const serum=bestByCategory('serum');
   // Smart night serum: prefer calming+barrier-safe → barrier-safe → night-suitable → last resort
-  const allSelectedSerums=selected.filter(p=>normalizedCategory(p)==='serum');
+  const allSelectedSerums=selected.filter(p=>['serum','ampoule'].includes(normalizedCategory(p)));
   const nightSerum=(()=>{
     if(!allSelectedSerums.length)return null;
     const scored=allSelectedSerums.map(p=>({p,s:scoreProductForUser(p,a)+(isNightSuitableSerum(p)?2:0)+(isBarrierSafeProduct(p)?1:0)+(hasCalmingIngredient(p)?1:0)+(!p.daytimeOnly?0.5:0)})).sort((a,b)=>b.s-a.s);
@@ -2778,7 +2778,7 @@ const sleepingPack=selected.find(p=>normalizedCategory(p)==='sleeping mask'||p.s
   const _dpDayKeys=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const _dpTonerCands=_safeToners.length?_safeToners:allToners;
   const _dpEssenceCands=selected.filter(p=>normalizedCategory(p)==='essence'||p.subcategory==='essence');
-  const _dpSerumCands=selected.filter(p=>normalizedCategory(p)==='serum');
+  const _dpSerumCands=selected.filter(p=>['serum','ampoule'].includes(normalizedCategory(p)));
   const _dayProducts={};
   ['p1','p2','p3','p4'].forEach(pid=>{
     const _dpPlan=DAY_PLANS[pid]||DAY_PLANS.p1;
@@ -2968,6 +2968,7 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     const _effEssence=_phDayProds.essence!==undefined?_phDayProds.essence:essence;
     const _effSerum=_phDayProds.serum!==undefined?_phDayProds.serum:serum;
     const isRec=dp.recovery,isDev=dp.device&&usesDevice,isRet=dp.retinal&&retinal,isBHA=dp.bha&&bha,isPeel=dp.peel&&peel,isAHA=dp.aha&&aha;
+    const _isRetinalSerum=retinal&&['serum','ampoule'].includes(normalizedCategory(retinal));
     const isBarrierPhase=pid==='p1';
     const isBarrierRecovery=isRec&&isBarrierPhase;
     const c1IsBalm=c1&&(c1.subcategory==='cleansing balm'||c1.subcategory==='cleansing oil');
@@ -3111,16 +3112,17 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
             ${_showEssence?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(dayEssence)}</div><div class="rs-body"><div class="rs-brand">${dayEssence.brand}</div><div class="rs-name">${dayEssence.name}</div></div></div>`:''}
             ${_showBooster&&_boosterTarget!==dayToner&&!!_boosterTarget?_devOvl('Booster Mode','#FF8C00',_boosterNote):''}
             ${daySerum&&!isBarrierRecovery?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(daySerum)}</div><div class="rs-body"><div class="rs-brand">${daySerum.brand}</div><div class="rs-name">${daySerum.name}</div></div></div>`:''}
+            ${isRet&&retinal&&!isBarrierRecovery&&_isRetinalSerum?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(retinal)}</div><div class="rs-body"><div class="rs-brand">${retinal.brand}</div><div class="rs-name">${retinal.name}</div><div class="rs-note">${t('step_retinal_note')}</div></div></div>`:''}
             ${_showMC?_devOvl('MC Mode','#27AE60',_mcNote):''}
             ${_showDerma&&_dermaTarget===daySerum?_devOvl('Derma Shot','#E74C3C',_dermaNote):''}
             ${_showMistMilky?`<div class="routine-step">${sn()}<div class="rs-emoji">💦</div><div class="rs-body"><div class="rs-brand">${mistProd.brand}</div><div class="rs-name">${mistProd.name}</div><div class="rs-note">Apply milky mist after serum to seal in actives before moisturizer.</div></div></div>`:''}
             ${_showEye?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(dayEye)}</div><div class="rs-body"><div class="rs-brand">${dayEye.brand}</div><div class="rs-name">${dayEye.name}</div><div class="rs-note">${t('step_eye_note')}</div></div></div>`:''}
             ${isAHA&&aha&&!isBarrierRecovery?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(aha)}</div><div class="rs-body"><div class="rs-brand">${aha.brand}</div><div class="rs-name">${aha.name}</div><div class="rs-note">${t('step_aha_note')}</div></div></div>`:''}
             ${isBHA&&bha&&!isBarrierRecovery?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(bha)}</div><div class="rs-body"><div class="rs-brand">${bha.brand}</div><div class="rs-name">${bha.name}</div><div class="rs-note">${t('step_bha_note')}</div></div></div>`:''}
-            ${(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-brand">${moist.brand}</div><div class="rs-name">${moist.name}</div>${isRet&&retinal&&!isBarrierRecovery?`<div class="rs-note">${t('step_moisturizer_before_retinal_note')}</div>`:''}</div></div></div>`:''}
+            ${(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(moist)}</div><div class="rs-body"><div class="rs-brand">${moist.brand}</div><div class="rs-name">${moist.name}</div>${isRet&&retinal&&!isBarrierRecovery&&!_isRetinalSerum?`<div class="rs-note">${t('step_moisturizer_before_retinal_note')}</div>`:''}</div></div></div>`:''}
             ${_showDerma&&_dermaTarget===moist?_devOvl('Derma Shot','#E74C3C',_dermaNote):''}
             ${_showMistBarrier?`<div class="routine-step">${sn()}<div class="rs-emoji">💦</div><div class="rs-body"><div class="rs-brand">${mistProd.brand}</div><div class="rs-name">${mistProd.name}</div><div class="rs-note">Barrier mist over moisturizer to lock in hydration overnight.</div></div></div>`:''}
-            ${isRet&&retinal&&!isBarrierRecovery?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(retinal)}</div><div class="rs-body"><div class="rs-brand">${retinal.brand}</div><div class="rs-name">${retinal.name}</div><div class="rs-note">${t('step_retinal_note')}</div></div></div>`:''}
+            ${isRet&&retinal&&!isBarrierRecovery&&!_isRetinalSerum?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(retinal)}</div><div class="rs-body"><div class="rs-brand">${retinal.brand}</div><div class="rs-name">${retinal.name}</div><div class="rs-note">${t('step_retinal_note')}</div></div></div>`:''}
             ${_retinoidDayEye?`<div class="routine-step r-retinal">${sn('rt')}<div class="rs-emoji">${prodEmoji(_retinoidDayEye)}</div><div class="rs-body"><div class="rs-brand">${_retinoidDayEye.brand}</div><div class="rs-name">${_retinoidDayEye.name}</div><div class="rs-note">${t('step_eye_note')}</div></div></div>`:''}
             ${sleepingPack&&!isBarrierRecovery&&(!_rpIsSimple||_rpNeedsExtraOcclusion)&&(!_rpIsModerate||_rpNeedsExtraOcclusion)?`<div class="routine-step">${sn()}<div class="rs-emoji">🌙</div><div class="rs-body"><div class="rs-brand">${sleepingPack.brand}</div><div class="rs-name">${sleepingPack.name}</div></div></div>`:''}
             <div class="avoid-box"><div class="avoid-title">${t('avoid_tonight')}</div><div class="avoid-chips">${avoidList.map(a=>`<span class="avoid-chip">${a}</span>`).join('')}</div></div>
@@ -3154,8 +3156,9 @@ function _renderDayPanelHtml(d,pid,c1,c2,toner,essence,serum,moist,deviceGel,use
 // (once from the inline onclick, once from delegation) producing a visible flash
 // as active classes were stripped and re-applied.
 function attachDayInteractions(){
-  // No-op — kept to avoid "not defined" errors from existing call sites.
-  // All day interaction is handled by inline onclick in renderPhase().
+  setTimeout(function(){
+    if(typeof enhanceRoutineSteps==='function') enhanceRoutineSteps();
+  },0);
 }
 function dayClickHandler(e){
   const btn=e.target.closest('.day-btn[data-phase][data-day]');
@@ -3956,6 +3959,65 @@ function showPage(id,triggerBtn){
     document.removeEventListener('click', tryPlay);
   }, {once: true});
 })();
+
+
+/* Task 6 - Night Routine UX Polish */
+var T6={
+  en:{checkin_title:'Finished your routine?',checkin_sub:'Tap to log your progress',checkin_btn:'Log it',checkin_done:'Routine done today!',sos_title:'Skin Reacting?',sos_sub:'Follow these emergency steps',sos_close:'Got it',sos_tip1:'Stop the suspected product immediately',sos_tip2:'Rinse face with cool plain water',sos_tip3:'Apply a thin layer of Vaseline or barrier cream',sos_tip4:'Avoid acids and retinol for 5-7 days',sos_tip5:'See a doctor if swelling or hives develop'},
+  th:{checkin_title:'ทำรูทีนเสร็จแล้ว?',checkin_sub:'แตะเพื่อสะสมความคืบหน้า',checkin_btn:'สะสม',checkin_done:'ทำรูทีนวันนี้แล้ว!',sos_title:'ผิวแพ้?',sos_sub:'ทำตามขั้นตอนฉุกเฉน',sos_close:'เข้าใจแล้ว',sos_tip1:'หยุดใช้ผลิตภัณฑ์ที่สงสัยทันที',sos_tip2:'ล้างหน้าด้วน้ำสะอาด อุณหภูมิห้อง',sos_tip3:'ทา Vaseline หรือ barrier cream บางๆ',sos_tip4:'หลีกเลี่ยงกรดและเรตินอล 5-7 วัน',sos_tip5:'หากมีอาการบวมแดง ปรึกษาแพทย์'}
+};
+function t6(k){return(T6[LANG]&&T6[LANG][k])||T6.en[k]||k;}
+var GP_AMOUNT_RULES=[
+  {kw:['cleansing balm','cleansing oil','oil cleanser'],
+    amt:'1-2 pumps - massage 60s',           amt_th:'ต1-2 ปั๊ม - นวด 60 วินาที',
+    wait:'Pat dry before next step',         wait_th:'ซับให้แห้งก่อนขั้นตอนต่อไป'},
+  {kw:['foam','cleansing foam','gel cleanser','cleanser'],
+    amt:'Cherry-sized amount',               amt_th:'ปริมาณเท่าลูกเชอร์รี่',
+    wait:'Pat dry - 30s',                    wait_th:'ซับให้แห้ง - 30 วินาที'},
+  {kw:['toner pad','toner pads'],
+    amt:'1 pad - swipe then pat',            amt_th:'1 แผ่น - ปัดแล้วแตะ',
+    wait:'20-30s - let absorb',              wait_th:'20-30 วินาที - ให้ดูดซึม'},
+  {kw:['toner','skin softener','lotion toner'],
+    amt:'2-3 drops or half pad',             amt_th:'2-3 หยด หรือครึ่งแผ่น',
+    wait:'30s - pat in',                     wait_th:'30 วินาที - แตะให้ซึม'},
+  {kw:['essence'],
+    amt:'2-3 drops - press and pat',         amt_th:'2-3 หยด - กดแล้วแตะ',
+    wait:'30s',                              wait_th:'30 วินาที'},
+  {kw:['retinol','retinal','tretinoin'],
+    amt:'Rice-grain - less is more',         amt_th:'ปริมาณเท่าเมล็ดข้าว - น้อยแต่มาก',
+    wait:'20-30 min before moisturiser',     wait_th:'20-30 นาทีก่อนครีมบำรุง'},
+  {kw:['vitamin c','ascorbic acid'],
+    amt:'2-3 drops evenly',                  amt_th:'2-3 หยด ทาทั่ว',
+    wait:'1 min dry-down',                   wait_th:'1 นาที รอให้แห้ง'},
+  {kw:['aha','bha','pha','exfoliant','peeling'],
+    amt:'Thin layer - avoid eye area',       amt_th:'ทาบางๆ - หลีกเลี่ยงรอบดวงตา',
+    wait:'10 min - no actives on top',       wait_th:'10 นาที - ไม่ใช้ actives ซ้อน'},
+  {kw:['serum','ampoule'],
+    amt:'2-3 drops - press in',              amt_th:'2-3 หยด - กดให้ซึม',
+    wait:'60s - let sink in',                wait_th:'60 วินาที - รอให้ดูดซึม'},
+  {kw:['eye cream','eye gel'],
+    amt:'Millet grain each eye',             amt_th:'เมล็ดข้า฿ท่างต่อข้าง',
+    wait:'',                                 wait_th:''},
+  {kw:['sleeping mask','sleeping pack'],
+    amt:'Thin layer - last step',            amt_th:'ทาบางๆ - ขั้นสุดท้าย',
+    wait:'',                                 wait_th:''},
+  {kw:['moisturizer','moisturiser','cream','gel cream'],
+    amt:'Hazelnut-sized - warm first',       amt_th:'เฮเซลนัต - อุ่นในมือก่อน',
+    wait:'',                                 wait_th:''},
+  {kw:['sunscreen','spf'],
+    amt:'1/4 tsp full face',                 amt_th:'1/4 ช้อนชา ทั่วใบหน้า',
+    wait:'',                                 wait_th:''},
+  {kw:['mist','spray'],
+    amt:'Hold 20cm - 2-3 sprays',            amt_th:'ห่าง 20ซม - พ่น 2-3 ครั้ง',
+    wait:'Pat lightly',                      wait_th:'แตะเบาๆ'}
+];
+function guessAmountForStep(tx){if(!tx)return null;var l=tx.toLowerCase();for(var i=0;i<GP_AMOUNT_RULES.length;i++){var r=GP_AMOUNT_RULES[i];for(var j=0;j<r.kw.length;j++){if(l.indexOf(r.kw[j])>=0)return r;}}return null;}
+function enhanceRoutineSteps(){var ss=document.querySelectorAll('.routine-step');if(!ss.length)return;var isTH=typeof LANG!=='undefined'&&LANG==='th';ss.forEach(function(s){if(s.querySelector('.rs-amount'))return;var b=s.querySelector('.rs-body');if(!b)return;var tx=['.rs-name','.rs-note','.rs-brand'].map(function(q){var e=s.querySelector(q);return e?e.textContent:'';}).join(' ');var r=guessAmountForStep(tx);if(r&&(isTH?r.amt_th:r.amt)){var el=document.createElement('div');el.className='rs-amount';el.textContent=isTH?(r.amt_th||r.amt):r.amt;b.appendChild(el);}});var a=Array.prototype.slice.call(ss);a.forEach(function(s,i){if(i===a.length-1)return;if(s.nextElementSibling&&s.nextElementSibling.classList.contains('rs-wait-chip'))return;var tx=['.rs-name','.rs-note'].map(function(q){var e=s.querySelector(q);return e?e.textContent:'';}).join(' ');var r=guessAmountForStep(tx);var wt=isTH?(r&&r.wait_th!==undefined?r.wait_th:r&&r.wait):r&&r.wait;if(r&&wt){var c=document.createElement('div');c.className='rs-wait-chip';c.textContent=wt;s.parentNode.insertBefore(c,s.nextSibling);}});}
+
+function triggerSkinReactionAlert(){var ex=document.getElementById('gp-sos-sheet');if(ex)ex.remove();var tips=[t6('sos_tip1'),t6('sos_tip2'),t6('sos_tip3'),t6('sos_tip4'),t6('sos_tip5')];var h=tips.map(function(tip){return '<div class="gp-sos-tip"><span class="gp-sos-tip-dot"></span>'+tip+'</div>';}).join('');var ov=document.createElement('div');ov.id='gp-sos-sheet';ov.className='gp-sos-overlay';ov.innerHTML='<div class="gp-sos-sheet"><div class="gp-sos-handle"></div><div class="gp-sos-head"><span class="gp-sos-icon">🚨</span><div><div class="gp-sos-title">'+t6('sos_title')+'</div><div class="gp-sos-sub">'+t6('sos_sub')+'</div></div></div>'+h+'<button class="gp-sos-close-btn" onclick="closeSosSheet()">'+t6('sos_close')+'</button></div>';ov.addEventListener('click',function(e){if(e.target===ov)closeSosSheet();});document.body.appendChild(ov);}
+function closeSosSheet(){var el=document.getElementById('gp-sos-sheet');if(el){el.style.pointerEvents='none';if(el.parentNode)el.parentNode.removeChild(el);}}
+function renderEmergencySOS(){if(document.getElementById('gp-sos-fab'))return;var f=document.createElement('button');f.id='gp-sos-fab';f.className='gp-sos-fab';f.title='Skin reaction emergency';f.innerHTML='🆘';f.onclick=triggerSkinReactionAlert;document.body.appendChild(f);}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderEmergencySOS);}else{renderEmergencySOS();}
 
 document.addEventListener('DOMContentLoaded',()=>{
   const savedLang=localStorage.getItem('gp_lang')||'en';
