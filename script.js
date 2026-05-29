@@ -1636,6 +1636,53 @@ const T = {
     modal_inci_title:'Full INCI Ingredient List',
     modal_inci_missing:'Ingredient data missing — verify ingredient list on your physical carton before use.',
     modal_close:'Close',
+    // Skin Readiness Gate
+    sg_badge_p2:'Checking readiness for Phase 2',
+    sg_badge_p3:'Checking readiness for Phase 3',
+    sg_badge_p4:'Checking readiness for Phase 4',
+    sg_title:'How is your skin feeling?',
+    sg_subtitle:'Answer 3 quick questions so we can make sure you\'re ready for the next phase.',
+    sg_q1_label:'Does your skin sting after skincare?',
+    sg_q1_a:'Never',sg_q1_b:'Sometimes',sg_q1_c:'Often',
+    sg_q2_label:'How does your skin feel lately?',
+    sg_q2_a:'Comfortable',sg_q2_b:'Slightly dry',sg_q2_c:'Tight or irritated',
+    sg_q3_label:'Have you had increased breakouts or redness recently?',
+    sg_q3_a:'No',sg_q3_b:'Slightly',sg_q3_c:'Yes',
+    sg_btn_check:'Check My Skin Readiness',
+    sg_btn_skip:'Skip for now',
+    // Gate results
+    sg_ready_icon:'✨',
+    sg_ready_title:'Your skin looks ready!',
+    sg_ready_msg:'Your answers suggest your skin is calm and stable. You\'re in a great place to move forward.',
+    sg_ready_btn:'Continue to Next Phase',
+    sg_caution_icon:'🌿',
+    sg_caution_title:'Almost there — take it gently',
+    sg_caution_msg:'Your skin is showing some sensitivity. You can move forward, but go slowly and listen to your skin.',
+    sg_caution_tip1:'Start with the mildest products in the next phase first.',
+    sg_caution_tip2:'Add one new product at a time — wait 3 days between introductions.',
+    sg_caution_tip3:'If any stinging or redness appears, step back for a recovery day.',
+    sg_caution_btn_stay:'Stay in Current Phase a Bit Longer',
+    sg_caution_btn_anyway:'I\'ll move forward carefully',
+    sg_notready_icon:'🛡',
+    sg_notready_title:'Your skin may need a little more time',
+    sg_notready_msg:'Based on your answers, your skin is still in recovery mode. Moving to stronger actives now could set you back — and that\'s the last thing we want.',
+    sg_notready_tip1:'Continue your current routine consistently for another 1–2 weeks.',
+    sg_notready_tip2:'Focus on hydration and barrier-repair products.',
+    sg_notready_tip3:'When skin no longer stings or feels tight, check again.',
+    sg_notready_btn:'Stay in Current Phase',
+    sg_notready_btn_anyway:'I understand, move forward anyway',
+    // Step Back / Recovery Mode
+    sb_btn:'I\'m reacting — step back',
+    sb_sheet_title:'Your skin is telling you something',
+    sb_sheet_msg:'That\'s okay — stepping back is not failing. It\'s one of the most intelligent things you can do for your skin. Let\'s reduce intensity temporarily while your barrier recovers.',
+    sb_tip1:'All retinol, AHA, and exfoliants will be paused.',
+    sb_tip2:'Your routine will focus on hydration and barrier repair.',
+    sb_tip3:'You can return to your phase whenever your skin feels calm.',
+    sb_confirm:'Yes, recover for now',
+    sb_cancel:'Stay in current phase',
+    sb_banner_title:'🌿 Recovery Mode — temporary',
+    sb_banner_body:'You\'re in a recovery routine while your skin calms down. No actives, no pressure.',
+    sb_banner_return:'Return to my phase',
     warn_fragrance:'⚠️ Contains fragrance/parfum — caution if fragrance-sensitive',
     warn_alcohol:'⚠️ Contains drying alcohol — caution if dry or barrier-compromised',
     warn_eo:'⚠️ Contains essential oils — caution if reactive',
@@ -1982,6 +2029,52 @@ const T = {
     modal_inci_title:'รายการส่วนผสม INCI แบบเต็ม',
     modal_inci_missing:'ไม่มีข้อมูลส่วนผสม — โปรดตรวจสอบรายการส่วนผสมบนกล่องผลิตภัณฑ์ก่อนใช้',
     modal_close:'ปิด',
+    // Skin Readiness Gate (Thai)
+    sg_badge_p2:'ตรวจสอบความพร้อมสำหรับ Phase 2',
+    sg_badge_p3:'ตรวจสอบความพร้อมสำหรับ Phase 3',
+    sg_badge_p4:'ตรวจสอบความพร้อมสำหรับ Phase 4',
+    sg_title:'ผิวของคุณเป็นอย่างไรบ้าง?',
+    sg_subtitle:'ตอบ 3 คำถามสั้น ๆ เพื่อให้เราตรวจสอบว่าคุณพร้อมสำหรับขั้นตอนต่อไปหรือยัง',
+    sg_q1_label:'ผิวของคุณแสบหลังทาผลิตภัณฑ์สกินแคร์หรือไม่?',
+    sg_q1_a:'ไม่เคย',sg_q1_b:'บางครั้ง',sg_q1_c:'บ่อยครั้ง',
+    sg_q2_label:'ผิวของคุณรู้สึกอย่างไรช่วงนี้?',
+    sg_q2_a:'สบายดี',sg_q2_b:'แห้งเล็กน้อย',sg_q2_c:'ตึงหรือระคายเคือง',
+    sg_q3_label:'มีสิวหรือรอยแดงเพิ่มขึ้นเร็ว ๆ นี้หรือไม่?',
+    sg_q3_a:'ไม่มี',sg_q3_b:'เล็กน้อย',sg_q3_c:'มี',
+    sg_btn_check:'ตรวจสอบความพร้อมของผิว',
+    sg_btn_skip:'ข้ามไปก่อน',
+    sg_ready_icon:'✨',
+    sg_ready_title:'ผิวของคุณพร้อมแล้ว!',
+    sg_ready_msg:'คำตอบของคุณบ่งชี้ว่าผิวสงบและมั่นคงดี คุณพร้อมที่จะก้าวไปข้างหน้าแล้ว',
+    sg_ready_btn:'ไปยังขั้นตอนถัดไป',
+    sg_caution_icon:'🌿',
+    sg_caution_title:'เกือบพร้อมแล้ว — ค่อย ๆ ไปนะ',
+    sg_caution_msg:'ผิวของคุณยังมีความไวอยู่บ้าง สามารถไปต่อได้ แต่ให้ค่อย ๆ ฟังสัญญาณจากผิว',
+    sg_caution_tip1:'เริ่มจากผลิตภัณฑ์ที่ออกฤทธิ์อ่อนที่สุดในขั้นตอนถัดไปก่อน',
+    sg_caution_tip2:'แนะนำผลิตภัณฑ์ใหม่ทีละชนิด รอ 3 วันระหว่างการแนะนำแต่ละครั้ง',
+    sg_caution_tip3:'หากมีอาการแสบหรือแดง ให้หยุดพักเป็น Recovery Day',
+    sg_caution_btn_stay:'อยู่ใน Phase นี้ต่อสักหน่อย',
+    sg_caution_btn_anyway:'ฉันจะไปต่ออย่างระวัง',
+    sg_notready_icon:'🛡',
+    sg_notready_title:'ผิวของคุณอาจต้องการเวลาอีกนิดหน่อย',
+    sg_notready_msg:'จากคำตอบของคุณ ผิวยังอยู่ในโหมดฟื้นฟู การเปลี่ยนไปใช้สารออกฤทธิ์ที่แรงขึ้นตอนนี้อาจทำให้ผิวแย่ลง ซึ่งเราไม่อยากให้เกิดขึ้นเลย',
+    sg_notready_tip1:'ทำตามรูทีนปัจจุบันต่อไปอีก 1–2 สัปดาห์อย่างสม่ำเสมอ',
+    sg_notready_tip2:'เน้นผลิตภัณฑ์เพิ่มความชุ่มชื้นและซ่อมแซมเกราะผิว',
+    sg_notready_tip3:'เมื่อผิวไม่แสบหรือตึงอีกต่อไป ลองตรวจสอบอีกครั้ง',
+    sg_notready_btn:'อยู่ใน Phase นี้ต่อไป',
+    sg_notready_btn_anyway:'ฉันเข้าใจแล้ว ไปต่อเลย',
+    // Step Back / Recovery Mode (Thai)
+    sb_btn:'ผิวกำลังแพ้ — ถอยกลับ',
+    sb_sheet_title:'ผิวของคุณกำลังบอกอะไรบางอย่าง',
+    sb_sheet_msg:'ไม่เป็นไรเลย — การถอยกลับไม่ใช่ความล้มเหลว แต่เป็นสิ่งที่ฉลาดที่สุดที่จะทำเพื่อผิวของคุณ ลดความเข้มข้นชั่วคราวขณะที่เกราะผิวฟื้นตัว',
+    sb_tip1:'หยุดใช้ Retinol, AHA และสารผลัดเซลล์ผิวทั้งหมด',
+    sb_tip2:'รูทีนจะเน้นการให้ความชุ่มชื้นและซ่อมแซมเกราะผิว',
+    sb_tip3:'กลับสู่ Phase เดิมได้เมื่อผิวรู้สึกสงบ',
+    sb_confirm:'ใช่ พักฟื้นก่อนเลย',
+    sb_cancel:'อยู่ใน Phase นี้ต่อ',
+    sb_banner_title:'🌿 Recovery Mode — ชั่วคราว',
+    sb_banner_body:'คุณอยู่ในโหมดพักฟื้นขณะที่ผิวสงบลง ไม่มีสารออกฤทธิ์ ไม่มีแรงกดดัน',
+    sb_banner_return:'กลับสู่ Phase ของฉัน',
     warn_fragrance:'⚠️ มีน้ำหอม/parfum — ระวังหากแพ้กลิ่นหอม',
     warn_alcohol:'⚠️ มีแอลกอฮอล์ที่ทำให้แห้ง — ระวังหากผิวแห้งหรือเกราะผิวเสียหาย',
     warn_eo:'⚠️ มีน้ำมันหอมระเหย — ระวังหากผิวตอบสนองไวต่อสิ่งกระตุ้น',
@@ -2453,6 +2546,279 @@ function highlightIngs(text,flagged){ let r=text;(flagged||[]).forEach(f=>{const
 function closeModal(){const m=document.getElementById('product-modal');if(m)m.classList.remove('open');}
 function closeModalOutside(e){if(e.target.id==='product-modal')closeModal();}
 
+/* ═══ SKIN READINESS GATE ═══ */
+const _sgState={answers:{q1:null,q2:null,q3:null},targetPid:null,targetBtn:null};
+
+function _sgScore(){
+  const map={q1:{a:0,b:1,c:2},q2:{a:0,b:1,c:2},q3:{a:0,b:1,c:2}};
+  return ['q1','q2','q3'].reduce((s,q)=>s+(map[q][_sgState.answers[q]]??0),0);
+}
+
+function openSkinGate(pid,btn){
+  _sgState.answers={q1:null,q2:null,q3:null};
+  _sgState.targetPid=pid;
+  _sgState.targetBtn=btn;
+  _renderSkinGateQuestions();
+  document.getElementById('skin-gate-modal').classList.add('open');
+}
+
+function closeSkinGate(){
+  document.getElementById('skin-gate-modal').classList.remove('open');
+}
+
+function _renderSkinGateQuestions(){
+  const pid=_sgState.targetPid;
+  const badge=pid==='p2'?t('sg_badge_p2'):pid==='p3'?t('sg_badge_p3'):t('sg_badge_p4');
+  const allAnswered=_sgState.answers.q1&&_sgState.answers.q2&&_sgState.answers.q3;
+
+  function optRow(q,key,label){
+    const sel=_sgState.answers[q]===key?'selected':'';
+    return `<div class="sg-option ${sel}" onclick="sgSelectAnswer('${q}','${key}')">
+      <div class="sg-option-dot"></div>${label}</div>`;
+  }
+
+  document.getElementById('skin-gate-box').innerHTML=`
+    <div class="sg-header">
+      <div class="sg-phase-badge">🌸 ${badge}</div>
+      <div class="sg-title">${t('sg_title')}</div>
+      <div class="sg-subtitle">${t('sg_subtitle')}</div>
+    </div>
+    <div class="sg-body">
+      <div class="sg-question">
+        <div class="sg-q-label"><span class="sg-q-num">1</span>${t('sg_q1_label')}</div>
+        <div class="sg-options">
+          ${optRow('q1','a',t('sg_q1_a'))}
+          ${optRow('q1','b',t('sg_q1_b'))}
+          ${optRow('q1','c',t('sg_q1_c'))}
+        </div>
+      </div>
+      <div class="sg-divider"></div>
+      <div class="sg-question">
+        <div class="sg-q-label"><span class="sg-q-num">2</span>${t('sg_q2_label')}</div>
+        <div class="sg-options">
+          ${optRow('q2','a',t('sg_q2_a'))}
+          ${optRow('q2','b',t('sg_q2_b'))}
+          ${optRow('q2','c',t('sg_q2_c'))}
+        </div>
+      </div>
+      <div class="sg-divider"></div>
+      <div class="sg-question">
+        <div class="sg-q-label"><span class="sg-q-num">3</span>${t('sg_q3_label')}</div>
+        <div class="sg-options">
+          ${optRow('q3','a',t('sg_q3_a'))}
+          ${optRow('q3','b',t('sg_q3_b'))}
+          ${optRow('q3','c',t('sg_q3_c'))}
+        </div>
+      </div>
+    </div>
+    <div class="sg-footer">
+      <button class="sg-btn-check" id="sg-check-btn" onclick="sgSubmit()" ${allAnswered?'':'disabled'}>${t('sg_btn_check')}</button>
+      <button class="sg-btn-skip" onclick="sgProceed()">${t('sg_btn_skip')}</button>
+    </div>`;
+}
+
+function sgSelectAnswer(q,key){
+  _sgState.answers[q]=key;
+  const box=document.getElementById('skin-gate-box');
+  const scrollTop=box?box.scrollTop:0;
+  _renderSkinGateQuestions();
+  if(box)box.scrollTop=scrollTop;
+}
+
+function sgSubmit(){
+  const score=_sgScore();
+  let icon,title,msg,tips,buttons;
+
+  if(score<=2){
+    // READY
+    document.getElementById('skin-gate-box').innerHTML=`
+      <div class="sg-result">
+        <div class="sg-result-icon">${t('sg_ready_icon')}</div>
+        <div class="sg-result-title">${t('sg_ready_title')}</div>
+        <div class="sg-result-msg">${t('sg_ready_msg')}</div>
+        <button class="sg-btn-proceed" onclick="sgProceed()">${t('sg_ready_btn')}</button>
+      </div>`;
+  } else if(score<=4){
+    // CAUTION — allow but warn
+    document.getElementById('skin-gate-box').innerHTML=`
+      <div class="sg-result">
+        <div class="sg-result-icon">${t('sg_caution_icon')}</div>
+        <div class="sg-result-title">${t('sg_caution_title')}</div>
+        <div class="sg-result-msg">${t('sg_caution_msg')}</div>
+        <div class="sg-result-tips">
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_caution_tip1')}</div>
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_caution_tip2')}</div>
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_caution_tip3')}</div>
+        </div>
+        <button class="sg-btn-stay" onclick="closeSkinGate()">${t('sg_caution_btn_stay')}</button>
+        <button class="sg-btn-anyway" onclick="sgProceed()">${t('sg_caution_btn_anyway')}</button>
+      </div>`;
+  } else {
+    // NOT READY — recommend staying, but still allow
+    document.getElementById('skin-gate-box').innerHTML=`
+      <div class="sg-result">
+        <div class="sg-result-icon">${t('sg_notready_icon')}</div>
+        <div class="sg-result-title">${t('sg_notready_title')}</div>
+        <div class="sg-result-msg">${t('sg_notready_msg')}</div>
+        <div class="sg-result-tips">
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_notready_tip1')}</div>
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_notready_tip2')}</div>
+          <div class="sg-result-tip"><div class="sg-result-tip-dot"></div>${t('sg_notready_tip3')}</div>
+        </div>
+        <button class="sg-btn-stay" onclick="closeSkinGate()">${t('sg_notready_btn')}</button>
+        <button class="sg-btn-anyway" onclick="sgProceed()">${t('sg_notready_btn_anyway')}</button>
+      </div>`;
+  }
+}
+
+function sgProceed(){
+  closeSkinGate();
+  // Now actually execute the phase switch
+  const pid=_sgState.targetPid;
+  const btn=_sgState.targetBtn;
+  if(pid&&btn)_doSwitchRoutinePhase(pid,btn);
+}
+
+/* ═══ STEP BACK / RECOVERY MODE ═══ */
+// Stores cardId of the phase panel currently in recovery mode
+const _sbState={cardId:null,originalPid:null};
+
+function openStepBackSheet(triggerEl){
+  // Find the builder-card this button lives in
+  const card=triggerEl?triggerEl.closest('.builder-card'):null;
+  const cardId=card?card.dataset.cardId:null;
+  if(!cardId)return;
+  // Store context for later
+  const phasePanel=card.querySelector('.phase-panel');
+  const originalPid=phasePanel?phasePanel.dataset.pid:null;
+  _sbState.cardId=cardId;
+  _sbState.originalPid=originalPid;
+
+  // Build bottom sheet
+  const ex=document.getElementById('sb-sheet-overlay');
+  if(ex)ex.remove();
+  const ov=document.createElement('div');
+  ov.id='sb-sheet-overlay';
+  ov.className='sb-sheet-overlay';
+  ov.innerHTML=`
+    <div class="sb-sheet">
+      <div class="sb-sheet-handle"></div>
+      <div class="sb-sheet-head">
+        <span class="sb-sheet-emoji">🌿</span>
+        <div class="sb-sheet-title">${t('sb_sheet_title')}</div>
+      </div>
+      <div class="sb-sheet-msg">${t('sb_sheet_msg')}</div>
+      <div class="sb-sheet-tips">
+        <div class="sb-sheet-tip"><div class="sb-sheet-tip-dot"></div>${t('sb_tip1')}</div>
+        <div class="sb-sheet-tip"><div class="sb-sheet-tip-dot"></div>${t('sb_tip2')}</div>
+        <div class="sb-sheet-tip"><div class="sb-sheet-tip-dot"></div>${t('sb_tip3')}</div>
+      </div>
+      <button class="sb-sheet-confirm" onclick="activateRecoveryMode()">${t('sb_confirm')}</button>
+      <button class="sb-sheet-cancel" onclick="closeStepBackSheet()">${t('sb_cancel')}</button>
+    </div>`;
+  ov.addEventListener('click',function(e){if(e.target===ov)closeStepBackSheet();});
+  document.body.appendChild(ov);
+}
+
+function closeStepBackSheet(){
+  const el=document.getElementById('sb-sheet-overlay');
+  if(el&&el.parentNode)el.parentNode.removeChild(el);
+}
+
+function activateRecoveryMode(){
+  closeStepBackSheet();
+  const cardId=_sbState.cardId;
+  if(!cardId)return;
+  const card=document.querySelector(`.builder-card[data-card-id="${cardId}"]`);
+  if(!card)return;
+  const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+  if(!data)return;
+
+  // Render p1 (barrier/recovery plan, zero actives) into active-phase-area
+  const phaseArea=card.querySelector('.active-phase-area');
+  if(!phaseArea)return;
+  phaseArea.innerHTML=renderPhase(
+    'p1',data.selected,data.c1,data.c2,
+    data.toner,data.essence,data.nightSerum,data.moist,
+    data.deviceGel,data.usesDevice,
+    false,false,false,false,
+    data.isMature,data.isHighSens,'active',false,
+    data.eye,data.sleepingPack,data._answersWithDayProducts,data.mistProd,'Mon'
+  );
+  setTimeout(enhanceRoutineSteps,0);
+
+  // Deactivate all night phase tabs — content no longer matches any single tab
+  card.querySelectorAll('.phase-nav:not(.morning-phase-nav) .phase-tab').forEach(b=>b.classList.remove('active'));
+
+  // Inject recovery banner at top of active-phase-area (before the phase-panel content)
+  const banner=document.createElement('div');
+  banner.id='sb-recovery-banner';
+  banner.className='sb-recovery-banner';
+  banner.innerHTML=`
+    <div class="sb-recovery-icon">🌿</div>
+    <div class="sb-recovery-content">
+      <div class="sb-recovery-title">${t('sb_banner_title')}</div>
+      <div class="sb-recovery-body">${t('sb_banner_body')}</div>
+      <button class="sb-recovery-return" onclick="exitRecoveryMode()">${t('sb_banner_return')}</button>
+    </div>`;
+  phaseArea.insertBefore(banner,phaseArea.firstChild);
+  // Auto-save recovery state — no user action needed
+  _gpAutoSavePhaseState(cardId,_sbState.originalPid||'p3',true);
+}
+
+function exitRecoveryMode(){
+  const cardId=_sbState.cardId;
+  const originalPid=_sbState.originalPid||'p3';
+  if(!cardId)return;
+  const card=document.querySelector(`.builder-card[data-card-id="${cardId}"]`);
+  if(!card)return;
+  // Route through the Skin Readiness Gate — user must confirm skin is ready before returning.
+  // _sbState is intentionally NOT cleared here: if the user dismisses the gate,
+  // the banner stays visible and they can try returning again without being stuck.
+  const tabBtn=card.querySelector(`.phase-nav .phase-tab[data-phase="${originalPid}"]`);
+  if(tabBtn) switchRoutinePhase(originalPid,tabBtn);
+}
+
+/* ═══ PHASE STATE AUTO-SAVE + RESTORE ═══ */
+
+// Silently writes activePhase + inRecoveryMode to the saved routine in localStorage.
+// Called automatically on every phase switch and recovery mode change — no user action needed.
+function _gpAutoSavePhaseState(cardId,pid,inRecovery){
+  if(!cardId||cardId==='gc-draft')return; // unsaved draft — nothing to persist
+  const routineId=cardId.replace('gc-','');
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(r=>r.id===routineId);
+  if(idx===-1)return; // routine not yet saved to localStorage — skip silently
+  routines[idx].activePhase=pid;
+  routines[idx].inRecoveryMode=!!inRecovery;
+  setSavedRoutines(routines);
+}
+
+// Called after every DOM render (via attachDayInteractions).
+// Reads each visible card's saved phase state and silently restores it —
+// bypassing the Skin Readiness Gate because this is restoration, not new progression.
+function restorePhaseState(){
+  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    const routineId=cardId.replace('gc-','');
+    const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+    if(!r)return;
+    const savedPhase=r.activePhase;
+    const inRecovery=r.inRecoveryMode;
+    if(inRecovery&&savedPhase){
+      // Restore recovery mode — seed _sbState then activate
+      _sbState.cardId=cardId;
+      _sbState.originalPid=savedPhase;
+      activateRecoveryMode();
+    } else if(savedPhase&&savedPhase!=='p1'){
+      // Restore non-default phase — use _doSwitchRoutinePhase to bypass the gate
+      const tabBtn=card.querySelector('.phase-nav .phase-tab[data-phase="'+savedPhase+'"]');
+      if(tabBtn)_doSwitchRoutinePhase(savedPhase,tabBtn);
+    }
+  });
+}
+
 /* ═══ ROUTINE BUILDER ═══ */
 let builderState={step:0,answers:{},selectedIds:[],routineData:null,prodSearchQuery:''};
 /* ═══ MY ROUTINE state — tracks which saved routine is currently displayed ═══ */
@@ -2909,6 +3275,15 @@ function switchMorningPhase(mid,btn){
 }
 
 function switchRoutinePhase(pid,btn){
+  // Show Skin Readiness Gate before allowing progression to Phase 2, 3, or 4
+  if(pid==='p2'||pid==='p3'||pid==='p4'){
+    openSkinGate(pid,btn);
+    return;
+  }
+  _doSwitchRoutinePhase(pid,btn);
+}
+
+function _doSwitchRoutinePhase(pid,btn){
   const card=btn?btn.closest('.builder-card'):null;
   if(!card)return;
   const cardId=card.dataset.cardId;
@@ -2931,6 +3306,10 @@ function switchRoutinePhase(pid,btn){
     data.isMature,data.isHighSens,'active',isOptional,
     data.eye,data.sleepingPack,data._answersWithDayProducts,data.mistProd,data.selectedDay||'Mon'
   );
+  // Re-apply amount guides and wait chips to newly rendered steps
+  setTimeout(enhanceRoutineSteps,0);
+  // Auto-save active phase — no user action needed
+  _gpAutoSavePhaseState(cardId,pid,false);
 }
 
 /* ═══ PHASE RENDER ═══ */
@@ -3133,7 +3512,8 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
         </div>
       </div>`;
   }).join('');
-  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
+  const _sbStrip=(pid==='p3'||pid==='p4')?`<div class="sb-strip"><button class="sb-btn" onclick="openStepBackSheet(this)"><span class="sb-btn-icon">🌿</span>${t('sb_btn')}</button></div>`:'';
+  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
 }
 
 /* Render a single day-panel HTML string by delegating to renderPhase with
@@ -3158,6 +3538,7 @@ function _renderDayPanelHtml(d,pid,c1,c2,toner,essence,serum,moist,deviceGel,use
 function attachDayInteractions(){
   setTimeout(function(){
     if(typeof enhanceRoutineSteps==='function') enhanceRoutineSteps();
+    if(typeof restorePhaseState==='function') restorePhaseState();
   },0);
 }
 function dayClickHandler(e){
@@ -3188,6 +3569,8 @@ function selectDay(pid,day,btn){
   );
   // Persist selected day so phase switches can restore the user's position
   data.selectedDay=day;
+  // Re-apply amount guides and wait chips to newly rendered steps
+  setTimeout(enhanceRoutineSteps,0);
 }
 function makeStep(type,num,emoji,brand,name,note){
   const colors={n:'linear-gradient(135deg,#c9897a,#a86b5e)',re:'linear-gradient(135deg,#8aaa92,#5a7f64)',dv:'linear-gradient(135deg,#7898c0,#5a7898)',ac:'linear-gradient(135deg,#9878c0,#7a60a8)',rt:'linear-gradient(135deg,#c8a040,#a07820)'};
