@@ -3436,6 +3436,20 @@ function restorePhaseState(){
       const tabBtn=card.querySelector('.phase-nav .phase-tab[data-phase="'+savedPhase+'"]');
       if(tabBtn)_doSwitchRoutinePhase(savedPhase,tabBtn);
     }
+    // Restore p4 focus if saved
+    if(r.p4Focus&&r.p4Focus!=='aging'){
+      const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+      if(data){
+        data.p4Focus=r.p4Focus;
+        if(data._answersWithDayProducts)data._answersWithDayProducts._p4Focus=r.p4Focus;
+        // Re-render focus tabs if p4 is currently shown
+        const phasePanel=card.querySelector('.phase-panel[data-pid="p4"]');
+        if(phasePanel){
+          const focusTab=card.querySelector('.p4focus-tab');
+          if(focusTab)switchP4Focus(r.p4Focus,focusTab.parentNode.querySelector('.p4focus-tab:nth-child('+(r.p4Focus==='barrier'?1:r.p4Focus==='glow'?2:3)+')'));
+        }
+      }
+    }
   });
 }
 
@@ -4016,6 +4030,48 @@ function _doSwitchRoutinePhase(pid,btn){
   _gpAutoSavePhaseState(cardId,pid,false);
 }
 
+/* ═══ PHASE 4 FOCUS ═══ */
+function switchP4Focus(focus,btn){
+  const card=btn?btn.closest('.builder-card'):null;
+  if(!card)return;
+  const cardId=card.dataset.cardId;
+  const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+  if(!data)return;
+
+  // Update runtime state
+  data.p4Focus=focus;
+  // Propagate to answers so renderPhase picks up the new plan
+  if(data._answersWithDayProducts)data._answersWithDayProducts._p4Focus=focus;
+
+  // Save focus to localStorage
+  const routineId=cardId.replace('gc-','');
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(function(r){return r.id===routineId;});
+  if(idx!==-1){routines[idx].p4Focus=focus;setSavedRoutines(routines);}
+
+  // Update focus tab active state
+  card.querySelectorAll('.p4focus-tab').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+
+  // Update focus description text
+  const descEl=card.querySelector('.p4focus-desc');
+  if(descEl)descEl.textContent=t('p4focus_'+focus+'_desc');
+
+  // Re-render the active phase with new focus actives + plan
+  const pa=_getPhaseActives(data,'p4');
+  const phaseArea=card.querySelector('.active-phase-area');
+  if(!phaseArea)return;
+  phaseArea.innerHTML=renderPhase(
+    'p4',data.selected,data.c1,data.c2,
+    data.toner,data.essence,data.nightSerum,data.moist,
+    data.deviceGel,data.usesDevice,
+    pa.bha,pa.retinal,pa.aha,pa.peel,
+    data.isMature,data.isHighSens,'active',false,
+    data.eye,data.sleepingPack,data._answersWithDayProducts,data.mistProd,data.selectedDay||'Mon'
+  );
+  setTimeout(enhanceRoutineSteps,0);
+}
+
 /* ═══ PHASE RENDER ═══ */
 const DAY_PLANS={
   p1:{Mon:{type:'normal',goal:'Deep hydration + barrier sealing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'Device-boosted hydration',device:true,deviceModes:['booster','air'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Rest + deep repair overnight',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Hydration + soothing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster mode hydration infusion',device:true,deviceModes:['booster'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Skin reset + moisture lock',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery + week prep',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
@@ -4236,6 +4292,8 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     <div class="p4focus-desc">${t('p4focus_'+_p4Focus+'_desc')}</div>
     <div class="p4focus-note">${t('p4focus_switch_note')}</div>
   </div>`:'';
+
+  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${_focusTabs}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
 }
 
 /* Render a single day-panel HTML string by delegating to renderPhase with

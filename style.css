@@ -4438,3 +4438,12 @@ img { display: block; max-width: 100%; }
   transition:opacity .2s,transform .2s;
 }
 .grad-btn:hover{opacity:.88;transform:translateY(-1px);}
+
+/* ═══ PHASE 4 FOCUS TABS ═══ */
+.p4focus-wrap{padding:12px 0 4px;}
+.p4focus-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.p4focus-tab{padding:8px 16px;border-radius:var(--r-pill);font-size:.75rem;font-weight:600;border:1.5px solid var(--border-chrome);background:linear-gradient(180deg,#FFFFFF 0%,#FCF8FA 100%);color:var(--muted);cursor:pointer;transition:var(--transition-fast);}
+.p4focus-tab:hover{border-color:var(--gp-pink);color:var(--gp-rose);}
+.p4focus-tab.active{background:linear-gradient(180deg,rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 55%),var(--grad-btn);border-color:transparent;color:white;box-shadow:0 4px 16px rgba(207,161,174,.4);}
+.p4focus-desc{font-size:.8rem;color:#a08090;line-height:1.5;margin-bottom:4px;}
+.p4focus-note{font-size:.72rem;color:#c0a8b0;font-style:italic;}
