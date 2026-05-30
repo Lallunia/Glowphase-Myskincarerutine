@@ -1617,6 +1617,23 @@ const T = {
     dpgoal_aha_refine:'AHA texture refinement',
     dpgoal_collagen_recovery:'Collagen support + barrier banking',
     dpgoal_full_moist:'Full moisturize + week prep',
+    // Phase 4 focus mode goals (barrier)
+    dpgoal_barrier_hyd:'Barrier protection + deep hydration',
+    dpgoal_barrier_device:'Booster mode — hydration infusion',
+    dpgoal_barrier_bank:'Barrier banking + recovery',
+    dpgoal_barrier_calm:'Calming hydration',
+    dpgoal_barrier_glow:'Gentle radiance + moisture seal',
+    // Phase 4 focus mode goals (clarity + glow)
+    dpgoal_glow_spot:'Clarity + spot control',
+    dpgoal_glow_device:'PDRN device — PIH + radiance',
+    dpgoal_glow_aha:'AHA texture refinement + glow',
+    dpgoal_glow_device2:'Booster + glow treatment',
+    dpgoal_glow_radiance:'Radiance prep + hydration',
+    // Phase 4 focus mode UI
+    p4focus_barrier_label:'🛡 Barrier',p4focus_barrier_title:'Barrier Maintenance',p4focus_barrier_desc:'Calm, protect, and deeply hydrate. Minimal actives.',
+    p4focus_glow_label:'✨ Clarity + Glow',p4focus_glow_title:'Clarity + Glow',p4focus_glow_desc:'Texture refinement, radiance, and spot control. No retinal.',
+    p4focus_aging_label:'🌿 Healthy Aging',p4focus_aging_title:'Healthy Aging',p4focus_aging_desc:'Peptides, retinal pacing, and elasticity support.',
+    p4focus_switch_note:'You can switch focus anytime — no progress lost.',
     /* Product Library category chip labels */
     chip_oil_cleanser:'Oil Cleanser',
     chip_mist:'Mist',
@@ -1683,6 +1700,70 @@ const T = {
     sg_notready_tip3:'When skin no longer stings or feels tight, check again.',
     sg_notready_btn:'Stay in Current Phase',
     sg_notready_btn_anyway:'I understand, move forward anyway',
+    // Journey strip
+    js_day:'Day',js_phase_label:'Phase',
+    js_recovery_label:'Recovery Mode',js_recovery_sub:'barrier banking',
+    js_day_suffix:'of your routine',
+    js_week:'Week',js_stable:'Stable',
+    // Phase context labels (calm, human names)
+    js_ctx_p1:'Barrier Repair',js_ctx_p2:'Strengthen',js_ctx_p3:'Treat',js_ctx_p4:'Maintain',js_ctx_recovery:'Recovery',
+    // Home phase widget
+    phw_title:'Your skin journey',
+    phw_view:'View routine →',
+    phw_no_routine:'Build your personalised routine to start tracking your skin journey.',
+    phw_cta:'Build My Routine',
+    // Phase Graduation
+    grad_continue:'Continue',
+    grad_to_p2_icon:'💧',grad_to_p2_title:'Your barrier is strong.',grad_to_p2_msg:'You\'ve done the foundational work. Time to build hydration, glow, and gentle targeted care.',
+    grad_to_p3_icon:'✨',grad_to_p3_title:'Your skin is resilient.',grad_to_p3_msg:'Your barrier is ready for active treatment. Introduce new ingredients gently and listen to your skin.',
+    grad_to_p4_icon:'🌿',grad_to_p4_title:'You\'ve reached long-term skin health.',grad_to_p4_msg:'This is the maintenance phase — protecting what you\'ve built and supporting your skin for the long run.',
+    grad_recovery_icon:'🌸',grad_recovery_title:'Your skin recovered beautifully.',grad_recovery_msg:'Your barrier is calm and stable again. Welcome back to your routine.',
+    // Phase shift suggestion
+    pss_mild_title:'Your skin has been showing some stress lately',
+    pss_mild_msg:'Your last two check-ins picked up signs of sensitivity. A few Barrier Banking nights this week will help your skin reset without losing your progress.',
+    pss_mild_tip:'Swap 1–2 active nights for Barrier Banking nights until your next check-in.',
+    pss_mild_btn:'Got it, I\'ll add some recovery nights',
+    pss_mild_dismiss:'Dismiss',
+    pss_strong_title:'Your skin may need a temporary recovery phase',
+    pss_strong_msg:'Your recent check-ins suggest your skin is consistently under stress. Stepping back temporarily is the kindest thing you can do — it protects your long-term progress.',
+    pss_strong_btn_yes:'Step back to recovery mode',
+    pss_strong_btn_no:'I\'ll watch it for now',
+    // Weekly Skin Check
+    wsc_banner_title:'Time for your weekly skin check',
+    wsc_banner_sub:'4 quick questions — takes 30 seconds',
+    wsc_banner_btn:'Check my skin',
+    wsc_sheet_title:'How has your skin been this week?',
+    wsc_q1_label:'Moisture & dryness',
+    wsc_q1_a:'Comfortable',wsc_q1_b:'Slightly dry',wsc_q1_c:'Very dry or tight',
+    wsc_q2_label:'Irritation & sensitivity',
+    wsc_q2_a:'No irritation',wsc_q2_b:'Mild sensitivity',wsc_q2_c:'Clear irritation',
+    wsc_q3_label:'Breakouts',
+    wsc_q3_a:'None',wsc_q3_b:'A few minor ones',wsc_q3_c:'Significant breakouts',
+    wsc_q4_label:'Overall routine tolerance',
+    wsc_q4_a:'Handling it well',wsc_q4_b:'Needs some adjustment',wsc_q4_c:'Struggling with it',
+    wsc_btn_submit:'See my skin check result',
+    wsc_btn_skip:'Skip for now',
+    wsc_great_title:'Your skin is thriving ✨',
+    wsc_great_msg:'Everything looks stable this week. Keep your current routine going — you\'re on track.',
+    wsc_great_btn:'Great, keep going!',
+    wsc_caution_title:'A little extra care this week 🌿',
+    wsc_caution_msg:'Your skin is showing some mild stress. A couple of Barrier Banking nights will help reset things without disrupting your progress.',
+    wsc_caution_tip:'Swap 1–2 active nights for Barrier Banking nights this week.',
+    wsc_caution_btn:'Got it, I\'ll add some recovery nights',
+    wsc_stepback_title:'Your skin is asking for a pause 🛡',
+    wsc_stepback_msg:'Based on this week, your skin would benefit from stepping back temporarily. This is just a suggestion — you stay in control.',
+    wsc_stepback_btn_yes:'Step back to recovery mode',
+    wsc_stepback_btn_no:'I\'ll keep watching it',
+    // Suggested Phase Shift
+    pss_caution_title:'Your skin has been under some stress lately',
+    pss_caution_msg:'Your last 2 check-ins showed signs of sensitivity or dryness. Adding a few Barrier Banking nights will help your skin stay resilient.',
+    pss_caution_tip:'Swap 1–2 active nights for Barrier Banking nights this week and next.',
+    pss_caution_btn:'Got it, I\'ll add barrier banking nights',
+    pss_stepback_title:'Your skin may benefit from a temporary recovery phase',
+    pss_stepback_msg:'Your last 2 check-ins showed consistent signs of stress. Stepping back temporarily is the kindest thing you can do for your skin right now — it will recover faster.',
+    pss_stepback_btn_yes:'Step back to recovery mode',
+    pss_stepback_btn_no:'I\'ll keep monitoring',
+    pss_dismiss:'Dismiss',
     // Step Back / Recovery Mode
     sb_btn:'I\'m reacting — step back',
     sb_sheet_title:'Your skin is telling you something',
@@ -2022,6 +2103,20 @@ const T = {
     dpgoal_aha_refine:'AHA ปรับผิวเรียบเนียน',
     dpgoal_collagen_recovery:'เสริมคอลลาเจน + สะสมเกราะผิว',
     dpgoal_full_moist:'บำรุงเต็มที่ + เตรียมพร้อมสัปดาห์ถัดไป',
+    dpgoal_barrier_hyd:'ปกป้องเกราะผิว + เติมความชุ่มชื้นลึก',
+    dpgoal_barrier_device:'Booster Mode — อัดฉีดความชุ่มชื้น',
+    dpgoal_barrier_bank:'สะสมเกราะผิว + พักฟื้น',
+    dpgoal_barrier_calm:'ให้ความชุ่มชื้นอย่างสงบ',
+    dpgoal_barrier_glow:'ผิวเปล่งปลั่งอ่อนโยน + ปิดล็อกความชุ่มชื้น',
+    dpgoal_glow_spot:'ความสด + ควบคุมสิว',
+    dpgoal_glow_device:'PDRN ด้วยอุปกรณ์ — รอยสิว + ผิวเปล่งปลั่ง',
+    dpgoal_glow_aha:'AHA ปรับผิวเรียบเนียน + เปล่งปลั่ง',
+    dpgoal_glow_device2:'Booster + ทรีทเม้นต์เปล่งปลั่ง',
+    dpgoal_glow_radiance:'เตรียมผิวสว่าง + เติมความชุ่มชื้น',
+    p4focus_barrier_label:'🛡 เกราะผิว',p4focus_barrier_title:'บำรุงเกราะผิว',p4focus_barrier_desc:'สงบ ปกป้อง และเติมความชุ่มชื้น สารออกฤทธิ์น้อยที่สุด',
+    p4focus_glow_label:'✨ ความสด + เปล่งปลั่ง',p4focus_glow_title:'ความสด + เปล่งปลั่ง',p4focus_glow_desc:'ปรับพื้นผิว ผิวสว่าง และควบคุมสิว ไม่มี Retinal',
+    p4focus_aging_label:'🌿 ต้านวัย',p4focus_aging_title:'ต้านวัย',p4focus_aging_desc:'เพปไทด์ ปรับจังหวะ Retinal และเสริมความยืดหยุ่น',
+    p4focus_switch_note:'สามารถเปลี่ยน Focus ได้ตลอดเวลา — ไม่เสียความก้าวหน้า',
     /* Product Library category chip labels */
     chip_oil_cleanser:'คลีนซิ่งออยล์/บาล์ม',
     chip_mist:'มิสต์/สเปรย์บำรุงผิว',
@@ -2087,6 +2182,68 @@ const T = {
     sg_notready_tip3:'เมื่อผิวไม่แสบหรือตึงอีกต่อไป ลองตรวจสอบอีกครั้ง',
     sg_notready_btn:'อยู่ใน Phase นี้ต่อไป',
     sg_notready_btn_anyway:'ฉันเข้าใจแล้ว ไปต่อเลย',
+    // Journey strip (Thai)
+    js_day:'วันที่',js_phase_label:'Phase',
+    js_recovery_label:'โหมดพักฟื้น',js_recovery_sub:'สะสมเกราะผิว',
+    js_day_suffix:'ของรูทีน',
+    js_week:'สัปดาห์ที่',js_stable:'คงที่',
+    js_ctx_p1:'ซ่อมแซมเกราะผิว',js_ctx_p2:'เสริมความแข็งแรง',js_ctx_p3:'บำรุง',js_ctx_p4:'ดูแลต่อเนื่อง',js_ctx_recovery:'พักฟื้น',
+    phw_title:'การเดินทางของผิวคุณ',
+    phw_view:'ดูรูทีน →',
+    phw_no_routine:'สร้างรูทีนของคุณเพื่อเริ่มติดตามสุขภาพผิว',
+    phw_cta:'สร้างรูทีน',
+    // Phase Graduation (Thai)
+    grad_continue:'ต่อไปเลย',
+    grad_to_p2_icon:'💧',grad_to_p2_title:'เกราะผิวของคุณแข็งแรงแล้ว',grad_to_p2_msg:'คุณทำรากฐานสำเร็จแล้ว ถึงเวลาเสริมความชุ่มชื้น ผิวเปล่งปลั่ง และดูแลเฉพาะจุดอย่างอ่อนโยน',
+    grad_to_p3_icon:'✨',grad_to_p3_title:'ผิวของคุณแข็งแกร่งพร้อมแล้ว',grad_to_p3_msg:'เกราะผิวพร้อมรับสารออกฤทธิ์แล้ว แนะนำส่วนผสมใหม่อย่างค่อยเป็นค่อยไปและฟังเสียงผิว',
+    grad_to_p4_icon:'🌿',grad_to_p4_title:'คุณมาถึงสุขภาพผิวระยะยาวแล้ว',grad_to_p4_msg:'นี่คือ Phase บำรุงระยะยาว — ปกป้องสิ่งที่สร้างมาและดูแลผิวให้ยั่งยืน',
+    grad_recovery_icon:'🌸',grad_recovery_title:'ผิวของคุณฟื้นตัวได้อย่างสวยงาม',grad_recovery_msg:'เกราะผิวสงบและมั่นคงอีกครั้งแล้ว ยินดีต้อนรับกลับสู่รูทีน',
+    // Phase shift suggestion (Thai)
+    pss_mild_title:'ผิวของคุณมีสัญญาณเครียดต่อเนื่อง',
+    pss_mild_msg:'การเช็คสองครั้งล่าสุดพบสัญญาณความไวของผิว คืนสะสมเกราะผิวเพิ่มสักไม่กี่คืนจะช่วยให้ผิวรีเซ็ตได้โดยไม่เสียความก้าวหน้า',
+    pss_mild_tip:'เปลี่ยนคืนสารออกฤทธิ์ 1–2 คืนเป็นคืนสะสมเกราะผิวจนกว่าจะเช็คครั้งถัดไป',
+    pss_mild_btn:'เข้าใจแล้ว จะเพิ่มคืนพักฟื้น',
+    pss_mild_dismiss:'ปิด',
+    pss_strong_title:'ผิวของคุณอาจต้องการพักชั่วคราว',
+    pss_strong_msg:'การเช็คล่าสุดบ่งบอกว่าผิวมีความเครียดต่อเนื่อง การถอยกลับชั่วคราวคือสิ่งที่ดีที่สุดสำหรับผิวในระยะยาว',
+    pss_strong_btn_yes:'เข้าสู่โหมดพักฟื้น',
+    pss_strong_btn_no:'ฉันจะสังเกตดูต่อไปก่อน',
+    // Weekly Skin Check (Thai)
+    wsc_banner_title:'ถึงเวลาเช็คผิวประจำสัปดาห์แล้ว',
+    wsc_banner_sub:'4 คำถามสั้น ๆ — ใช้เวลาแค่ 30 วินาที',
+    wsc_banner_btn:'เช็คผิวเลย',
+    wsc_sheet_title:'ผิวของคุณเป็นอย่างไรบ้างสัปดาห์นี้?',
+    wsc_q1_label:'ความชุ่มชื้นและความแห้ง',
+    wsc_q1_a:'สบายดี',wsc_q1_b:'แห้งเล็กน้อย',wsc_q1_c:'แห้งมากหรือตึง',
+    wsc_q2_label:'การระคายเคืองและความไว',
+    wsc_q2_a:'ไม่ระคายเคือง',wsc_q2_b:'ไวนิดหน่อย',wsc_q2_c:'ระคายเคืองชัดเจน',
+    wsc_q3_label:'สิวใหม่',
+    wsc_q3_a:'ไม่มี',wsc_q3_b:'มีเล็กน้อย',wsc_q3_c:'มีสิวเยอะ',
+    wsc_q4_label:'ความทนทานต่อรูทีน',
+    wsc_q4_a:'ทนได้ดี',wsc_q4_b:'ต้องปรับนิดหน่อย',wsc_q4_c:'ยังรับไม่ไหว',
+    wsc_btn_submit:'ดูผลเช็คผิว',
+    wsc_btn_skip:'ข้ามไปก่อน',
+    wsc_great_title:'ผิวของคุณกำลังเปล่งปลั่ง ✨',
+    wsc_great_msg:'ทุกอย่างดูมั่นคงสัปดาห์นี้ ทำรูทีนต่อไปได้เลย — คุณอยู่ในเส้นทางที่ถูกต้อง',
+    wsc_great_btn:'เยี่ยม ทำต่อเลย!',
+    wsc_caution_title:'ดูแลพิเศษสักหน่อยสัปดาห์นี้ 🌿',
+    wsc_caution_msg:'ผิวของคุณมีสัญญาณเครียดเล็กน้อย คืนสะสมเกราะผิวเพิ่ม 1–2 คืนจะช่วยให้ผิวกลับมาสมดุลได้',
+    wsc_caution_tip:'เปลี่ยนคืนสารออกฤทธิ์ 1–2 คืนเป็นคืนสะสมเกราะผิวสัปดาห์นี้',
+    wsc_caution_btn:'เข้าใจแล้ว จะเพิ่มคืนพักฟื้น',
+    wsc_stepback_title:'ผิวของคุณขอพักสักหน่อย 🛡',
+    wsc_stepback_msg:'จากสัปดาห์นี้ ผิวควรได้พักชั่วคราว นี่เป็นแค่คำแนะนำ — คุณเป็นคนตัดสินใจเอง',
+    wsc_stepback_btn_yes:'เข้าสู่โหมดพักฟื้น',
+    wsc_stepback_btn_no:'ฉันจะดูอีกสักหน่อย',
+    // Suggested Phase Shift (Thai)
+    pss_caution_title:'ผิวของคุณมีสัญญาณเครียดช่วงนี้',
+    pss_caution_msg:'การเช็คผิว 2 ครั้งล่าสุดพบสัญญาณระคายเคืองหรือแห้ง การเพิ่มคืนสะสมเกราะผิวจะช่วยให้ผิวฟื้นตัวและแข็งแรงขึ้น',
+    pss_caution_tip:'เปลี่ยนคืนสารออกฤทธิ์ 1–2 คืนเป็นคืนสะสมเกราะผิวสัปดาห์นี้และสัปดาห์หน้า',
+    pss_caution_btn:'เข้าใจแล้ว จะเพิ่มคืนสะสมเกราะผิว',
+    pss_stepback_title:'ผิวของคุณอาจต้องการพักฟื้นชั่วคราว',
+    pss_stepback_msg:'การเช็คผิว 2 ครั้งล่าสุดพบสัญญาณเครียดต่อเนื่อง การถอยกลับชั่วคราวคือสิ่งที่ดีที่สุดสำหรับผิวของคุณตอนนี้',
+    pss_stepback_btn_yes:'เข้าสู่โหมดพักฟื้น',
+    pss_stepback_btn_no:'ฉันจะติดตามต่อไป',
+    pss_dismiss:'ปิด',
     // Step Back / Recovery Mode (Thai)
     sb_btn:'ผิวกำลังแพ้ — ถอยกลับ',
     sb_sheet_title:'ผิวของคุณกำลังบอกอะไรบางอย่าง',
@@ -2178,7 +2335,17 @@ const _DPGOAL_MAP = {
   'Anti-aging device treatment':'dpgoal_aa_device',
   'AHA texture refinement':'dpgoal_aha_refine',
   'Collagen support recovery':'dpgoal_collagen_recovery',
-  'Full moisturize + week prep':'dpgoal_full_moist'
+  'Full moisturize + week prep':'dpgoal_full_moist',
+  'Barrier protection + deep hydration':'dpgoal_barrier_hyd',
+  'Booster mode — hydration infusion':'dpgoal_barrier_device',
+  'Barrier banking + recovery':'dpgoal_barrier_bank',
+  'Calming hydration':'dpgoal_barrier_calm',
+  'Gentle radiance + moisture seal':'dpgoal_barrier_glow',
+  'Clarity + spot control':'dpgoal_glow_spot',
+  'PDRN device — PIH + radiance':'dpgoal_glow_device',
+  'AHA texture refinement + glow':'dpgoal_glow_aha',
+  'Booster + glow treatment':'dpgoal_glow_device2',
+  'Radiance prep + hydration':'dpgoal_glow_radiance'
 };
 function tDayGoal(s){ const k=_DPGOAL_MAP[s]; return k?t(k):s; }
 function tDayName(code){ return t('dayname_'+code) || code; }
@@ -2697,10 +2864,62 @@ function sgSubmit(){
 
 function sgProceed(){
   closeSkinGate();
-  // Now actually execute the phase switch
   const pid=_sgState.targetPid;
   const btn=_sgState.targetBtn;
-  if(pid&&btn)_doSwitchRoutinePhase(pid,btn);
+  if(!pid||!btn){return;}
+
+  // Detect forward progression for graduation moment
+  const card=btn.closest('.builder-card');
+  const phasePanel=card?card.querySelector('.phase-panel'):null;
+  const fromPid=phasePanel?phasePanel.dataset.pid:null;
+  const _phaseOrder={p1:1,p2:2,p3:3,p4:4};
+  const isForward=fromPid&&(_phaseOrder[pid]||0)>(_phaseOrder[fromPid]||0);
+  const isRecoveryReturn=!!(_sbState.cardId&&_sbState.originalPid===pid);
+
+  if(isForward||isRecoveryReturn){
+    // Show graduation moment — switches phase after user dismisses
+    showGraduation(fromPid,pid,isRecoveryReturn,function(){
+      _doSwitchRoutinePhase(pid,btn);
+    });
+  } else {
+    _doSwitchRoutinePhase(pid,btn);
+  }
+}
+
+/* ═══ PHASE GRADUATION ═══ */
+function showGraduation(fromPid,toPid,isRecoveryReturn,onComplete){
+  const el=document.getElementById('grad-overlay');
+  if(!el)return onComplete&&onComplete();
+
+  // Pick the right message
+  let icon,title,msg;
+  if(isRecoveryReturn){
+    icon=t('grad_recovery_icon');title=t('grad_recovery_title');msg=t('grad_recovery_msg');
+  } else {
+    icon=t('grad_to_'+toPid+'_icon')||'✨';
+    title=t('grad_to_'+toPid+'_title')||'';
+    msg=t('grad_to_'+toPid+'_msg')||'';
+  }
+
+  el.innerHTML=`
+    <div class="grad-card">
+      <div class="grad-glow"></div>
+      <div class="grad-icon">${icon}</div>
+      <div class="grad-title">${title}</div>
+      <div class="grad-msg">${msg}</div>
+      <button class="grad-btn" id="grad-continue-btn">${t('grad_continue')}</button>
+    </div>`;
+  el.classList.add('open');
+
+  function _close(){
+    if(_gradTimer)clearTimeout(_gradTimer);
+    el.classList.remove('open');
+    if(onComplete)onComplete();
+  }
+
+  document.getElementById('grad-continue-btn').onclick=_close;
+  // Auto-dismiss after 5 seconds
+  var _gradTimer=setTimeout(_close,5000);
 }
 
 /* ═══ STEP BACK / RECOVERY MODE ═══ */
@@ -2803,6 +3022,380 @@ function exitRecoveryMode(){
   if(tabBtn) switchRoutinePhase(originalPid,tabBtn);
 }
 
+/* ═══ SUGGESTED PHASE SHIFT ═══ */
+
+// Analyzes the last 4 WSC check scores and returns a suggestion level:
+//   'stepback'  → 2+ consecutive scores ≥ 6 (significant stress)
+//   'caution'   → 2+ consecutive scores ≥ 4 (mild/moderate stress)
+//   null        → no action needed
+function _detectPhaseShiftNeeded(r){
+  const hist=r.wscHistory;
+  if(!hist||hist.length<2)return null;
+  // Look at most recent 2 entries
+  const last2=hist.slice(-2).map(function(h){return h.score;});
+  if(last2[0]>=6&&last2[1]>=6) return 'stepback';
+  if(last2[0]>=4&&last2[1]>=4) return 'caution';
+  return null;
+}
+
+// Injects the phase shift suggestion card into the routine card on My Routine page.
+function renderPhaseShiftSuggestion(){
+  const myPage=document.getElementById('page-myroutine');
+  if(!myPage||!myPage.classList.contains('active'))return;
+
+  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    if(card.querySelector('.pss-card'))return; // already injected
+    const routineId=cardId.replace('gc-','');
+    const routines=getSavedRoutines();
+    const r=routines.find(function(x){return x.id===routineId;});
+    if(!r)return;
+    if(r.pssIgnored)return; // user dismissed — don't show again until next WSC
+
+    const level=_detectPhaseShiftNeeded(r);
+    if(!level)return;
+
+    const el=document.createElement('div');
+    el.className='pss-card pss-'+level;
+
+    if(level==='caution'){
+      el.innerHTML=`
+        <div class="pss-head">
+          <span class="pss-icon">🌿</span>
+          <div>
+            <div class="pss-title">${t('pss_caution_title')}</div>
+            <div class="pss-tip">${t('pss_caution_tip')}</div>
+          </div>
+        </div>
+        <div class="pss-msg">${t('pss_caution_msg')}</div>
+        <div class="pss-actions">
+          <button class="pss-btn-main" onclick="dismissPhaseShift('${routineId}',this)">${t('pss_caution_btn')}</button>
+          <button class="pss-btn-dismiss" onclick="dismissPhaseShift('${routineId}',this)">${t('pss_dismiss')}</button>
+        </div>`;
+    } else {
+      el.innerHTML=`
+        <div class="pss-head">
+          <span class="pss-icon">🛡</span>
+          <div>
+            <div class="pss-title">${t('pss_stepback_title')}</div>
+          </div>
+        </div>
+        <div class="pss-msg">${t('pss_stepback_msg')}</div>
+        <div class="pss-actions">
+          <button class="pss-btn-main" onclick="_pssActivateStepBack('${routineId}',this)">${t('pss_stepback_btn_yes')}</button>
+          <button class="pss-btn-secondary" onclick="dismissPhaseShift('${routineId}',this)">${t('pss_stepback_btn_no')}</button>
+        </div>`;
+    }
+
+    // Insert after journey strip / before builder-step-hd
+    const hd=card.querySelector('.builder-step-hd');
+    if(hd)card.insertBefore(el,hd);
+    else card.prepend(el);
+  });
+}
+
+function dismissPhaseShift(routineId,btn){
+  // Mark as ignored so it won't reappear until next WSC clears it
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(function(x){return x.id===routineId;});
+  if(idx!==-1){routines[idx].pssIgnored=true;setSavedRoutines(routines);}
+  // Remove card from DOM
+  const card=btn?btn.closest('.pss-card'):null;
+  if(card)card.remove();
+}
+
+function _pssActivateStepBack(routineId,btn){
+  dismissPhaseShift(routineId,btn);
+  const cardId='gc-'+routineId;
+  const card=document.querySelector('.builder-card[data-card-id="'+cardId+'"]');
+  if(!card)return;
+  const phasePanel=card.querySelector('.phase-panel');
+  const currentPid=phasePanel?phasePanel.dataset.pid:'p3';
+  _sbState.cardId=cardId;
+  _sbState.originalPid=currentPid;
+  activateRecoveryMode();
+}
+
+/* ═══ WEEKLY SKIN CHECK ═══ */
+const _WSC_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const _wscState = {routineId:null, answers:{q1:null,q2:null,q3:null,q4:null}};
+
+function _wscLastKey(routineId){ return 'gp_wsc_last_'+routineId; }
+
+function _wscIsDue(routineId){
+  if(!routineId||routineId==='draft')return false;
+  try{
+    // Never show before 7 days from routine creation — even on first-ever check
+    const routines=getSavedRoutines();
+    const r=routines.find(function(x){return x.id===routineId;});
+    if(!r)return false;
+    const createdAt=r.createdAt?new Date(r.createdAt).getTime():null;
+    if(createdAt&&(Date.now()-createdAt)<_WSC_INTERVAL_MS)return false;
+    // After the first 7 days, check if another 7 days have passed since last check
+    const last=localStorage.getItem(_wscLastKey(routineId));
+    if(!last)return true; // past 7-day minimum, never checked — show now
+    return (Date.now()-parseInt(last,10))>=_WSC_INTERVAL_MS;
+  }catch(e){return false;}
+}
+
+function _wscMarkDone(routineId){
+  try{localStorage.setItem(_wscLastKey(routineId),Date.now().toString());}catch(e){}
+}
+
+// Renders the journey strip showing "Day X · Phase Y" at the top of each saved routine card.
+// Shows "Recovery Mode" when the user is in recovery. Never shown for draft routines.
+function renderJourneyStrip(){
+  // Only show on My Routine page — not on the builder result
+  const myPage=document.getElementById('page-myroutine');
+  if(!myPage||!myPage.classList.contains('active'))return;
+  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    // Only inject once
+    if(card.querySelector('.js-strip'))return;
+    const routineId=cardId.replace('gc-','');
+    const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+    if(!r)return;
+    // Fall back to createdAt for routines saved before phaseStartedAt was introduced
+    const _startDate=r.phaseStartedAt||r.createdAt;
+    if(!_startDate)return;
+
+    const inRecovery=!!r.inRecoveryMode;
+    const activePid=r.activePhase||'p1';
+    const days=Math.max(1,Math.floor((Date.now()-new Date(_startDate).getTime())/(1000*60*60*24))+1);
+    const weeks=Math.ceil(days/7);
+
+    // Phase icons
+    const _phIcons={p1:'🛡',p2:'💧',p3:'✨',p4:'🌿'};
+    let icon,dayText,subText,extraClass='';
+    if(inRecovery){
+      icon='🌿';
+      dayText=t('js_ctx_recovery')+' · '+t('js_week')+' '+weeks;
+      subText=t('js_recovery_sub');
+      extraClass='recovery';
+    } else {
+      const ctx=t('js_ctx_'+activePid)||('Phase '+activePid.replace('p',''));
+      icon=_phIcons[activePid]||'🗓';
+      // Show "Stable" after 28 days in same phase, otherwise show Week X
+      const timeLabel=days>28?t('js_stable'):t('js_week')+' '+weeks;
+      dayText=ctx+' · '+timeLabel;
+      subText=t('js_day')+' '+days+' '+t('js_day_suffix');
+    }
+
+    const strip=document.createElement('div');
+    strip.className='js-strip '+extraClass;
+    strip.innerHTML=`
+      <div class="js-strip-icon">${icon}</div>
+      <div>
+        <div class="js-strip-day">${dayText}</div>
+        <div class="js-strip-phase">${subText}</div>
+      </div>`;
+
+    // Insert before the builder-step-hd
+    const hd=card.querySelector('.builder-step-hd');
+    if(hd)card.insertBefore(strip,hd);
+    else card.prepend(strip);
+  });
+}
+
+// Inject the weekly check banner into the correct builder-card
+function checkAndShowWscBanner(){
+  // Only show on My Routine page — not on the builder result
+  const myPage=document.getElementById('page-myroutine');
+  if(!myPage||!myPage.classList.contains('active'))return;
+  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    const routineId=cardId.replace('gc-','');
+    if(!_wscIsDue(routineId))return;
+    // Only inject once
+    if(card.querySelector('.wsc-banner'))return;
+    const banner=document.createElement('div');
+    banner.className='wsc-banner';
+    banner.innerHTML=`
+      <div class="wsc-banner-icon">🌸</div>
+      <div class="wsc-banner-content">
+        <div class="wsc-banner-title">${t('wsc_banner_title')}</div>
+        <div class="wsc-banner-sub">${t('wsc_banner_sub')}</div>
+      </div>
+      <button class="wsc-banner-btn" onclick="openWscSheet('${routineId}')">${t('wsc_banner_btn')}</button>`;
+    // Insert at very top of card, before builder-step-hd
+    const hd=card.querySelector('.builder-step-hd');
+    if(hd)card.insertBefore(banner,hd);
+    else card.prepend(banner);
+  });
+}
+
+function openWscSheet(routineId){
+  _wscState.routineId=routineId;
+  _wscState.answers={q1:null,q2:null,q3:null,q4:null};
+  const ov=_wscGetOrCreateOverlay(); // create DOM elements first
+  _renderWscQuestions();              // wsc-sheet-box now exists
+  ov.style.display='flex';           // then show
+}
+
+function closeWscSheet(){
+  const ov=document.getElementById('wsc-sheet-overlay');
+  if(ov)ov.style.display='none';
+}
+
+function _wscGetOrCreateOverlay(){
+  let ov=document.getElementById('wsc-sheet-overlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='wsc-sheet-overlay';
+    ov.className='sb-sheet-overlay'; // reuse existing overlay style
+    ov.style.display='none';
+    ov.addEventListener('click',function(e){if(e.target===ov)closeWscSheet();});
+    const sheet=document.createElement('div');
+    sheet.id='wsc-sheet-box';
+    sheet.className='wsc-sheet';
+    ov.appendChild(sheet);
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
+
+function _renderWscQuestions(){
+  const all=_wscState.answers;
+  const allAnswered=all.q1&&all.q2&&all.q3&&all.q4;
+
+  function optRow(q,key,label){
+    const sel=_wscState.answers[q]===key?'selected':'';
+    return `<div class="wsc-option ${sel}" onclick="wscSelectAnswer('${q}','${key}')"><div class="wsc-option-dot"></div>${label}</div>`;
+  }
+
+  document.getElementById('wsc-sheet-box').innerHTML=`
+    <div class="wsc-handle"></div>
+    <div class="wsc-title">${t('wsc_sheet_title')}</div>
+    <div class="wsc-question">
+      <div class="wsc-q-label">${t('wsc_q1_label')}</div>
+      <div class="wsc-options">
+        ${optRow('q1','a',t('wsc_q1_a'))}${optRow('q1','b',t('wsc_q1_b'))}${optRow('q1','c',t('wsc_q1_c'))}
+      </div>
+    </div>
+    <div class="wsc-divider"></div>
+    <div class="wsc-question">
+      <div class="wsc-q-label">${t('wsc_q2_label')}</div>
+      <div class="wsc-options">
+        ${optRow('q2','a',t('wsc_q2_a'))}${optRow('q2','b',t('wsc_q2_b'))}${optRow('q2','c',t('wsc_q2_c'))}
+      </div>
+    </div>
+    <div class="wsc-divider"></div>
+    <div class="wsc-question">
+      <div class="wsc-q-label">${t('wsc_q3_label')}</div>
+      <div class="wsc-options">
+        ${optRow('q3','a',t('wsc_q3_a'))}${optRow('q3','b',t('wsc_q3_b'))}${optRow('q3','c',t('wsc_q3_c'))}
+      </div>
+    </div>
+    <div class="wsc-divider"></div>
+    <div class="wsc-question">
+      <div class="wsc-q-label">${t('wsc_q4_label')}</div>
+      <div class="wsc-options">
+        ${optRow('q4','a',t('wsc_q4_a'))}${optRow('q4','b',t('wsc_q4_b'))}${optRow('q4','c',t('wsc_q4_c'))}
+      </div>
+    </div>
+    <div class="wsc-footer">
+      <button class="wsc-btn-submit" ${allAnswered?'':'disabled'} onclick="wscSubmit()">${t('wsc_btn_submit')}</button>
+      <button class="wsc-btn-skip" onclick="_wscSkip()">${t('wsc_btn_skip')}</button>
+    </div>`;
+}
+
+function wscSelectAnswer(q,key){
+  const box=document.getElementById('wsc-sheet-box');
+  const scrollTop=box?box.scrollTop:0;
+  _wscState.answers[q]=key;
+  _renderWscQuestions();
+  if(box)box.scrollTop=scrollTop;
+}
+
+function _wscScore(){
+  const map={q1:{a:0,b:1,c:2},q2:{a:0,b:1,c:2},q3:{a:0,b:1,c:2},q4:{a:0,b:1,c:2}};
+  return ['q1','q2','q3','q4'].reduce(function(s,q){return s+(map[q][_wscState.answers[q]]??0);},0);
+}
+
+function wscSubmit(){
+  const score=_wscScore();
+  const routineId=_wscState.routineId;
+  _wscMarkDone(routineId);
+
+  // Save score to history (last 4 checks) for trend detection
+  const _routines=getSavedRoutines();
+  const _ri=_routines.findIndex(function(x){return x.id===routineId;});
+  if(_ri!==-1){
+    const _hist=_routines[_ri].wscHistory||[];
+    _hist.push({date:new Date().toISOString(),score:score});
+    if(_hist.length>4)_hist.shift(); // keep last 4 only
+    _routines[_ri].wscHistory=_hist;
+    // Clear any existing phase-shift dismissal so next render re-evaluates
+    delete _routines[_ri].pssIgnored;
+    setSavedRoutines(_routines);
+  }
+
+  // Remove banner from card now that check is complete
+  const card=document.querySelector('.builder-card[data-card-id="gc-'+routineId+'"]');
+  if(card){const b=card.querySelector('.wsc-banner');if(b)b.remove();}
+
+  const box=document.getElementById('wsc-sheet-box');
+  if(!box)return;
+
+  if(score<=2){
+    // All good — confirm progression
+    box.innerHTML=`
+      <div class="wsc-handle"></div>
+      <div class="wsc-result">
+        <div class="wsc-result-icon">✨</div>
+        <div class="wsc-result-title">${t('wsc_great_title')}</div>
+        <div class="wsc-result-msg">${t('wsc_great_msg')}</div>
+        <button class="wsc-btn-proceed" onclick="closeWscSheet()">${t('wsc_great_btn')}</button>
+      </div>`;
+  } else if(score<=5){
+    // Mild concerns — suggest barrier banking nights
+    box.innerHTML=`
+      <div class="wsc-handle"></div>
+      <div class="wsc-result">
+        <div class="wsc-result-icon">🌿</div>
+        <div class="wsc-result-title">${t('wsc_caution_title')}</div>
+        <div class="wsc-result-msg">${t('wsc_caution_msg')}</div>
+        <div class="wsc-result-tip">💡 ${t('wsc_caution_tip')}</div>
+        <button class="wsc-btn-stay" onclick="closeWscSheet()">${t('wsc_caution_btn')}</button>
+      </div>`;
+  } else {
+    // Significant stress — suggest step back (user confirms)
+    box.innerHTML=`
+      <div class="wsc-handle"></div>
+      <div class="wsc-result">
+        <div class="wsc-result-icon">🛡</div>
+        <div class="wsc-result-title">${t('wsc_stepback_title')}</div>
+        <div class="wsc-result-msg">${t('wsc_stepback_msg')}</div>
+        <button class="wsc-btn-stay" onclick="_wscTriggerStepBack('${routineId}')">${t('wsc_stepback_btn_yes')}</button>
+        <button class="wsc-btn-anyway" onclick="closeWscSheet()">${t('wsc_stepback_btn_no')}</button>
+      </div>`;
+  }
+}
+
+function _wscSkip(){
+  // Mark as done so it won't show again for 7 days
+  _wscMarkDone(_wscState.routineId);
+  closeWscSheet();
+  const card=document.querySelector('.builder-card[data-card-id="gc-'+_wscState.routineId+'"]');
+  if(card){const b=card.querySelector('.wsc-banner');if(b)b.remove();}
+}
+
+function _wscTriggerStepBack(routineId){
+  closeWscSheet();
+  // Seed _sbState and activate recovery mode — reuses the existing step-back system
+  const cardId='gc-'+routineId;
+  const card=document.querySelector('.builder-card[data-card-id="'+cardId+'"]');
+  if(!card)return;
+  const phasePanel=card.querySelector('.phase-panel');
+  const currentPid=phasePanel?phasePanel.dataset.pid:'p3';
+  _sbState.cardId=cardId;
+  _sbState.originalPid=currentPid;
+  activateRecoveryMode();
+}
+
 /* ═══ PHASE STATE AUTO-SAVE + RESTORE ═══ */
 
 // Silently writes activePhase + inRecoveryMode to the saved routine in localStorage.
@@ -2813,8 +3406,11 @@ function _gpAutoSavePhaseState(cardId,pid,inRecovery){
   const routines=getSavedRoutines();
   const idx=routines.findIndex(r=>r.id===routineId);
   if(idx===-1)return; // routine not yet saved to localStorage — skip silently
+  const prevPhase=routines[idx].activePhase;
   routines[idx].activePhase=pid;
   routines[idx].inRecoveryMode=!!inRecovery;
+  // Only update phaseStartedAt when the phase genuinely changes — not on page-load restores
+  if(pid!==prevPhase) routines[idx].phaseStartedAt=new Date().toISOString();
   setSavedRoutines(routines);
 }
 
@@ -3128,6 +3724,12 @@ function renderRoutineResult(c){
 function _getPhaseActives(data,pid){
   if(pid==='p1')return{bha:false,retinal:false,aha:false,peel:false};
   if(pid==='p2')return{bha:data.bha,retinal:false,aha:false,peel:false};
+  if(pid==='p4'){
+    const focus=data.p4Focus||'aging';
+    if(focus==='barrier')return{bha:false,retinal:false,aha:false,peel:false};
+    if(focus==='glow')return{bha:data.bha,retinal:false,aha:data.aha,peel:false};
+    // aging (default)
+  }
   return{bha:data.bha,retinal:data.retinalProd,aha:data.aha,peel:data.peel};
 }
 
@@ -3248,7 +3850,9 @@ const sleepingPack=selected.find(p=>normalizedCategory(p)==='sleeping mask'||p.s
     });
   });
   // Attach computed rotation map to answers so renderPhase() can read per-day picks
-  const _answersWithDayProducts=Object.assign({},a,{_dayProducts});
+  // Include p4Focus so renderPhase can pick the right day plan
+  const _p4FocusInit=rd.p4Focus||'aging';
+  const _answersWithDayProducts=Object.assign({},a,{_dayProducts,_p4Focus:_p4FocusInit});
   const numPhases=rd.phases||(needsAntiAging?4:(hasActives?3:2));
   const phaseIds=['p1','p2','p3','p4'].slice(0,numPhases);
   // Entry assessment — determine starting phase
@@ -3417,12 +4021,20 @@ const DAY_PLANS={
   p1:{Mon:{type:'normal',goal:'Deep hydration + barrier sealing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'Device-boosted hydration',device:true,deviceModes:['booster','air'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Rest + deep repair overnight',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Hydration + soothing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster mode hydration infusion',device:true,deviceModes:['booster'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Skin reset + moisture lock',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery + week prep',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
   p2:{Mon:{type:'normal',goal:'Hydration + spot acne control',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'PDRN device treatment for PIH',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery from device treatment',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Glow boost + hydration',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster + PDRN treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Deep moisture + skin reset',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Gentle prep for next week',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
   p3:{Mon:{type:'normal',goal:'Hydration + spot acne',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal introduction — eye area only',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery after retinal',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'PDRN device + optional peel',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:true},Fri:{type:'active',goal:'Second retinal night',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Sat:{type:'normal',goal:'Spot acne + glow',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery night',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
-  p4:{Mon:{type:'normal',goal:'Peptide + anti-aging hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal maintenance',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + barrier maintenance',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'Anti-aging device treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'active',goal:'AHA texture refinement',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Sat:{type:'recovery',goal:'Collagen support recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Full moisturize + week prep',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}}
+  // p4 is an alias — actual plan is looked up via p4Focus in renderPhase
+  p4:{Mon:{type:'normal',goal:'Peptide + anti-aging hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal maintenance',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + barrier maintenance',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'Anti-aging device treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'active',goal:'AHA texture refinement',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Sat:{type:'recovery',goal:'Collagen support recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Full moisturize + week prep',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
+  // Phase 4 focus plans
+  p4_aging:{Mon:{type:'normal',goal:'Peptide + anti-aging hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal maintenance',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + barrier maintenance',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'Anti-aging device treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'active',goal:'AHA texture refinement',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Sat:{type:'recovery',goal:'Collagen support recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Full moisturize + week prep',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
+  p4_barrier:{Mon:{type:'normal',goal:'Barrier protection + deep hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'Booster mode — hydration infusion',device:true,deviceModes:['booster','air'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Calming hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster mode — hydration infusion',device:true,deviceModes:['booster'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Gentle radiance + moisture seal',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
+  p4_glow:{Mon:{type:'normal',goal:'Clarity + spot control',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'PDRN device — PIH + radiance',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'active',goal:'AHA texture refinement + glow',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Fri:{type:'device',goal:'Booster + glow treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Radiance prep + hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}}
 };
 const DAY_NAMES={Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday'};
 
 function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers,mistProd,selectedDay){
-  const plan=DAY_PLANS[pid]||DAY_PLANS.p1;
+  // For p4, use the focus-specific day plan based on answers or _p4CurrentFocus
+  const _p4Focus=(pid==='p4')?(answers&&answers._p4Focus)||'aging':'';
+  const _planKey=pid==='p4'?('p4_'+_p4Focus):pid;
+  const plan=DAY_PLANS[_planKey]||DAY_PLANS[pid]||DAY_PLANS.p1;
   const _rpA=answers||{};
   const _rpIsDry=(_rpA.skinTypes||[]).some(s=>s===t('o_dry'));
   const _rpDamagedBarrier=_rpA.barrierCondition===t('o_slightly')||_rpA.barrierCondition===t('o_very_damaged')||(_rpA.skinTypes||[]).includes(t('o_barrier'));
@@ -3613,7 +4225,17 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
       </div>`;
   }).join('');
   const _sbStrip=(pid==='p3'||pid==='p4')?`<div class="sb-strip"><button class="sb-btn" onclick="openStepBackSheet(this)"><span class="sb-btn-icon">🌿</span>${t('sb_btn')}</button></div>`:'';
-  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
+
+  // Phase 4 focus tabs
+  const _focusTabs=pid==='p4'?`<div class="p4focus-wrap">
+    <div class="p4focus-tabs">
+      <button class="p4focus-tab ${_p4Focus==='barrier'?'active':''}" onclick="switchP4Focus('barrier',this)">${t('p4focus_barrier_label')}</button>
+      <button class="p4focus-tab ${_p4Focus==='glow'?'active':''}" onclick="switchP4Focus('glow',this)">${t('p4focus_glow_label')}</button>
+      <button class="p4focus-tab ${_p4Focus==='aging'?'active':''}" onclick="switchP4Focus('aging',this)">${t('p4focus_aging_label')}</button>
+    </div>
+    <div class="p4focus-desc">${t('p4focus_'+_p4Focus+'_desc')}</div>
+    <div class="p4focus-note">${t('p4focus_switch_note')}</div>
+  </div>`:'';
 }
 
 /* Render a single day-panel HTML string by delegating to renderPhase with
@@ -3639,6 +4261,9 @@ function attachDayInteractions(){
   setTimeout(function(){
     if(typeof enhanceRoutineSteps==='function') enhanceRoutineSteps();
     if(typeof restorePhaseState==='function') restorePhaseState();
+    if(typeof renderJourneyStrip==='function') renderJourneyStrip();
+    if(typeof renderPhaseShiftSuggestion==='function') renderPhaseShiftSuggestion();
+    if(typeof checkAndShowWscBanner==='function') checkAndShowWscBanner();
   },0);
 }
 function dayClickHandler(e){
@@ -3927,6 +4552,8 @@ function saveCurrentRoutine(){
   const routines=getSavedRoutines();
   const existing=routines.findIndex(r=>r.id===builderState.routineData.id);
   const payload={...builderState.routineData,updatedAt:new Date().toISOString()};
+  // Set phaseStartedAt on first save only — marks when the user committed to their routine
+  if(!payload.phaseStartedAt) payload.phaseStartedAt=payload.createdAt||new Date().toISOString();
   if(existing>-1)routines[existing]=payload;
   else routines.push(payload);
   setSavedRoutines(routines);
@@ -4398,6 +5025,55 @@ function importRoutines(e){
   reader.readAsText(file);e.target.value='';
 }
 
+/* ═══ HOME PHASE WIDGET ═══ */
+// Shared helper: computes the display data for the current phase state.
+// Used by both the home widget and the journey strip.
+function _getPhaseDisplayData(r){
+  if(!r)return null;
+  const _startDate=r.phaseStartedAt||r.createdAt;
+  if(!_startDate)return null;
+  const days=Math.max(1,Math.floor((Date.now()-new Date(_startDate).getTime())/(1000*60*60*24))+1);
+  const weeks=Math.ceil(days/7);
+  const activePid=r.activePhase||'p1';
+  const inRecovery=!!r.inRecoveryMode;
+  const _phIcons={p1:'🛡',p2:'💧',p3:'✨',p4:'🌿'};
+  if(inRecovery){
+    return{icon:'🌿',label:t('js_ctx_recovery')+' · '+t('js_week')+' '+weeks,sub:t('js_recovery_sub'),days,weeks,isRecovery:true};
+  }
+  const ctx=t('js_ctx_'+activePid)||('Phase '+activePid.replace('p',''));
+  const timeLabel=days>28?t('js_stable'):t('js_week')+' '+weeks;
+  return{icon:_phIcons[activePid]||'🗓',label:ctx+' · '+timeLabel,sub:t('js_day')+' '+days+' '+t('js_day_suffix'),days,weeks,isRecovery:false,pid:activePid};
+}
+
+function renderHomePhaseWidget(){
+  const el=document.getElementById('home-phase-widget');
+  if(!el)return;
+  // Get the most recently updated saved routine
+  const routines=getSavedRoutines();
+  if(!routines.length){
+    el.innerHTML=''; // no routine — widget hidden
+    return;
+  }
+  const r=routines.slice().sort(function(a,b){return new Date(b.updatedAt||b.createdAt)-new Date(a.updatedAt||a.createdAt);})[0];
+  const d=_getPhaseDisplayData(r);
+  if(!d){el.innerHTML='';return;}
+
+  el.innerHTML=`
+    <div class="phw-wrap">
+      <div class="phw-header">
+        <div class="phw-eyebrow">${t('phw_title')}</div>
+      </div>
+      <div class="phw-card ${d.isRecovery?'recovery':''}">
+        <div class="phw-icon">${d.icon}</div>
+        <div class="phw-content">
+          <div class="phw-label">${d.label}</div>
+          <div class="phw-sub">${d.sub}</div>
+        </div>
+        <button class="phw-view-btn" onclick="showPage('myroutine',null)">${t('phw_view')}</button>
+      </div>
+    </div>`;
+}
+
 /* ═══ PAGE NAVIGATION ═══ */
 function showPage(id,triggerBtn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -4409,6 +5085,7 @@ function showPage(id,triggerBtn){
   if(id==='builder')initBuilder();
   if(id==='myroutine')renderMyRoutines();
   if(id==='conflict')renderConflictGrid();
+  if(id==='home')renderHomePhaseWidget();
 }
 
 /* ═══ INIT ═══ */
@@ -4501,6 +5178,7 @@ function triggerSkinReactionAlert(){var ex=document.getElementById('gp-sos-sheet
 function closeSosSheet(){var el=document.getElementById('gp-sos-sheet');if(el){el.style.pointerEvents='none';if(el.parentNode)el.parentNode.removeChild(el);}}
 function renderEmergencySOS(){if(document.getElementById('gp-sos-fab'))return;var f=document.createElement('button');f.id='gp-sos-fab';f.className='gp-sos-fab';f.title='Skin reaction emergency';f.innerHTML='🆘';f.onclick=triggerSkinReactionAlert;document.body.appendChild(f);}
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderEmergencySOS);}else{renderEmergencySOS();}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',renderHomePhaseWidget);}else{renderHomePhaseWidget();}
 
 document.addEventListener('DOMContentLoaded',()=>{
   const savedLang=localStorage.getItem('gp_lang')||'en';
@@ -4512,3 +5190,55 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderConflictGrid();
   renderMyRoutines();
 });
+
+/* ── Mobile hamburger nav ── */
+function toggleMobileNav(){
+  var btn=document.getElementById('navHamburger');
+  var drawer=document.getElementById('mobileNavDrawer');
+  if(!btn||!drawer)return;
+  var isOpen=drawer.classList.contains('open');
+  if(isOpen){closeMobileNav();}else{openMobileNav();}
+}
+function openMobileNav(){
+  var btn=document.getElementById('navHamburger');
+  var drawer=document.getElementById('mobileNavDrawer');
+  if(!btn||!drawer)return;
+  btn.classList.add('open');
+  btn.setAttribute('aria-expanded','true');
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden','false');
+  document.addEventListener('click',_mobileNavOutsideClick,true);
+}
+function closeMobileNav(){
+  var btn=document.getElementById('navHamburger');
+  var drawer=document.getElementById('mobileNavDrawer');
+  if(!btn||!drawer)return;
+  btn.classList.remove('open');
+  btn.setAttribute('aria-expanded','false');
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+  document.removeEventListener('click',_mobileNavOutsideClick,true);
+}
+function _mobileNavOutsideClick(e){
+  var drawer=document.getElementById('mobileNavDrawer');
+  var btn=document.getElementById('navHamburger');
+  if(drawer&&!drawer.contains(e.target)&&btn&&!btn.contains(e.target)){
+    closeMobileNav();
+  }
+}
+/* Keep active state in drawer in sync with main nav */
+function _syncMobDrawerActive(pageId){
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b){
+    b.classList.toggle('mob-active',b.dataset.page===pageId);
+  });
+}
+/* Patch showPage to also sync drawer active state */
+(function(){
+  var _orig=window.showPage;
+  if(typeof _orig==='function'){
+    window.showPage=function(id,triggerBtn){
+      _orig(id,triggerBtn);
+      _syncMobDrawerActive(id);
+    };
+  }
+})();

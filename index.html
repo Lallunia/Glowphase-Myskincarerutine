@@ -35,8 +35,20 @@
       <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
       <button class="lang-btn" onclick="setLang('th',this)">TH</button>
     </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+  <button class="mob-nav-btn" data-page="home" onclick="showPage('home',null);closeMobileNav()">Home</button>
+  <button class="mob-nav-btn" data-page="library" onclick="showPage('library',null);closeMobileNav()">Products</button>
+  <button class="mob-nav-btn" data-page="builder" onclick="showPage('builder',null);closeMobileNav()">Routine Builder</button>
+  <button class="mob-nav-btn" data-page="myroutine" onclick="showPage('myroutine',null);closeMobileNav()">My Routine</button>
+  <button class="mob-nav-btn" data-page="device" onclick="showPage('device',null);closeMobileNav()">Device Guide</button>
+  <button class="mob-nav-btn" data-page="conflict" onclick="showPage('conflict',null);closeMobileNav()">Conflict Checker</button>
+</div>
 
 <!-- ══ HOME ══ -->
 <div class="page active" id="page-home">
@@ -85,6 +97,9 @@
       <div class="scroll-dot"></div>
     </div>
   </div>
+
+  <!-- Phase Progress Widget — injected dynamically when a routine exists -->
+  <div id="home-phase-widget"></div>
 
   <!-- Feature cards -->
   <div class="home-section">
@@ -320,6 +335,9 @@
 <div class="overlay" id="product-modal" onclick="closeModalOutside(event)">
   <div class="modal" id="modal-box"></div>
 </div>
+
+<!-- PHASE GRADUATION OVERLAY -->
+<div id="grad-overlay"></div>
 
 <!-- SKIN READINESS GATE MODAL -->
 <div class="overlay" id="skin-gate-modal">
