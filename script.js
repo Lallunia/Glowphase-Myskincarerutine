@@ -1452,10 +1452,10 @@ const T = {
     g_barrier:'Barrier Repair',g_hydration:'Hydration',g_calm:'Calm Redness',g_glow:'Glow',
     g_acne:'Clear Acne',g_pih:'Fade Post-Acne Marks',g_antiaging:'Anti-Aging',g_elasticity:'Elasticity & Firmness',
     g_texture:'Texture',g_fine_lines:'Fine Lines',g_wrinkles:'Wrinkles',g_hyperpig:'Hyperpigmentation',g_glass:'Glass Skin',
-    phase1_title:'🛡 Barrier Repair + Calm Inflammation',phase1_desc:'Rebuild skin barrier, reduce redness, hydrate. No actives.',phase1_dur:'⏱ Weeks 1–4 · Until no stinging, redness at rest, or flaking',phase1_optional_badge:'Optional for Healthy Skin',phase1_optional_note:'Your barrier currently appears healthy. This phase is a gentle buffer — you can shorten it to 1–2 weeks if skin feels stable and calm.',
-    phase2_title:'💧 Hydration + Glow',phase2_desc:'Barrier stable. Add PDRN device treatments and spot treatments. PIH starts fading.',phase2_dur:'⏱ Weeks 5–8 · When skin no longer stings or flakes',
-    phase3_title:'✨ Actives + Acne Marks + Texture',phase3_desc:'Barrier fully repaired. Introduce retinal, exfoliants. Fade PIH.',phase3_dur:'⏱ Week 9+ · Only when fully calm',
-    phase4_title:'🌿 Maintenance + Anti-Aging Support',phase4_desc:'Stable skin. Focus on collagen support, prevention, and long-term health.',phase4_dur:'⏱ Ongoing · Adjust as seasons and skin change',
+    phase1_title:'🛡 Barrier Repair + Calm Inflammation',phase1_desc:'Rebuild skin barrier, reduce redness, hydrate. No actives.',phase1_dur:'✓ Progress when · No stinging, redness, or flaking for several days',phase1_optional_badge:'Optional for Healthy Skin',phase1_optional_note:'Your barrier currently appears healthy. This phase is a gentle buffer — feel free to move on when your skin feels calm and stable.',
+    phase2_title:'💧 Hydration + Glow',phase2_desc:'Barrier stable. Add PDRN device treatments and spot treatments. PIH starts fading.',phase2_dur:'✓ Progress when · Barrier feels stable and no new reactions for 2+ weeks',
+    phase3_title:'✨ Actives + Acne Marks + Texture',phase3_desc:'Barrier fully repaired. Introduce retinal, exfoliants. Fade PIH.',phase3_dur:'✓ Progress when · Actives tolerated comfortably with no irritation',
+    phase4_title:'🌿 Maintenance + Anti-Aging Support',phase4_desc:'Stable skin. Focus on collagen support, prevention, and long-term health.',phase4_dur:'✓ Your focus · Long-term resilience and skin health',
     morning_routine:'☀️ Daily Morning Base Routine',night_routine:'🌙 Night Routine',recovery_night_label:'🌿 Barrier Banking Night',treatment_night_label:'🌙 Treatment Night',step_c1_recovery_note:'Optional if no makeup or sunscreen was worn.',
     avoid_tonight:'⛔ Avoid Tonight',avoid_today:'⛔ Avoid Today',
     recovery_note:'🌿 Barrier Banking',retinal_rule:'🌙 Retinal Rule',
@@ -1712,8 +1712,28 @@ const T = {
     phw_view:'View routine →',
     phw_no_routine:'Build your personalised routine to start tracking your skin journey.',
     phw_cta:'Build My Routine',
+    // Why explanation strings
+    why_btn:'Why am I here?',why_hide:'Hide',
+    why_p1_damaged:'Your skin barrier showed signs of damage or sensitivity, so we\'re starting with gentle repair before introducing any actives.',
+    why_p1_reacting:'Your skin was reacting at the time of your assessment. Phase 1 gives it space to calm before anything stronger is introduced.',
+    why_p1_sensitive:'With high sensitivity, building a strong barrier first ensures your skin can tolerate actives later without reacting.',
+    why_p1_default:'Phase 1 ensures your barrier is strong enough before anything more active is introduced.',
+    why_p2_skipped:'Your skin barrier was healthy enough to skip Phase 1. You\'re starting with hydration and gentle targeted care.',
+    why_p2_progressed:'You progressed here after your skin showed stability in Phase 1. Your barrier is ready for more.',
+    why_p3_experienced:'With your experience using actives and a stable barrier, you\'re ready for targeted treatment routines.',
+    why_p3_progressed:'You progressed here after your skin tolerated Phase 2 comfortably. Active treatment starts now.',
+    why_p4_progressed:'You\'ve built a strong foundation through all phases. Phase 4 is about maintaining and protecting what you\'ve achieved.',
+    why_recovery:'You\'re temporarily in recovery mode while your skin rebuilds resilience. You can return to your phase when you\'re ready.',
     // Phase Graduation
     grad_continue:'Continue',
+    // Smart gate — WSC-based caution screen
+    sg_wsc_caution_title:'A gentle heads-up before you continue',
+    sg_wsc_caution_msg:'Your last skin check showed some sensitivity. You can still move forward — just introduce things slowly and step back if your skin reacts.',
+    sg_wsc_caution_proceed:'Continue carefully',
+    sg_wsc_caution_stay:'Stay in current phase',
+    ph_wsc_ok:'Your last check showed your skin is doing well',
+    ph_wsc_caution:'Some sensitivity noted in your last check',
+    ph_wsc_stress:'Your last check suggests more recovery time',
     grad_to_p2_icon:'💧',grad_to_p2_title:'Your barrier is strong.',grad_to_p2_msg:'You\'ve done the foundational work. Time to build hydration, glow, and gentle targeted care.',
     grad_to_p3_icon:'✨',grad_to_p3_title:'Your skin is resilient.',grad_to_p3_msg:'Your barrier is ready for active treatment. Introduce new ingredients gently and listen to your skin.',
     grad_to_p4_icon:'🌿',grad_to_p4_title:'You\'ve reached long-term skin health.',grad_to_p4_msg:'This is the maintenance phase — protecting what you\'ve built and supporting your skin for the long run.',
@@ -1933,10 +1953,10 @@ const T = {
     g_barrier:'ซ่อมแซมเกราะผิว',g_hydration:'เติมความชุ่มชื้น',g_calm:'ปลอบประโลม / ลดรอยแดง',g_glow:'ผิวเปล่งปลั่ง',
     g_acne:'ลดสิว',g_pih:'จางรอยสิว',g_antiaging:'ลดเลือนริ้วรอย',g_elasticity:'ยืดหยุ่นและกระชับ',
     g_texture:'ผิวเรียบเนียน',g_fine_lines:'ริ้วรอยตื้น ๆ',g_wrinkles:'ริ้วรอยลึก',g_hyperpig:'ฝ้า / จุดด่างดำ',g_glass:'Glass Skin',
-    phase1_title:'🛡 ซ่อมแซมเกราะผิว + ลดการอักเสบ',phase1_desc:'ฟื้นฟูเกราะผิว ลดรอยแดง เติมความชุ่มชื้น ยังงดสารออกฤทธิ์ทุกชนิด',phase1_dur:'⏱ สัปดาห์ที่ 1–4 · จนกว่าผิวจะไม่แสบ แดง หรือลอก',phase1_optional_badge:'ขั้นตอนเสริม (สำหรับผิวแข็งแรง)',phase1_optional_note:'เกราะผิวของคุณดูแข็งแรงดี ขั้นตอนนี้เป็นแค่บัฟเฟอร์ป้องกัน — ย่นระยะได้เหลือ 1–2 สัปดาห์ หากผิวนิ่งและสงบ',
-    phase2_title:'💧 เติมความชุ่มชื้น + ผิวเปล่งปลั่ง',phase2_desc:'เมื่อเกราะผิวแข็งแรงแล้ว เริ่มใช้ PDRN และผลิตภัณฑ์ลดรอย รอยสิวเริ่มจางลง',phase2_dur:'⏱ สัปดาห์ที่ 5–8 · เมื่อผิวไม่แสบหรือลอกอีก',
-    phase3_title:'✨ สารออกฤทธิ์ + รอยสิว + พื้นผิว',phase3_desc:'เกราะผิวฟื้นฟูสมบูรณ์ เริ่มใช้ Retinal และผลัดเซลล์อย่างอ่อนโยน รอยสิวจางลงชัดเจน',phase3_dur:'⏱ สัปดาห์ที่ 9 เป็นต้นไป · เฉพาะตอนผิวสงบเท่านั้น',
-    phase4_title:'🌿 บำรุงระยะยาว + ต้านวัย',phase4_desc:'ผิวอยู่ในภาวะสมดุล เน้นเสริมคอลลาเจน ความยืดหยุ่น และสุขภาพผิวระยะยาว',phase4_dur:'⏱ ต่อเนื่อง · ปรับตามฤดูกาลและสภาพผิว',
+    phase1_title:'🛡 ซ่อมแซมเกราะผิว + ลดการอักเสบ',phase1_desc:'ฟื้นฟูเกราะผิว ลดรอยแดง เติมความชุ่มชื้น ยังงดสารออกฤทธิ์ทุกชนิด',phase1_dur:'✓ ไปต่อเมื่อ · ไม่แสบ แดง หรือลอกต่อเนื่องหลายวัน',phase1_optional_badge:'ขั้นตอนเสริม (สำหรับผิวแข็งแรง)',phase1_optional_note:'เกราะผิวของคุณดูแข็งแรงดี ขั้นตอนนี้เป็นแค่บัฟเฟอร์ป้องกัน — ไปต่อได้เมื่อผิวนิ่งและสงบ',
+    phase2_title:'💧 เติมความชุ่มชื้น + ผิวเปล่งปลั่ง',phase2_desc:'เมื่อเกราะผิวแข็งแรงแล้ว เริ่มใช้ PDRN และผลิตภัณฑ์ลดรอย รอยสิวเริ่มจางลง',phase2_dur:'✓ ไปต่อเมื่อ · เกราะผิวมั่นคง ไม่มีปฏิกิริยาใหม่ต่อเนื่อง 2+ สัปดาห์',
+    phase3_title:'✨ สารออกฤทธิ์ + รอยสิว + พื้นผิว',phase3_desc:'เกราะผิวฟื้นฟูสมบูรณ์ เริ่มใช้ Retinal และผลัดเซลล์อย่างอ่อนโยน รอยสิวจางลงชัดเจน',phase3_dur:'✓ ไปต่อเมื่อ · ทนสารออกฤทธิ์ได้โดยไม่มีการระคายเคือง',
+    phase4_title:'🌿 บำรุงระยะยาว + ต้านวัย',phase4_desc:'ผิวอยู่ในภาวะสมดุล เน้นเสริมคอลลาเจน ความยืดหยุ่น และสุขภาพผิวระยะยาว',phase4_dur:'✓ เป้าหมายของคุณ · ความยืดหยุ่นระยะยาวและสุขภาพผิว',
     morning_routine:'☀️ รูทีนเช้าพื้นฐาน',night_routine:'🌙 รูทีนกลางคืน',recovery_night_label:'🌿 คืนสะสมเกราะผิว',treatment_night_label:'🌙 คืนบำรุงพิเศษ',step_c1_recovery_note:'ไม่จำเป็นหากไม่ได้แต่งหน้าหรือทาครีมกันแดด',
     avoid_tonight:'⛔ หลีกเลี่ยงคืนนี้',avoid_today:'⛔ หลีกเลี่ยงวันนี้',
     recovery_note:'🌿 การสะสมเกราะผิว',retinal_rule:'🌙 กฎการใช้ Retinal',
@@ -2192,8 +2212,26 @@ const T = {
     phw_view:'ดูรูทีน →',
     phw_no_routine:'สร้างรูทีนของคุณเพื่อเริ่มติดตามสุขภาพผิว',
     phw_cta:'สร้างรูทีน',
+    why_btn:'ทำไมฉันถึงอยู่ที่นี่?',why_hide:'ซ่อน',
+    why_p1_damaged:'เกราะผิวของคุณแสดงสัญญาณเสียหายหรือไวต่อสิ่งกระตุ้น จึงเริ่มด้วยการซ่อมแซมก่อนแนะนำสารออกฤทธิ์',
+    why_p1_reacting:'ผิวของคุณกำลังระคายเคืองตอนทำแบบประเมิน Phase 1 ให้พื้นที่ผิวสงบก่อนนำอะไรที่แรงกว่านี้เข้ามา',
+    why_p1_sensitive:'ผิวไวสูง การสร้างเกราะผิวให้แข็งแรงก่อนช่วยให้ผิวรับสารออกฤทธิ์ได้ในภายหลังโดยไม่แพ้',
+    why_p1_default:'Phase 1 ทำให้มั่นใจว่าเกราะผิวแข็งแรงพอก่อนเริ่มสิ่งที่ออกฤทธิ์มากขึ้น',
+    why_p2_skipped:'เกราะผิวของคุณแข็งแรงพอที่จะข้าม Phase 1 ได้ เริ่มต้นด้วยการเติมความชุ่มชื้นและดูแลเฉพาะจุดอย่างอ่อนโยน',
+    why_p2_progressed:'คุณก้าวมาที่นี่หลังจากผิวแสดงความมั่นคงใน Phase 1 เกราะผิวพร้อมสำหรับการดูแลเพิ่มเติมแล้ว',
+    why_p3_experienced:'ด้วยประสบการณ์ใช้สารออกฤทธิ์และเกราะผิวที่มั่นคง คุณพร้อมสำหรับรูทีนบำรุงเฉพาะจุด',
+    why_p3_progressed:'คุณก้าวมาที่นี่หลังจากผิวทนสารออกฤทธิ์ใน Phase 2 ได้สบาย ถึงเวลาบำรุงเชิงลึกแล้ว',
+    why_p4_progressed:'คุณสร้างรากฐานที่แข็งแกร่งผ่านทุก Phase แล้ว Phase 4 คือการบำรุงและปกป้องสิ่งที่สร้างมา',
+    why_recovery:'คุณอยู่ในโหมดพักฟื้นชั่วคราวขณะที่ผิวกำลังเสริมความแข็งแกร่ง กลับสู่ Phase ของคุณได้เมื่อพร้อม',
     // Phase Graduation (Thai)
     grad_continue:'ต่อไปเลย',
+    sg_wsc_caution_title:'แจ้งเตือนก่อนไปต่อ',
+    sg_wsc_caution_msg:'การเช็คผิวครั้งล่าสุดพบสัญญาณความไวบางอย่าง คุณยังไปต่อได้ — แค่แนะนำสิ่งใหม่อย่างช้า ๆ และถอยกลับได้เสมอหากผิวตอบสนอง',
+    sg_wsc_caution_proceed:'ไปต่ออย่างระวัง',
+    sg_wsc_caution_stay:'อยู่ใน Phase นี้ต่อ',
+    ph_wsc_ok:'การเช็คครั้งล่าสุดพบว่าผิวของคุณสบายดี',
+    ph_wsc_caution:'มีสัญญาณความไวบางอย่างในการเช็คครั้งล่าสุด',
+    ph_wsc_stress:'การเช็คครั้งล่าสุดแนะนำให้พักฟื้นเพิ่มเติม',
     grad_to_p2_icon:'💧',grad_to_p2_title:'เกราะผิวของคุณแข็งแรงแล้ว',grad_to_p2_msg:'คุณทำรากฐานสำเร็จแล้ว ถึงเวลาเสริมความชุ่มชื้น ผิวเปล่งปลั่ง และดูแลเฉพาะจุดอย่างอ่อนโยน',
     grad_to_p3_icon:'✨',grad_to_p3_title:'ผิวของคุณแข็งแกร่งพร้อมแล้ว',grad_to_p3_msg:'เกราะผิวพร้อมรับสารออกฤทธิ์แล้ว แนะนำส่วนผสมใหม่อย่างค่อยเป็นค่อยไปและฟังเสียงผิว',
     grad_to_p4_icon:'🌿',grad_to_p4_title:'คุณมาถึงสุขภาพผิวระยะยาวแล้ว',grad_to_p4_msg:'นี่คือ Phase บำรุงระยะยาว — ปกป้องสิ่งที่สร้างมาและดูแลผิวให้ยั่งยืน',
@@ -2912,14 +2950,12 @@ function showGraduation(fromPid,toPid,isRecoveryReturn,onComplete){
   el.classList.add('open');
 
   function _close(){
-    if(_gradTimer)clearTimeout(_gradTimer);
     el.classList.remove('open');
     if(onComplete)onComplete();
   }
 
+  // User must click Continue — no auto-dismiss, progression is a conscious act
   document.getElementById('grad-continue-btn').onclick=_close;
-  // Auto-dismiss after 5 seconds
-  var _gradTimer=setTimeout(_close,5000);
 }
 
 /* ═══ STEP BACK / RECOVERY MODE ═══ */
@@ -3143,6 +3179,29 @@ function _wscMarkDone(routineId){
   try{localStorage.setItem(_wscLastKey(routineId),Date.now().toString());}catch(e){}
 }
 
+// Generates a 1-sentence explanation of why the user is in their current phase.
+function _generatePhaseExplanation(r){
+  if(!r)return '';
+  const a=r.answers||{};
+  const inRecovery=!!r.inRecoveryMode;
+  const phase=r.activePhase||'p1';
+  if(inRecovery) return t('why_recovery');
+  if(phase==='p1'){
+    if(a.barrierCondition===t('o_very_damaged'))      return t('why_p1_damaged');
+    if(a.currentIrritation===t('o_irritation_yes'))   return t('why_p1_reacting');
+    if(a.sensitivity===t('o_high'))                   return t('why_p1_sensitive');
+    if((a.skinTypes||[]).includes(t('o_reactive')))   return t('why_p1_sensitive');
+    return t('why_p1_default');
+  }
+  if(phase==='p2'){
+    return r.startingPhase==='p2'?t('why_p2_skipped'):t('why_p2_progressed');
+  }
+  if(phase==='p3'){
+    return a.activeExperience===t('o_exp_regular')&&r.startingPhase==='p3'?t('why_p3_experienced'):t('why_p3_progressed');
+  }
+  return t('why_p4_progressed');
+}
+
 // Renders the journey strip showing "Day X · Phase Y" at the top of each saved routine card.
 // Shows "Recovery Mode" when the user is in recovery. Never shown for draft routines.
 function renderJourneyStrip(){
@@ -3183,19 +3242,67 @@ function renderJourneyStrip(){
       subText=t('js_day')+' '+days+' '+t('js_day_suffix');
     }
 
+    const whyText=_generatePhaseExplanation(r);
+    const whyId='js-why-'+routineId;
+
     const strip=document.createElement('div');
     strip.className='js-strip '+extraClass;
     strip.innerHTML=`
       <div class="js-strip-icon">${icon}</div>
-      <div>
+      <div style="flex:1">
         <div class="js-strip-day">${dayText}</div>
         <div class="js-strip-phase">${subText}</div>
-      </div>`;
+      </div>
+      ${whyText?`<button class="js-why-btn" onclick="toggleWhyExplanation('${whyId}',this)" aria-label="${t('why_btn')}">ℹ</button>`:''}`;
+
+    if(whyText){
+      const whyRow=document.createElement('div');
+      whyRow.id=whyId;
+      whyRow.className='js-why-row';
+      whyRow.style.display='none';
+      whyRow.textContent=whyText;
+      strip.appendChild(whyRow);
+    }
 
     // Insert before the builder-step-hd
     const hd=card.querySelector('.builder-step-hd');
     if(hd)card.insertBefore(strip,hd);
     else card.prepend(strip);
+  });
+}
+
+function toggleWhyExplanation(id,btn){
+  const row=document.getElementById(id);
+  if(!row)return;
+  const isOpen=row.style.display!=='none';
+  row.style.display=isOpen?'none':'block';
+  if(btn)btn.textContent=isOpen?'ℹ':t('why_hide');
+  if(btn)btn.classList.toggle('active',!isOpen);
+}
+
+// Injects a one-line WSC status below the ph-duration on each visible phase card.
+// Only shown on My Routine page. Updates on every render.
+function updatePhaseCardWSCStatus(){
+  const myPage=document.getElementById('page-myroutine');
+  if(!myPage||!myPage.classList.contains('active'))return;
+  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    const routineId=cardId.replace('gc-','');
+    const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+    if(!r||!r.wscHistory||!r.wscHistory.length)return;
+    const lastEntry=r.wscHistory[r.wscHistory.length-1];
+    if(!lastEntry)return;
+    const score=lastEntry.score;
+    let statusHtml='';
+    if(score<=2)     statusHtml='<div class="ph-wsc-status ok">✨ '+t('ph_wsc_ok')+'</div>';
+    else if(score<=5)statusHtml='<div class="ph-wsc-status caution">🌿 '+t('ph_wsc_caution')+'</div>';
+    else             statusHtml='<div class="ph-wsc-status stress">🛡 '+t('ph_wsc_stress')+'</div>';
+    // Inject after each ph-duration in visible phase panels
+    card.querySelectorAll('.ph-duration').forEach(function(el){
+      if(el.nextElementSibling&&el.nextElementSibling.classList.contains('ph-wsc-status'))return;
+      el.insertAdjacentHTML('afterend',statusHtml);
+    });
   });
 }
 
@@ -3992,13 +4099,76 @@ function switchMorningPhase(mid,btn){
   if(btn)btn.classList.add('active');
 }
 
+// Returns the last WSC score (0-8) if completed within 3 days, else null
+function _getRecentWscScore(btn){
+  try{
+    const card=btn?btn.closest('.builder-card'):null;
+    if(!card)return null;
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return null;
+    const routineId=cardId.replace('gc-','');
+    const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+    if(!r||!r.wscHistory||!r.wscHistory.length)return null;
+    const last=r.wscHistory[r.wscHistory.length-1];
+    const THREE_DAYS=3*24*60*60*1000;
+    if(!last||!last.date||(Date.now()-new Date(last.date).getTime())>THREE_DAYS)return null;
+    return last.score;
+  }catch(e){return null;}
+}
+
 function switchRoutinePhase(pid,btn){
-  // Show Skin Readiness Gate before allowing progression to Phase 2, 3, or 4
+  // Only gate forward progression (p2, p3, p4)
   if(pid==='p2'||pid==='p3'||pid==='p4'){
+    const recentScore=_getRecentWscScore(btn);
+
+    if(recentScore!==null&&recentScore<=2){
+      // Recent WSC was great — skip gate, show graduation directly
+      const card=btn?btn.closest('.builder-card'):null;
+      const phasePanel=card?card.querySelector('.phase-panel'):null;
+      const fromPid=phasePanel?phasePanel.dataset.pid:null;
+      const _phaseOrder={p1:1,p2:2,p3:3,p4:4};
+      const isForward=fromPid&&(_phaseOrder[pid]||0)>(_phaseOrder[fromPid]||0);
+      const isRecoveryReturn=!!(_sbState.cardId&&_sbState.originalPid===pid);
+      if(isForward||isRecoveryReturn){
+        showGraduation(fromPid,pid,isRecoveryReturn,function(){_doSwitchRoutinePhase(pid,btn);});
+      } else {
+        _doSwitchRoutinePhase(pid,btn);
+      }
+      return;
+    }
+
+    if(recentScore!==null&&recentScore>=3&&recentScore<=5){
+      // Recent WSC showed mild concern — show single caution screen, no questions
+      _showWscCautionGate(pid,btn);
+      return;
+    }
+
+    // No recent WSC or score ≥ 6 — run full gate
     openSkinGate(pid,btn);
     return;
   }
   _doSwitchRoutinePhase(pid,btn);
+}
+
+// Single-screen caution gate when WSC score was 3-5
+function _showWscCautionGate(pid,btn){
+  const box=document.getElementById('skin-gate-box');
+  if(!box){openSkinGate(pid,btn);return;}
+  _sgState.targetPid=pid;
+  _sgState.targetBtn=btn;
+  box.innerHTML=`
+    <div style="padding:28px">
+      <div class="sg-header" style="padding:0 0 18px">
+        <div class="sg-phase-badge">🌿 ${t(pid==='p2'?'sg_badge_p2':pid==='p3'?'sg_badge_p3':'sg_badge_p4')}</div>
+        <div class="sg-title">${t('sg_wsc_caution_title')}</div>
+        <div class="sg-subtitle">${t('sg_wsc_caution_msg')}</div>
+      </div>
+      <div class="sg-footer" style="position:static">
+        <button class="sg-btn-check" onclick="sgProceed()">${t('sg_wsc_caution_proceed')}</button>
+        <button class="sg-btn-skip" onclick="closeSkinGate()">${t('sg_wsc_caution_stay')}</button>
+      </div>
+    </div>`;
+  document.getElementById('skin-gate-modal').classList.add('open');
 }
 
 function _doSwitchRoutinePhase(pid,btn){
@@ -4320,6 +4490,7 @@ function attachDayInteractions(){
     if(typeof enhanceRoutineSteps==='function') enhanceRoutineSteps();
     if(typeof restorePhaseState==='function') restorePhaseState();
     if(typeof renderJourneyStrip==='function') renderJourneyStrip();
+    if(typeof updatePhaseCardWSCStatus==='function') updatePhaseCardWSCStatus();
     if(typeof renderPhaseShiftSuggestion==='function') renderPhaseShiftSuggestion();
     if(typeof checkAndShowWscBanner==='function') checkAndShowWscBanner();
   },0);

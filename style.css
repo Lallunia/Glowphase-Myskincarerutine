@@ -4447,3 +4447,14 @@ img { display: block; max-width: 100%; }
 .p4focus-tab.active{background:linear-gradient(180deg,rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 55%),var(--grad-btn);border-color:transparent;color:white;box-shadow:0 4px 16px rgba(207,161,174,.4);}
 .p4focus-desc{font-size:.8rem;color:#a08090;line-height:1.5;margin-bottom:4px;}
 .p4focus-note{font-size:.72rem;color:#c0a8b0;font-style:italic;}
+
+/* ═══ PHASE CARD WSC STATUS ═══ */
+.ph-wsc-status{font-size:.72rem;font-weight:600;margin-top:5px;padding:4px 10px;border-radius:20px;display:inline-block;}
+.ph-wsc-status.ok{background:rgba(72,187,120,0.12);color:#276749;}
+.ph-wsc-status.caution{background:rgba(246,215,223,0.4);color:#9a7060;}
+.ph-wsc-status.stress{background:rgba(251,191,36,0.12);color:#b45309;}
+
+/* ═══ WHY AM I IN THIS PHASE ═══ */
+.js-why-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(228,181,191,0.45);background:transparent;color:#CFA1AE;font-size:.8rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-style:normal;}
+.js-why-btn:hover,.js-why-btn.active{background:rgba(228,181,191,0.2);border-color:#CFA1AE;color:#9a7060;}
+.js-why-row{font-size:.78rem;color:#7a6878;line-height:1.55;padding:10px 12px;margin-top:8px;background:rgba(246,215,223,0.18);border-radius:10px;border-left:3px solid rgba(228,181,191,0.4);animation:gradFadeUp .25s var(--ease) both;width:100%;}
