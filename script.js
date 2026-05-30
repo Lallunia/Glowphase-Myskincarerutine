@@ -1435,6 +1435,18 @@ const T = {
     o_none:'None',o_occasional:'Occasional',o_moderate:'Moderate',o_severe:'Severe',
     o_healthy:'Healthy',o_slightly:'Slightly Damaged',o_very_damaged:'Very Damaged',o_unsure:'Unsure',
     o_low:'Low',o_medium:'Medium',o_high:'High',
+    // Entry assessment — new questions
+    q_current_irritation:'Is your skin currently stinging, tight, or reacting?',
+    o_irritation_no:'No — feels calm',o_irritation_little:'A little — minor tightness',o_irritation_yes:'Yes — clearly reacting',
+    q_active_experience:'Have you used retinoids or acids before?',
+    o_exp_never:'Never used them',o_exp_tried:'Tried a few times',o_exp_regular:'Use regularly',
+    // Placement banner
+    ea_banner_p1_title:'Starting you at Phase 1 — Barrier Repair',
+    ea_banner_p1_body:'Based on your answers, your skin needs some recovery time first. Phase 1 focuses on calming and rebuilding before introducing any actives.',
+    ea_banner_p2_title:'Starting you at Phase 2 — Hydration + Glow',
+    ea_banner_p2_body:'Your skin barrier looks stable enough to skip Phase 1. You\'ll start with hydration and gentle spot treatments while your barrier stays strong.',
+    ea_banner_p3_title:'Starting you at Phase 3 — Actives + Treatment',
+    ea_banner_p3_body:'Your experience with actives and stable skin means you\'re ready to start with treatments. Listen to your skin and step back if needed.',
     o_simple:'Simple (3–5 steps)',o_moderate_r:'Moderate (5–7)',o_advanced:'Advanced (7+)',
     o_fragrance:'Fragrance / Parfum',o_alcohol:'Alcohol Denat.',o_eo:'Essential Oils',o_silicones:'Silicones',
     g_barrier:'Barrier Repair',g_hydration:'Hydration',g_calm:'Calm Redness',g_glow:'Glow',
@@ -1444,9 +1456,9 @@ const T = {
     phase2_title:'💧 Hydration + Glow',phase2_desc:'Barrier stable. Add PDRN device treatments and spot treatments. PIH starts fading.',phase2_dur:'⏱ Weeks 5–8 · When skin no longer stings or flakes',
     phase3_title:'✨ Actives + Acne Marks + Texture',phase3_desc:'Barrier fully repaired. Introduce retinal, exfoliants. Fade PIH.',phase3_dur:'⏱ Week 9+ · Only when fully calm',
     phase4_title:'🌿 Maintenance + Anti-Aging Support',phase4_desc:'Stable skin. Focus on collagen support, prevention, and long-term health.',phase4_dur:'⏱ Ongoing · Adjust as seasons and skin change',
-    morning_routine:'☀️ Daily Morning Base Routine',night_routine:'🌙 Night Routine',recovery_night_label:'🌿 Recovery Night',treatment_night_label:'🌙 Treatment Night',step_c1_recovery_note:'Optional if no makeup or sunscreen was worn.',
+    morning_routine:'☀️ Daily Morning Base Routine',night_routine:'🌙 Night Routine',recovery_night_label:'🌿 Barrier Banking Night',treatment_night_label:'🌙 Treatment Night',step_c1_recovery_note:'Optional if no makeup or sunscreen was worn.',
     avoid_tonight:'⛔ Avoid Tonight',avoid_today:'⛔ Avoid Today',
-    recovery_note:'🌿 Recovery Note',retinal_rule:'🌙 Retinal Rule',
+    recovery_note:'🌿 Barrier Banking',retinal_rule:'🌙 Retinal Rule',
     btn_start_over:'← Start Over',btn_save_routine:'💾 Save Routine',btn_check_ingredients:'Check Ingredients',
     saved_empty:'No saved routines yet. Build a routine to get started.',
     analysis_conflicts:'Ingredient Conflicts Detected',analysis_ok:'No Major Ingredient Conflicts Found',
@@ -1517,7 +1529,7 @@ const T = {
     morning_makeup_moist_note:'Let absorb 5 min before applying makeup.',
     morning_makeup_spf_tip:'⏱️ Wait 5 minutes after SPF before applying makeup.',
     result_phase_label:'Phase {n}',
-    dbadge_recovery:'🌿 Recovery',
+    dbadge_recovery:'🌿 Barrier Banking',
     dbadge_device:'💡 Device',
     dbadge_retinal:'🌙 Retinal',
     dbadge_bha:'Spot BHA',
@@ -1555,7 +1567,7 @@ const T = {
     avoid_device_phase1:'Device (Phase 1)',
     avoid_device_label:'Device',
     retinal_rule_body:'Eye area only · 2×/week max · Always SPF next morning · Apply after moisturizer',
-    recovery_note_body:'Less is more tonight. Barrier rebuilds during recovery. No actives, no device.',
+    recovery_note_body:'Tonight focuses on restoring your skin barrier and reducing inflammation. Less is more — no actives, no device. Your skin is rebuilding resilience and preparing for future treatments.',
     mature_skin_note_label:'🌿 Mature Skin Note',
     mature_skin_note_body:'Reduce Air Shot to 1× per session. Focus on MC Mode for firmness and elasticity support.',
     analyses_missing_spf_body:'No sunscreen selected. SPF is essential every morning.',
@@ -1579,31 +1591,31 @@ const T = {
     /* Day plan goals */
     dpgoal_deep_hyd_barrier:'Deep hydration + barrier sealing',
     dpgoal_device_hydration:'Device-boosted hydration',
-    dpgoal_rest_repair:'Rest + deep repair overnight',
+    dpgoal_rest_repair:'Barrier banking + deep overnight repair',
     dpgoal_hyd_soothing:'Hydration + soothing',
     dpgoal_booster_hyd:'Booster mode hydration infusion',
-    dpgoal_reset_lock:'Skin reset + moisture lock',
-    dpgoal_full_recovery:'Full recovery + week prep',
+    dpgoal_reset_lock:'Barrier banking + moisture lock',
+    dpgoal_full_recovery:'Barrier banking + week preparation',
     dpgoal_hyd_spot_acne:'Hydration + spot acne control',
     dpgoal_pdrn_pih:'PDRN device treatment for PIH',
-    dpgoal_recovery_device:'Recovery from device treatment',
+    dpgoal_recovery_device:'Barrier banking after device treatment',
     dpgoal_glow_hyd:'Glow boost + hydration',
     dpgoal_booster_pdrn:'Booster + PDRN treatment',
-    dpgoal_deep_moist_reset:'Deep moisture + skin reset',
+    dpgoal_deep_moist_reset:'Barrier banking + deep moisture',
     dpgoal_gentle_prep:'Gentle prep for next week',
     dpgoal_hyd_spot:'Hydration + spot acne',
     dpgoal_retinal_intro:'Retinal introduction — eye area only',
-    dpgoal_recovery_retinal:'Recovery after retinal',
+    dpgoal_recovery_retinal:'Barrier banking after retinal',
     dpgoal_pdrn_peel:'PDRN device + optional peel',
     dpgoal_second_retinal:'Second retinal night',
     dpgoal_spot_glow:'Spot acne + glow',
-    dpgoal_full_recovery_night:'Full recovery night',
+    dpgoal_full_recovery_night:'Full barrier banking night',
     dpgoal_peptide_aa:'Peptide + anti-aging hydration',
     dpgoal_retinal_maint:'Retinal maintenance',
-    dpgoal_recovery_barrier:'Recovery + barrier maintenance',
+    dpgoal_recovery_barrier:'Barrier banking + maintenance',
     dpgoal_aa_device:'Anti-aging device treatment',
     dpgoal_aha_refine:'AHA texture refinement',
-    dpgoal_collagen_recovery:'Collagen support recovery',
+    dpgoal_collagen_recovery:'Collagen support + barrier banking',
     dpgoal_full_moist:'Full moisturize + week prep',
     /* Product Library category chip labels */
     chip_oil_cleanser:'Oil Cleanser',
@@ -1660,7 +1672,7 @@ const T = {
     sg_caution_msg:'Your skin is showing some sensitivity. You can move forward, but go slowly and listen to your skin.',
     sg_caution_tip1:'Start with the mildest products in the next phase first.',
     sg_caution_tip2:'Add one new product at a time — wait 3 days between introductions.',
-    sg_caution_tip3:'If any stinging or redness appears, step back for a recovery day.',
+    sg_caution_tip3:'If any stinging or redness appears, step back for a Barrier Banking Day.',
     sg_caution_btn_stay:'Stay in Current Phase a Bit Longer',
     sg_caution_btn_anyway:'I\'ll move forward carefully',
     sg_notready_icon:'🛡',
@@ -1823,6 +1835,18 @@ const T = {
     o_none:'ไม่มี',o_occasional:'นาน ๆ ครั้ง',o_moderate:'ปานกลาง',o_severe:'รุนแรง',
     o_healthy:'แข็งแรงดี',o_slightly:'เสียหายเล็กน้อย',o_very_damaged:'เสียหายมาก',o_unsure:'ไม่แน่ใจ',
     o_low:'ต่ำ',o_medium:'ปานกลาง',o_high:'สูง',
+    // Entry assessment (Thai)
+    q_current_irritation:'ผิวของคุณกำลังแสบ ตึง หรือระคายเคืองอยู่ตอนนี้ไหม?',
+    o_irritation_no:'ไม่มี — ผิวสงบดี',o_irritation_little:'เล็กน้อย — ตึงนิดหน่อย',o_irritation_yes:'ใช่ — ผิวกำลังระคายเคืองชัดเจน',
+    q_active_experience:'คุณเคยใช้ Retinoid หรือกรดผลัดเซลล์ผิวมาก่อนไหม?',
+    o_exp_never:'ไม่เคยใช้เลย',o_exp_tried:'เคยลองใช้บ้าง',o_exp_regular:'ใช้เป็นประจำ',
+    // Placement banner (Thai)
+    ea_banner_p1_title:'เริ่มต้นที่ Phase 1 — ซ่อมแซมเกราะผิว',
+    ea_banner_p1_body:'จากคำตอบของคุณ ผิวต้องการเวลาฟื้นฟูก่อน Phase 1 จะเน้นการสงบและเสริมเกราะผิวก่อนเริ่มใช้สารออกฤทธิ์',
+    ea_banner_p2_title:'เริ่มต้นที่ Phase 2 — เติมความชุ่มชื้น + ผิวเปล่งปลั่ง',
+    ea_banner_p2_body:'เกราะผิวของคุณแข็งแรงพอที่จะข้าม Phase 1 ได้ คุณจะเริ่มด้วยการเพิ่มความชุ่มชื้นและแต้มสิวอย่างอ่อนโยน',
+    ea_banner_p3_title:'เริ่มต้นที่ Phase 3 — สารออกฤทธิ์ + การรักษา',
+    ea_banner_p3_body:'ประสบการณ์ใช้สารออกฤทธิ์และผิวที่มั่นคงของคุณพร้อมสำหรับการบำรุงเชิงลึก คอยฟังเสียงผิวและถอยกลับได้เสมอหากจำเป็น',
     o_simple:'เรียบง่าย (3–5 ขั้นตอน)',o_moderate_r:'ปานกลาง (5–7 ขั้นตอน)',o_advanced:'ละเอียด (7 ขั้นตอนขึ้นไป)',
     o_fragrance:'น้ำหอม / Parfum',o_alcohol:'Alcohol Denat.',o_eo:'Essential Oils',o_silicones:'Silicones',
     g_barrier:'ซ่อมแซมเกราะผิว',g_hydration:'เติมความชุ่มชื้น',g_calm:'ปลอบประโลม / ลดรอยแดง',g_glow:'ผิวเปล่งปลั่ง',
@@ -1832,9 +1856,9 @@ const T = {
     phase2_title:'💧 เติมความชุ่มชื้น + ผิวเปล่งปลั่ง',phase2_desc:'เมื่อเกราะผิวแข็งแรงแล้ว เริ่มใช้ PDRN และผลิตภัณฑ์ลดรอย รอยสิวเริ่มจางลง',phase2_dur:'⏱ สัปดาห์ที่ 5–8 · เมื่อผิวไม่แสบหรือลอกอีก',
     phase3_title:'✨ สารออกฤทธิ์ + รอยสิว + พื้นผิว',phase3_desc:'เกราะผิวฟื้นฟูสมบูรณ์ เริ่มใช้ Retinal และผลัดเซลล์อย่างอ่อนโยน รอยสิวจางลงชัดเจน',phase3_dur:'⏱ สัปดาห์ที่ 9 เป็นต้นไป · เฉพาะตอนผิวสงบเท่านั้น',
     phase4_title:'🌿 บำรุงระยะยาว + ต้านวัย',phase4_desc:'ผิวอยู่ในภาวะสมดุล เน้นเสริมคอลลาเจน ความยืดหยุ่น และสุขภาพผิวระยะยาว',phase4_dur:'⏱ ต่อเนื่อง · ปรับตามฤดูกาลและสภาพผิว',
-    morning_routine:'☀️ รูทีนเช้าพื้นฐาน',night_routine:'🌙 รูทีนกลางคืน',recovery_night_label:'🌿 คืนฟื้นฟูผิว',treatment_night_label:'🌙 คืนบำรุงพิเศษ',step_c1_recovery_note:'ไม่จำเป็นหากไม่ได้แต่งหน้าหรือทาครีมกันแดด',
+    morning_routine:'☀️ รูทีนเช้าพื้นฐาน',night_routine:'🌙 รูทีนกลางคืน',recovery_night_label:'🌿 คืนสะสมเกราะผิว',treatment_night_label:'🌙 คืนบำรุงพิเศษ',step_c1_recovery_note:'ไม่จำเป็นหากไม่ได้แต่งหน้าหรือทาครีมกันแดด',
     avoid_tonight:'⛔ หลีกเลี่ยงคืนนี้',avoid_today:'⛔ หลีกเลี่ยงวันนี้',
-    recovery_note:'🌿 บันทึกวันพักฟื้น',retinal_rule:'🌙 กฎการใช้ Retinal',
+    recovery_note:'🌿 การสะสมเกราะผิว',retinal_rule:'🌙 กฎการใช้ Retinal',
     btn_start_over:'← เริ่มใหม่',btn_save_routine:'💾 บันทึกรูทีน',btn_check_ingredients:'ตรวจสอบส่วนผสม',
     saved_empty:'ยังไม่มีรูทีนที่บันทึก สร้างรูทีนเพื่อเริ่มต้น',
     analysis_conflicts:'พบส่วนผสมที่อาจขัดแย้งกัน',analysis_ok:'ไม่พบส่วนผสมที่ขัดแย้งรุนแรง',
@@ -1910,7 +1934,7 @@ const T = {
     morning_makeup_moist_note:'รอซึมซาบ 5 นาที ก่อนแต่งหน้า',
     morning_makeup_spf_tip:'⏱️ รอ 5 นาที หลังทา SPF ก่อนแต่งหน้า',
     result_phase_label:'เฟส {n}',
-    dbadge_recovery:'🌿 พักฟื้น',
+    dbadge_recovery:'🌿 สะสมเกราะผิว',
     dbadge_device:'💡 อุปกรณ์',
     dbadge_retinal:'🌙 Retinal',
     dbadge_bha:'แต้มสิว BHA',
@@ -1948,7 +1972,7 @@ const T = {
     avoid_device_phase1:'อุปกรณ์ (เฟส 1)',
     avoid_device_label:'อุปกรณ์',
     retinal_rule_body:'เฉพาะรอบดวงตา · สัปดาห์ละไม่เกิน 2 ครั้ง · ตามด้วย SPF เช้าเสมอ · ทาหลังมอยส์เจอไรเซอร์',
-    recovery_note_body:'คืนนี้ใช้ให้น้อย ผิวจะซ่อมแซมเองในช่วงพักฟื้น งดสารออกฤทธิ์และอุปกรณ์ทุกชนิด',
+    recovery_note_body:'คืนนี้เน้นฟื้นฟูเกราะผิวและลดการอักเสบ ใช้ให้น้อย งดสารออกฤทธิ์และอุปกรณ์ทุกชนิด ผิวของคุณกำลังสะสมความแข็งแรงและเตรียมพร้อมสำหรับการบำรุงครั้งต่อไป',
     mature_skin_note_label:'🌿 หมายเหตุสำหรับผิวที่เริ่มมีอายุ',
     mature_skin_note_body:'ลด Air Shot เหลือ 1 ครั้งต่อรอบ เน้น MC Mode เพื่อความกระชับและความยืดหยุ่น',
     analyses_missing_spf_body:'ยังไม่ได้เลือกครีมกันแดด SPF จำเป็นต้องใช้ทุกเช้า',
@@ -1972,31 +1996,31 @@ const T = {
     /* Day plan goals */
     dpgoal_deep_hyd_barrier:'เติมความชุ่มชื้นลึก + ปิดกั้นเกราะผิว',
     dpgoal_device_hydration:'เพิ่มความชุ่มชื้นด้วยอุปกรณ์',
-    dpgoal_rest_repair:'พักผิว + ซ่อมแซมข้ามคืน',
+    dpgoal_rest_repair:'สะสมเกราะผิว + ซ่อมแซมข้ามคืน',
     dpgoal_hyd_soothing:'เติมความชุ่มชื้น + ปลอบประโลม',
     dpgoal_booster_hyd:'อัดฉีดความชุ่มชื้นด้วย Booster Mode',
-    dpgoal_reset_lock:'รีเซ็ตผิว + ล็อกความชุ่มชื้น',
-    dpgoal_full_recovery:'พักฟื้นเต็มที่ + เตรียมพร้อมสัปดาห์ถัดไป',
+    dpgoal_reset_lock:'สะสมเกราะผิว + ล็อกความชุ่มชื้น',
+    dpgoal_full_recovery:'สะสมเกราะผิว + เตรียมพร้อมสัปดาห์ถัดไป',
     dpgoal_hyd_spot_acne:'เติมความชุ่มชื้น + แต้มสิว',
     dpgoal_pdrn_pih:'ใช้ PDRN กับอุปกรณ์เพื่อลดรอยดำ',
-    dpgoal_recovery_device:'พักฟื้นหลังใช้อุปกรณ์',
+    dpgoal_recovery_device:'สะสมเกราะผิวหลังใช้อุปกรณ์',
     dpgoal_glow_hyd:'เพิ่มความเปล่งปลั่ง + ความชุ่มชื้น',
     dpgoal_booster_pdrn:'Booster + PDRN ร่วมกัน',
-    dpgoal_deep_moist_reset:'บำรุงเข้มข้น + รีเซ็ตผิว',
+    dpgoal_deep_moist_reset:'สะสมเกราะผิว + บำรุงเข้มข้น',
     dpgoal_gentle_prep:'เตรียมผิวอย่างอ่อนโยนสำหรับสัปดาห์ถัดไป',
     dpgoal_hyd_spot:'เติมความชุ่มชื้น + แต้มสิว',
     dpgoal_retinal_intro:'เริ่มใช้ Retinal — เฉพาะรอบดวงตา',
-    dpgoal_recovery_retinal:'พักฟื้นหลังใช้ Retinal',
+    dpgoal_recovery_retinal:'สะสมเกราะผิวหลังใช้ Retinal',
     dpgoal_pdrn_peel:'PDRN ด้วยอุปกรณ์ + Peel ตามเหมาะสม',
     dpgoal_second_retinal:'คืนใช้ Retinal ครั้งที่สอง',
     dpgoal_spot_glow:'แต้มสิว + เพิ่มความเปล่งปลั่ง',
-    dpgoal_full_recovery_night:'คืนพักฟื้นเต็มที่',
+    dpgoal_full_recovery_night:'คืนสะสมเกราะผิวเต็มที่',
     dpgoal_peptide_aa:'เพปไทด์ + เติมความชุ่มชื้นต้านวัย',
     dpgoal_retinal_maint:'ใช้ Retinal ดูแลต่อเนื่อง',
-    dpgoal_recovery_barrier:'พักฟื้น + ดูแลเกราะผิว',
+    dpgoal_recovery_barrier:'สะสมเกราะผิว + ดูแลต่อเนื่อง',
     dpgoal_aa_device:'ใช้อุปกรณ์เพื่อชะลอวัย',
     dpgoal_aha_refine:'AHA ปรับผิวเรียบเนียน',
-    dpgoal_collagen_recovery:'พักฟื้นเสริมคอลลาเจน',
+    dpgoal_collagen_recovery:'เสริมคอลลาเจน + สะสมเกราะผิว',
     dpgoal_full_moist:'บำรุงเต็มที่ + เตรียมพร้อมสัปดาห์ถัดไป',
     /* Product Library category chip labels */
     chip_oil_cleanser:'คลีนซิ่งออยล์/บาล์ม',
@@ -2052,7 +2076,7 @@ const T = {
     sg_caution_msg:'ผิวของคุณยังมีความไวอยู่บ้าง สามารถไปต่อได้ แต่ให้ค่อย ๆ ฟังสัญญาณจากผิว',
     sg_caution_tip1:'เริ่มจากผลิตภัณฑ์ที่ออกฤทธิ์อ่อนที่สุดในขั้นตอนถัดไปก่อน',
     sg_caution_tip2:'แนะนำผลิตภัณฑ์ใหม่ทีละชนิด รอ 3 วันระหว่างการแนะนำแต่ละครั้ง',
-    sg_caution_tip3:'หากมีอาการแสบหรือแดง ให้หยุดพักเป็น Recovery Day',
+    sg_caution_tip3:'หากมีอาการแสบหรือแดง ให้หยุดพักเป็น Barrier Banking Day',
     sg_caution_btn_stay:'อยู่ใน Phase นี้ต่อสักหน่อย',
     sg_caution_btn_anyway:'ฉันจะไปต่ออย่างระวัง',
     sg_notready_icon:'🛡',
@@ -2831,6 +2855,8 @@ const QUIZ_STEPS=[
   {key:'sensitivity',label:'q_sensitivity',multi:false,options:[{icon:'🟢',key:'o_low'},{icon:'🟡',key:'o_medium'},{icon:'🔴',key:'o_high'}]},
   {key:'acneLevel',label:'q_acne',multi:false,options:[{icon:'😊',key:'o_none'},{icon:'🔸',key:'o_occasional'},{icon:'🔴',key:'o_moderate'},{icon:'⚠️',key:'o_severe'}]},
   {key:'barrierCondition',label:'q_barrier',multi:false,options:[{icon:'✅',key:'o_healthy'},{icon:'🟡',key:'o_slightly'},{icon:'🔴',key:'o_very_damaged'},{icon:'❓',key:'o_unsure'}]},
+  {key:'currentIrritation',label:'q_current_irritation',multi:false,options:[{icon:'✅',key:'o_irritation_no'},{icon:'🟡',key:'o_irritation_little'},{icon:'🔴',key:'o_irritation_yes'}]},
+  {key:'activeExperience',label:'q_active_experience',multi:false,options:[{icon:'🌱',key:'o_exp_never'},{icon:'🔸',key:'o_exp_tried'},{icon:'⚡',key:'o_exp_regular'}]},
   {key:'redness',label:'q_redness',multi:false,options:[{icon:'✅',key:'o_none'},{icon:'🟡',key:'o_medium'},{icon:'🔴',key:'o_high'}]},
   {key:'goals',label:'q_goals',multi:true,options:[{icon:'🛡',key:'g_barrier'},{icon:'💧',key:'g_hydration'},{icon:'🌿',key:'g_calm'},{icon:'✨',key:'g_glow'},{icon:'🎯',key:'g_acne'},{icon:'🌓',key:'g_pih'},{icon:'🕰',key:'g_antiaging'},{icon:'💪',key:'g_elasticity'},{icon:'🔬',key:'g_texture'},{icon:'〰️',key:'g_fine_lines'},{icon:'📍',key:'g_wrinkles'},{icon:'🎨',key:'g_hyperpig'},{icon:'💎',key:'g_glass'}]},
   {key:'usesDevice',label:'q_device',multi:false,options:[{icon:'✅',key:'o_yes'},{icon:'❌',key:'o_no'}]},
@@ -2995,6 +3021,64 @@ function toggleBuilderProduct(id,el){
 }
 function generateRoutine(){builderState.step=QUIZ_STEPS.length+1;renderBuilderStep();}
 
+/* ═══ ENTRY ASSESSMENT PLACEMENT ═══ */
+// Computes the appropriate starting phase based on quiz answers.
+// Safety guards always take priority; scoring system handles nuanced cases.
+function _computeStartingPhase(a){
+  const skinTypes=a.skinTypes||[];
+
+  // ── SAFETY GUARDS (force Phase 1 regardless of score) ──────────────────────
+  if(a.barrierCondition===t('o_very_damaged'))          return 'p1';
+  if(a.currentIrritation===t('o_irritation_yes'))       return 'p1';
+  if(a.redness===t('o_high'))                            return 'p1';
+  if(a.acneLevel===t('o_severe'))                        return 'p1';
+  if(skinTypes.includes(t('o_reactive')))                return 'p1';
+
+  // ── SCORING ─────────────────────────────────────────────────────────────────
+  let score=0;
+
+  // Barrier health — most important signal
+  if(a.barrierCondition===t('o_healthy'))               score+=3;
+  else if(a.barrierCondition===t('o_unsure'))           score+=1;
+  else                                                   score-=2; // slightly damaged
+
+  // Sensitivity level
+  if(a.sensitivity===t('o_low'))                        score+=2;
+  else if(a.sensitivity===t('o_medium'))                score+=1;
+  else                                                   score-=2; // high
+
+  // Current irritation
+  if(a.currentIrritation===t('o_irritation_no'))        score+=2;
+  else if(a.currentIrritation===t('o_irritation_little'))score+=0;
+  // yes already caught by safety guard above
+
+  // Redness
+  if(a.redness===t('o_none'))                           score+=1;
+  else if(a.redness===t('o_medium'))                    score+=0;
+  else                                                   score-=2; // high (not caught above = medium-high)
+
+  // Active experience — key differentiator for Phase 3
+  if(a.activeExperience===t('o_exp_regular'))           score+=3;
+  else if(a.activeExperience===t('o_exp_tried'))        score+=1;
+  // never = 0
+
+  // Skin type modifiers
+  if(skinTypes.includes(t('o_sensitive')))              score-=1;
+  if(skinTypes.includes(t('o_barrier')))                score-=2;
+
+  // Acne severity modifier
+  if(a.acneLevel===t('o_moderate')||a.acneLevel===t('o_severe')) score-=1;
+
+  // ── PLACEMENT ────────────────────────────────────────────────────────────────
+  // Phase 3: requires BOTH regular active experience AND a high stability score.
+  // Score alone is not enough — retinal/AHA should only go to users already familiar with actives.
+  if(score>=7 && a.activeExperience===t('o_exp_regular')) return 'p3';
+  // Phase 2: stable enough to skip barrier repair (score ≥ 3)
+  if(score>=3) return 'p2';
+  // Phase 1: everything else — barrier repair first
+  return 'p1';
+}
+
 /* ═══ ROUTINE RESULT ═══ */
 /* Renders the routine result inside the Routine Builder (with builder-specific actions) */
 function renderRoutineResult(c){
@@ -3016,6 +3100,11 @@ function renderRoutineResult(c){
   const _hasActives=_selected.some(p=>hasRetinoid(p)||hasExfoliantAcid(p)||hasBenzoylPeroxide(p));
   const _needsAA=rd.answers.agingConcerns===t('o_yes')||(rd.answers.goals||[]).some(g=>[t('g_antiaging'),t('g_elasticity'),t('g_fine_lines'),t('g_wrinkles')].includes(g));
   rd.phases=_needsAA?4:(_hasActives?3:2);
+  // Entry assessment — compute and persist the starting phase
+  if(!rd.startingPhase) rd.startingPhase=_computeStartingPhase(rd.answers);
+  // Never place beyond the routine's phase count (e.g. p3 when only 2 phases)
+  const _phaseNums={'p1':1,'p2':2,'p3':3,'p4':4};
+  if((_phaseNums[rd.startingPhase]||1)>rd.phases) rd.startingPhase='p'+(rd.phases);
   builderState.routineData=rd;
 
   // Render the full result body + recommendations + personalised emergency + builder action buttons
@@ -3162,6 +3251,16 @@ const sleepingPack=selected.find(p=>normalizedCategory(p)==='sleeping mask'||p.s
   const _answersWithDayProducts=Object.assign({},a,{_dayProducts});
   const numPhases=rd.phases||(needsAntiAging?4:(hasActives?3:2));
   const phaseIds=['p1','p2','p3','p4'].slice(0,numPhases);
+  // Entry assessment — determine starting phase
+  const _startPid=rd.startingPhase&&phaseIds.includes(rd.startingPhase)?rd.startingPhase:'p1';
+  // Actives available in the starting phase
+  const _startBha=_startPid!=='p1'?bha:null;
+  const _startRetinal=(_startPid==='p3'||_startPid==='p4')?retinalProd:null;
+  const _startAha=(_startPid==='p3'||_startPid==='p4')?aha:null;
+  const _startPeel=(_startPid==='p3'||_startPid==='p4')?peel:null;
+  // Placement banner text
+  const _eaBannerKey='ea_banner_'+_startPid;
+  const _eaBanner=_startPid!=='p1'?`<div class="info-box" style="margin-bottom:14px;background:linear-gradient(135deg,rgba(228,181,191,0.15),rgba(246,215,223,0.2));border:1.5px solid rgba(228,181,191,0.35);display:flex;align-items:flex-start;gap:10px"><span style="font-size:1.2em;flex-shrink:0">🎯</span><div><strong>${t(_eaBannerKey+'_title')}</strong><div style="font-size:.82rem;color:#7a6878;margin-top:3px;line-height:1.5">${t(_eaBannerKey+'_body')}</div></div></div>`:'';
   const conflicts=detectConflicts(selected);
   const analyses=analyzeRoutine(selected,a);
 
@@ -3179,11 +3278,12 @@ const sleepingPack=selected.find(p=>normalizedCategory(p)==='sleeping mask'||p.s
       <div class="builder-step-hd"><div class="step-badge">✓</div><div><div class="step-title">${rd.name||t('result_name_default')}</div><div class="step-sub">${tFmt('result_based_on',{n:selected.length})}</div></div></div>
       ${isMature?`<div class="info-box blue" style="margin-bottom:14px">🌿 <strong>${t('result_mature_label')}</strong> ${t('result_mature_body')}</div>`:''}
       <div class="analysis-wrap">${analyses.map(an=>`<div class="analysis-item"><div class="a-head ${an.type}">${an.icon} ${an.title}</div><div class="a-body">${an.body}</div></div>`).join('')}${conflicts.length?`<div class="analysis-item"><div class="a-head danger">⚠️ ${t('analysis_conflicts')}</div><div class="a-body">${conflicts.map(x=>`<div style="margin-bottom:5px">🚫 <strong>${x.combo}</strong> — ${x.reason}</div>`).join('')}</div></div>`:`<div class="analysis-item"><div class="a-head ok">✅ ${t('analysis_ok')}</div><div class="a-body">${t('result_no_conflict_body')}</div></div>`}</div>
+      ${_eaBanner}
       <div class="info-box rose" style="margin-bottom:6px;font-weight:600">${t('morning_routine')} — ${t('result_daily_every_day')}</div>
       ${renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHighSens,eye,a,mistProd)}
       <div class="info-box" style="margin-top:18px;margin-bottom:6px;font-weight:600">${t('night_routine')}</div>
-      <div class="phase-nav" id="routine-phase-nav">${phaseIds.map((pid,i)=>`<button class="phase-tab ${i===0?'active':''}" data-phase="${pid}" onclick="switchRoutinePhase('${pid}',this)">${tFmt('result_phase_label',{n:i+1})}</button>`).join('')}</div>
-      <div class="active-phase-area">${renderPhase('p1',selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,false,false,false,false,isMature,isHighSens,'active',isBarrierHealthy,eye,sleepingPack,_answersWithDayProducts,mistProd,'Mon')}</div>
+      <div class="phase-nav" id="routine-phase-nav">${phaseIds.map((pid)=>`<button class="phase-tab ${pid===_startPid?'active':''}" data-phase="${pid}" onclick="switchRoutinePhase('${pid}',this)">${tFmt('result_phase_label',{n:pid.replace('p','')})}</button>`).join('')}</div>
+      <div class="active-phase-area">${renderPhase(_startPid,selected,c1,c2,toner,essence,nightSerum,moist,deviceGel,usesDevice,_startBha,_startRetinal,_startAha,_startPeel,isMature,isHighSens,'active',_startPid==='p1'&&isBarrierHealthy,eye,sleepingPack,_answersWithDayProducts,mistProd,'Mon')}</div>
     </div>`;
 }
 
