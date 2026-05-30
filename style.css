@@ -326,7 +326,7 @@ img { display: block; max-width: 100%; }
 }
 /* Logo PNG image */
 .nav-logo-img {
-  height: 90px;
+  height: 150px;
   width: auto;
   display: block;
   object-fit: contain;
