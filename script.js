@@ -1265,6 +1265,86 @@ function isAmpouleWeightSerum(p){
 }
 
 // ═══════════════════════════════════════════════
+// ─── ROUTINE LOAD INDICATOR ──────────────────────────────────────────────────
+// Computes a per-night "intensity score" from active signals.
+// Returns { score, level, signals } where level 0=none, 2=moderate, 3=high, 4=intense.
+
+function computeDayLoad(isRet, isAHA, isBHA, isPeel, isDev, isHighSens, isDamagedBarrier) {
+  let score = 0;
+  const signals = [];
+
+  if (isRet)  { score += 3; signals.push('retinal'); }
+  if (isAHA)  { score += 2; signals.push('aha'); }
+  if (isBHA)  { score += 1; signals.push('bha'); }
+  if (isPeel) { score += 2; signals.push('peel'); }
+  if (isDev)  { score += 1; signals.push('device'); }
+
+  // Stacking combos — increase load beyond individual scores
+  if (isRet && isDev)  { score += 2; signals.push('retinal+device'); }
+  if (isAHA && isDev)  { score += 1; signals.push('aha+device'); }
+  if (isPeel && isDev) { score += 1; signals.push('peel+device'); }
+
+  // Skin condition modifiers — sensitive/barrier skin feels more load from same actives
+  const hasActiveNight = isRet || isAHA || isPeel;
+  if (isHighSens && hasActiveNight)    { score += 1; signals.push('sensitive'); }
+  if (isDamagedBarrier && hasActiveNight) { score += 1; signals.push('barrier'); }
+
+  let level;
+  if (score <= 1)      level = 0; // light — don't show strip
+  else if (score <= 3) level = 2; // moderate
+  else if (score <= 5) level = 3; // high
+  else                 level = 4; // intense
+
+  return { score, level, signals };
+}
+
+// Renders the load indicator strip HTML. Returns '' when level is 0 (no display).
+function renderLoadStrip(isRet, isAHA, isBHA, isPeel, isDev, isHighSens, isDamagedBarrier) {
+  const { level, signals } = computeDayLoad(isRet, isAHA, isBHA, isPeel, isDev, isHighSens, isDamagedBarrier);
+  if (level === 0) return '';
+
+  // Dots — 3 total; fill based on level
+  const cls = `lv${level}`;
+  const filled = level - 1; // lv2→1, lv3→2, lv4→3
+  const dots = [1, 2, 3].map(i =>
+    `<div class="load-dot${i <= filled ? ` filled ${cls}` : ''}"></div>`
+  ).join('');
+
+  // Label
+  const label = level === 2 ? t('load_label_moderate')
+              : level === 3 ? t('load_label_high')
+              :               t('load_label_intense');
+
+  // Message — most specific signal wins
+  let msg;
+  if (signals.includes('retinal+device'))   msg = t('load_msg_retinal_device');
+  else if (signals.includes('barrier'))     msg = t('load_msg_barrier_active');
+  else if (signals.includes('retinal'))     msg = level >= 3 ? t('load_msg_high') : t('load_msg_retinal');
+  else if (signals.includes('aha') || signals.includes('peel')) msg = level >= 3 ? t('load_msg_high') : t('load_msg_aha');
+  else if (signals.includes('bha'))         msg = t('load_msg_bha');
+  else if (signals.includes('device'))      msg = t('load_msg_device');
+  else                                      msg = t('load_msg_high');
+  if (level === 4 && !signals.includes('retinal+device') && !signals.includes('barrier'))
+    msg = t('load_msg_intense');
+
+  // Optional tip — one contextual suggestion
+  let tip = '';
+  if (signals.includes('retinal+device'))            tip = t('load_tip_retinal_device');
+  else if (signals.includes('sensitive') && (signals.includes('aha') || signals.includes('peel')))
+    tip = t('load_tip_sensitive_exf');
+  else if (signals.includes('barrier'))              tip = t('load_tip_barrier_active');
+
+  return `<div class="load-strip load-lv${level}">
+    <div class="load-dots">${dots}</div>
+    <div class="load-content">
+      <div class="load-label">${label}</div>
+      <div class="load-msg">${msg}</div>
+      ${tip ? `<div class="load-tip">${tip}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
 
 /* ─── CATEGORY PLACEHOLDER SVG ───────────────────────────────────────────
    Returns a data: URI SVG icon for the given skincare category.
@@ -1509,7 +1589,7 @@ const T = {
     analysis_conflicts:'Ingredient Conflicts Detected',analysis_ok:'No Major Ingredient Conflicts Found',
     analysis_missing_spf:'Missing Sunscreen',analysis_missing_moist:'Missing Moisturizer',
     analysis_too_many:'Too Many Active Products',analysis_mature_note:'Mature Skin Detected',
-    water_rinse:'Water Rinse Only',no_cleanser_note:'No cleanser in the morning. Gentle lukewarm water.',
+    water_rinse:'Water Rinse Only',no_cleanser_note:'Splash face with lukewarm water for 20–30 seconds. No cleanser needed.',
     verify_inci:'Verify INCI on your carton',missing_spf_note:'No sunscreen selected. SPF is essential every morning.',
     prod_select_title:'Select Your Products',prod_select_sub:'Click to add · Click again to remove',
     prod_search_placeholder:'Search by brand, product name, category, or ingredient...',
@@ -1569,8 +1649,9 @@ const T = {
     morning_phase_normal_tab:'✨ Normal',
     morning_phase_makeup_tab:'💄 Makeup Prep',
     morning_phase_barrier_note:'For sensitive, irritated, or overworked skin. No actives, no exfoliants.',
-    morning_cleanser_optional:'Optional if skin feels dry in the morning.',
-    morning_makeup_cleanser_note:'Optional. Gentle water rinse or light cleanser only.',
+    morning_cleanser_optional:'Optional — rinse with water if skin feels clean from last night.',
+    morning_makeup_cleanser_note:'Light cleanse to prep skin for SPF and makeup.',
+    morning_water_rinse_makeup_note:'Rinse face with lukewarm water before SPF and makeup.',
     morning_makeup_serum_note:'Lightweight layer for glow and smooth texture.',
     morning_makeup_moist_note:'Let absorb 5 min before applying makeup.',
     morning_makeup_spf_tip:'⏱️ Wait 5 minutes after SPF before applying makeup.',
@@ -1582,8 +1663,9 @@ const T = {
     dbadge_peel:'Peel',
     dbadge_aha:'AHA',
     step_c1_note:'Optional · Skip if you did not wear makeup or sunscreen today.',
-    step_c2_note:'Skip if skin is sensitive today.',
-    step_cleanser_reminder:'Cleanse with a gentle water-based cleanser.',
+    step_c2_note:'Massage gently, rinse with lukewarm water.',
+    step_cleanser_reminder:'Rinse Face',
+    step_cleanser_reminder_note:'Rinse with lukewarm water — add a cleanser to your routine when ready.',
     step_peel_note:'⚠️ T-zone only. Feather-light pressure.',
     step_air_note:'Dry skin only, before toner. 1–2 passes.',
     step_air_mature_note:'⚠️ Mature/sensitive: 1 pass max',
@@ -1593,6 +1675,20 @@ const T = {
     step_toner_pad_recovery_note:'Hydrating pad only — pat gently, no exfoliating pads.',
     step_toner_pad_exf_note:'1 pad — gentle single swipe, wait 5–10 min before next step.',
     caution_exf_pad_skipped:'⚠️ Your exfoliating pad is paused during this phase — it contains active acids that could worsen a stressed barrier. Resume in Phase 3.',
+    load_label_moderate:'Tonight\'s Intensity · Moderate',
+    load_label_high:'Tonight\'s Intensity · High',
+    load_label_intense:'Tonight\'s Intensity · Intensive',
+    load_msg_bha:'BHA is active tonight — works best on calm, non-irritated skin.',
+    load_msg_aha:'AHA night — let your skin fully absorb before sleep.',
+    load_msg_device:'Device treatment tonight — keep skin well-hydrated before and after.',
+    load_msg_retinal:'Retinal is in the lineup. Start with a small amount and build tolerance gradually.',
+    load_msg_high:'Active night. A recovery or barrier-banking night tomorrow will help your skin reset.',
+    load_msg_intense:'High-intensity night — give your skin extra gentleness tomorrow.',
+    load_msg_retinal_device:'Retinal and device use on the same night increases exposure. Your skin may feel more sensitive.',
+    load_msg_barrier_active:'Your barrier is still rebuilding — tonight\'s actives may feel more sensitising than usual.',
+    load_tip_retinal_device:'💡 Consider using the device on a separate night from retinal.',
+    load_tip_sensitive_exf:'💡 Sensitive skin benefits from limiting AHA and exfoliant nights to 1× per week.',
+    load_tip_barrier_active:'💡 A Barrier Banking Day after tonight will help your skin recover faster.',
     step_booster_note:'Apply toner/essence to skin, then use device.',
     step_mcderma_note:'Apply {gel}, focus on PIH marks.',
     step_pdrn_gel:'PDRN gel',
@@ -2017,7 +2113,7 @@ const T = {
     analysis_conflicts:'พบส่วนผสมที่อาจขัดแย้งกัน',analysis_ok:'ไม่พบส่วนผสมที่ขัดแย้งรุนแรง',
     analysis_missing_spf:'ยังไม่ได้เลือกครีมกันแดด',analysis_missing_moist:'ยังไม่ได้เลือกมอยส์เจอไรเซอร์',
     analysis_too_many:'ใช้สารออกฤทธิ์มากเกินไป',analysis_mature_note:'ตรวจพบสัญญาณผิวที่เริ่มมีอายุ',
-    water_rinse:'ล้างหน้าด้วยน้ำเปล่า',no_cleanser_note:'งดคลีนเซอร์ในช่วงเช้า ใช้น้ำอุ่นเล็กน้อยก็พอ',
+    water_rinse:'ล้างหน้าด้วยน้ำเปล่า',no_cleanser_note:'ล้างหน้าด้วยน้ำอุ่น 20–30 วินาที ไม่จำเป็นต้องใช้คลีนเซอร์',
     verify_inci:'ตรวจสอบส่วนผสมบนบรรจุภัณฑ์จริงก่อนใช้',missing_spf_note:'ยังไม่ได้เลือกครีมกันแดด — SPF จำเป็นต้องใช้ทุกเช้า',
     prod_select_title:'เลือกผลิตภัณฑ์ของคุณ',prod_select_sub:'แตะเพื่อเพิ่ม · แตะอีกครั้งเพื่อนำออก',
     prod_search_placeholder:'ค้นหาด้วยแบรนด์ ชื่อผลิตภัณฑ์ หมวดหมู่ หรือส่วนผสม...',
@@ -2082,8 +2178,9 @@ const T = {
     morning_phase_normal_tab:'✨ ปกติ',
     morning_phase_makeup_tab:'💄 เตรียมแต่งหน้า',
     morning_phase_barrier_note:'เหมาะสำหรับผิวที่บอบบาง ระคายเคือง หรือโอเวอร์ใช้ผิว ไม่มี actives ไม่ผลัดผิว',
-    morning_cleanser_optional:'ไม่จำเป็นถ้าผิวรู้สึกแห้งตอนเช้า',
-    morning_makeup_cleanser_note:'ไม่จำเป็น ล้างน้ำเปล่าเบาๆ หรือคลีนเซอร์อ่อนโยนเท่านั้น',
+    morning_cleanser_optional:'ไม่จำเป็น — ล้างน้ำเปล่าได้ถ้าผิวยังสะอาดจากคืนก่อน',
+    morning_makeup_cleanser_note:'ล้างเบาๆ เพื่อเตรียมผิวก่อนทา SPF และแต่งหน้า',
+    morning_water_rinse_makeup_note:'ล้างหน้าด้วยน้ำอุ่นก่อนทา SPF และแต่งหน้า',
     morning_makeup_serum_note:'ชั้นบางเบาเพื่อความเงาและผิวเรียบก่อนแต่งหน้า',
     morning_makeup_moist_note:'รอซึมซาบ 5 นาที ก่อนแต่งหน้า',
     morning_makeup_spf_tip:'⏱️ รอ 5 นาที หลังทา SPF ก่อนแต่งหน้า',
@@ -2095,8 +2192,9 @@ const T = {
     dbadge_peel:'Peel',
     dbadge_aha:'AHA',
     step_c1_note:'ไม่บังคับ · ข้ามได้ถ้าวันนี้ไม่ได้ทา SPF หรือแต่งหน้า',
-    step_c2_note:'ข้ามไปถ้าผิววันนี้บอบบาง',
-    step_cleanser_reminder:'ล้างหน้าด้วยคลีนเซอร์ที่ไม่ทำลายเกราะผิว',
+    step_c2_note:'นวดเบา ๆ เป็นวงกลม แล้วล้างออกด้วยน้ำอุ่น',
+    step_cleanser_reminder:'ล้างหน้าด้วยน้ำเปล่า',
+    step_cleanser_reminder_note:'ล้างหน้าด้วยน้ำอุ่น — เพิ่มคลีนเซอร์ในรูทีนเพื่อทำความสะอาดได้ดีกว่า',
     step_peel_note:'⚠️ เฉพาะบริเวณ T-zone กดเบาที่สุด',
     step_air_note:'เฉพาะผิวแห้ง ก่อนใช้โทนเนอร์ 1–2 ครั้งพอ',
     step_air_mature_note:'⚠️ ผิวอายุ / ผิวแพ้ง่าย: ทำได้สูงสุด 1 ครั้ง',
@@ -2106,6 +2204,20 @@ const T = {
     step_toner_pad_recovery_note:'ใช้เฉพาะแผ่นเพิ่มความชุ่มชื้น — ห้ามใช้แผ่นผลัดเซลล์',
     step_toner_pad_exf_note:'1 แผ่น — ปัดเบา ๆ ครั้งเดียว รอ 5–10 นาทีก่อนขั้นตอนต่อไป',
     caution_exf_pad_skipped:'⚠️ แผ่นผลัดเซลล์ถูกพักในเฟสนี้ — มีกรดออกฤทธิ์ที่อาจทำให้เกราะผิวที่อ่อนแอแย่ลง กลับมาใช้ได้ใน Phase 3',
+    load_label_moderate:'ความเข้มข้นคืนนี้ · ปานกลาง',
+    load_label_high:'ความเข้มข้นคืนนี้ · สูง',
+    load_label_intense:'ความเข้มข้นคืนนี้ · เข้มข้นมาก',
+    load_msg_bha:'คืนนี้มี BHA — เหมาะสำหรับผิวที่ไม่มีการอักเสบ',
+    load_msg_aha:'คืนนี้เป็นคืน AHA — ให้ผิวดูดซึมก่อนนอน',
+    load_msg_device:'คืนนี้ใช้อุปกรณ์ — ควรเติมน้ำให้ผิวก่อนและหลังใช้',
+    load_msg_retinal:'มี Retinal อยู่ในรูทีน ใช้ปริมาณน้อย ๆ แล้วค่อย ๆ เพิ่มความทนทานขึ้นเรื่อย ๆ',
+    load_msg_high:'คืนนี้มีสารออกฤทธิ์ คืนพักฟื้นหรือ Barrier Banking Day พรุ่งนี้จะช่วยให้ผิวฟื้นตัวได้ดี',
+    load_msg_intense:'รูทีนเข้มข้นสูง — พรุ่งนี้ดูแลผิวด้วยความอ่อนโยนเป็นพิเศษ',
+    load_msg_retinal_device:'การใช้ Retinal และอุปกรณ์ในคืนเดียวกันเพิ่มการซึมผ่าน ผิวอาจรู้สึกไวขึ้น',
+    load_msg_barrier_active:'เกราะผิวยังฟื้นตัวอยู่ — สารออกฤทธิ์คืนนี้อาจทำให้รู้สึกแสบมากกว่าปกติ',
+    load_tip_retinal_device:'💡 ลองแยกการใช้อุปกรณ์และ Retinal ไว้คนละคืน',
+    load_tip_sensitive_exf:'💡 ผิวแพ้ง่ายควรจำกัดคืน AHA / ผลัดเซลล์ไว้ที่ 1 ครั้ง/สัปดาห์',
+    load_tip_barrier_active:'💡 Barrier Banking Day หลังจากคืนนี้จะช่วยให้ผิวฟื้นตัวเร็วขึ้น',
     step_booster_note:'ทาโทนเนอร์ / เอสเซนส์ลงผิวก่อน แล้วจึงใช้อุปกรณ์',
     step_mcderma_note:'ทา {gel} เน้นบริเวณรอยดำ',
     step_pdrn_gel:'PDRN gel',
@@ -4123,7 +4235,7 @@ function renderMorningPhases(selected,toner,essence,serum,moist,spf,c1,c2,isHigh
   /* Makeup Prep Phase */
   let mn=0;const mns=(tp,e,b,n,note)=>makeStep(tp,++mn,e,b,n,note);
   const makeupHtml=`
-    ${waterCleanse?mns('n',prodEmoji(waterCleanse),waterCleanse.brand,waterCleanse.name,t('morning_makeup_cleanser_note')):mns('re','💧','',t('water_rinse'),t('morning_makeup_cleanser_note'))}
+    ${waterCleanse?mns('n',prodEmoji(waterCleanse),waterCleanse.brand,waterCleanse.name,t('morning_makeup_cleanser_note')):mns('re','💧','',t('water_rinse'),t('morning_water_rinse_makeup_note'))}
     ${morningToner?mns('n',prodEmoji(morningToner),morningToner.brand,morningToner.name,normalizedCategory(morningToner)==='toner pad'?t('morning_toner_pad_note'):t('morning_toner_note')):''}
     ${_mpMistHydrating&&morningToner?mns('n',prodEmoji(mistProd),mistProd.brand,mistProd.name,'Mist onto face after toner for deeper hydration.'):''}
     ${makeupSerum?mns('n',prodEmoji(makeupSerum),makeupSerum.brand,makeupSerum.name,t('morning_makeup_serum_note')):''}
@@ -4477,8 +4589,9 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
           </div>
           <div class="day-card-body">
             <div class="label-xs">${isRec?t('recovery_night_label'):(isRet||isAHA||isBHA||isPeel)?t('treatment_night_label'):t('night_routine')}</div>
+            ${!isRec?renderLoadStrip(isRet,isAHA,isBHA,isPeel,isDev,isHighSens,_rpDamagedBarrier):''}
             ${oilCleanser?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(oilCleanser)}</div><div class="rs-body"><div class="rs-brand">${oilCleanser.brand}</div><div class="rs-name">${oilCleanser.name}</div><div class="rs-note">${isRec?t('step_c1_recovery_note'):t('step_c1_note')}</div></div></div>`:''}
-            ${waterCleanser?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(waterCleanser)}</div><div class="rs-body"><div class="rs-brand">${waterCleanser.brand}</div><div class="rs-name">${waterCleanser.name}</div></div></div>`:`<div class="routine-step">${sn()}<div class="rs-emoji">🧴</div><div class="rs-body"><div class="rs-name">${t('step_cleanser_reminder')}</div></div></div>`}
+            ${waterCleanser?`<div class="routine-step">${sn()}<div class="rs-emoji">${prodEmoji(waterCleanser)}</div><div class="rs-body"><div class="rs-brand">${waterCleanser.brand}</div><div class="rs-name">${waterCleanser.name}</div><div class="rs-note">${t('step_c2_note')}</div></div></div>`:`<div class="routine-step">${sn('re')}<div class="rs-emoji">💧</div><div class="rs-body"><div class="rs-name">${t('step_cleanser_reminder')}</div><div class="rs-note">${t('step_cleanser_reminder_note')}</div></div></div>`}
             ${_showAirShot?_devOvl('Air Shot','#00C2FF',_airNote):''}
             ${isPeel&&peel&&!isBarrierRecovery&&!_rpDamagedBarrier?`<div class="routine-step r-active">${sn('ac')}<div class="rs-emoji">${prodEmoji(peel)}</div><div class="rs-body"><div class="rs-brand">${peel.brand}</div><div class="rs-name">${peel.name}</div><div class="rs-note">${t('step_peel_note')}</div></div></div>`:''}
             ${dayToner?`<div class="routine-step ${isRec?'r-recovery':''}">${sn(isRec?'re':'n')}<div class="rs-emoji">${prodEmoji(dayToner)}</div><div class="rs-body"><div class="rs-brand">${dayToner.brand}</div><div class="rs-name">${dayToner.name}</div><div class="rs-note">${normalizedCategory(dayToner)==='toner pad'?(isRec?t('step_toner_pad_recovery_note'):t('step_toner_pad_note')):(isRec?t('step_toner_recovery_note'):t('step_toner_note'))}</div></div></div>`:''}
@@ -5436,6 +5549,10 @@ var T6={
 };
 function t6(k){return(T6[LANG]&&T6[LANG][k])||T6.en[k]||k;}
 var GP_AMOUNT_RULES=[
+  // Water-only steps — must come FIRST to prevent cleanser keyword match on note text
+  {kw:['water rinse','rinse face'],
+    amt:'',      amt_th:'',
+    wait:'Pat dry gently',  wait_th:'ซับหน้าเบาๆ'},
   {kw:['cleansing balm','cleansing oil','oil cleanser'],
     amt:'1-2 pumps - massage 60s',           amt_th:'ต1-2 ปั๊ม - นวด 60 วินาที',
     wait:'Pat dry before next step',         wait_th:'ซับให้แห้งก่อนขั้นตอนต่อไป'},

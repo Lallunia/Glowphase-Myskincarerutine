@@ -2704,6 +2704,69 @@ img { display: block; max-width: 100%; }
   margin-bottom: 4px;
 }
 
+/* ── Routine Load Indicator ───────────────────────── */
+.load-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 13px;
+  margin: 0 0 13px;
+  border-radius: var(--r-sm);
+  border-left: 3px solid transparent;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+.load-strip.load-lv2 {
+  background: var(--amber-lt);
+  border-left-color: var(--amber);
+}
+.load-strip.load-lv3 {
+  background: var(--pink-lt);
+  border-left-color: #CFA1AE;
+}
+.load-strip.load-lv4 {
+  background: var(--pink-mid);
+  border-left-color: #B85870;
+}
+.load-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding-top: 3px;
+  flex-shrink: 0;
+}
+.load-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(75,67,72,0.12);
+  flex-shrink: 0;
+}
+.load-dot.filled.lv2 { background: var(--amber); }
+.load-dot.filled.lv3 { background: #CFA1AE; }
+.load-dot.filled.lv4 { background: #B85870; }
+.load-content { flex: 1; min-width: 0; }
+.load-label {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.load-lv2 .load-label { color: var(--amber); }
+.load-lv3 .load-label { color: #9A6070; }
+.load-lv4 .load-label { color: #8A3050; }
+.load-msg {
+  color: var(--gp-shadow);
+  opacity: 0.85;
+}
+.load-tip {
+  margin-top: 5px;
+  font-size: 0.68rem;
+  color: var(--gp-shadow);
+  opacity: 0.72;
+}
+
 /* ════════════════════════════════════════════════
    MY ROUTINES
 ════════════════════════════════════════════════ */
@@ -3538,9 +3601,9 @@ img { display: block; max-width: 100%; }
   .nav-logo::before, .nav-logo::after { display: none; }
   .nav-logo-img {
     display: block;
-    height: 30px;
+    height: 80px;
     width: auto;
-    max-width: 130px;
+    max-width: 200px;
     object-fit: contain;
   }
   .nav-logo-glow { font-size: 1.4rem; line-height: 1; }
