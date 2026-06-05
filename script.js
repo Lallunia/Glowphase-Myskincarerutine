@@ -1460,6 +1460,8 @@ const T = {
   en:{
     nav_home:'Home',nav_products:'Products',nav_builder:'Routine Builder',
     nav_myroutine:'My Routine',nav_device:'Device Guide',nav_conflict:'Conflict Checker',nav_emergency:'Emergency',
+    myr_page_title:'My <em>Routines</em>',myr_page_sub:'Save, manage, and revisit your personalised skincare routines',
+    myr_btn_export:'⬆ Export Routines',myr_btn_import:'⬇ Import Routines',myr_btn_new:'+ New Routine',
     home_label:'Your Personalised Skin Journey',
     hero_tagline:'Skin intelligence, beautifully phased.',
     hero_sub:'Personalised routines for sensitive, acne-prone, mature, and barrier-compromised skin. 232 products from 52 worldwide brands, fully analysed.',
@@ -1851,6 +1853,22 @@ const T = {
     js_recovery_label:'Recovery Mode',js_recovery_sub:'barrier banking',
     js_day_suffix:'of your routine',
     js_week:'Week',js_stable:'Stable',
+    js_sub_p1_1:'Settling in',js_sub_p1_2:'Adapting',js_sub_p1_3:'Barrier strong',
+    js_sub_p1_1_tip:'Be gentle — your skin is adjusting to the routine',
+    js_sub_p1_2_tip:'Consistency now builds your barrier for what\'s next',
+    js_sub_p1_3_tip:'Your barrier has rebuilt — great foundation',
+    js_sub_p2_1:'Hydrating',js_sub_p2_2:'Plumping',js_sub_p2_3:'Deeply nourished',
+    js_sub_p2_1_tip:'Layer hydration from thinnest to thickest',
+    js_sub_p2_2_tip:'Your skin should feel more supple and bouncy',
+    js_sub_p2_3_tip:'Moisture barrier at full capacity — ready to progress',
+    js_sub_p3_1:'Actives starting',js_sub_p3_2:'Adapting',js_sub_p3_3:'Fully adapted',
+    js_sub_p3_1_tip:'Start slow — 2× per week max for new actives',
+    js_sub_p3_2_tip:'Watch for sensitivity — reduce frequency if needed',
+    js_sub_p3_3_tip:'Your skin has adapted — you can increase active frequency',
+    js_sub_p4_1:'Building results',js_sub_p4_2:'Progressing',js_sub_p4_3:'Long-term glow',
+    js_sub_p4_1_tip:'Actives work under the surface — results take 6–12 weeks',
+    js_sub_p4_2_tip:'Visible improvements in texture and tone are building now',
+    js_sub_p4_3_tip:'You\'re in maintenance — keep the routine consistent',
     // Phase context labels (calm, human names)
     js_ctx_p1:'Barrier Repair',js_ctx_p2:'Strengthen',js_ctx_p3:'Treat',js_ctx_p4:'Maintain',js_ctx_recovery:'Recovery',
     // Home phase widget
@@ -1984,6 +2002,8 @@ const T = {
   th:{
     nav_home:'หน้าแรก',nav_products:'ผลิตภัณฑ์',nav_builder:'สร้างรูทีน',
     nav_myroutine:'รูทีนของฉัน',nav_device:'คู่มืออุปกรณ์',nav_conflict:'ตรวจสอบส่วนผสม',nav_emergency:'ฉุกเฉิน',
+    myr_page_title:'รูทีน<em>ของฉัน</em>',myr_page_sub:'บันทึก จัดการ และดูรูทีนดูแลผิวส่วนตัวของคุณ',
+    myr_btn_export:'⬆ ส่งออกรูทีน',myr_btn_import:'⬇ นำเข้ารูทีน',myr_btn_new:'+ รูทีนใหม่',
     home_label:'การดูแลผิวส่วนตัวของคุณ',
     hero_tagline:'วิทยาศาสตร์ผิว สวยงามในทุกเฟส',
     hero_sub:'รูทีนดูแลผิวเฉพาะบุคคลสำหรับผิวแพ้ง่าย ผิวเป็นสิว ผิวผู้ใหญ่ และเกราะผิวบกพร่อง · 232 ผลิตภัณฑ์จาก 52 แบรนด์ทั่วโลก พร้อมการวิเคราะห์เต็มรูปแบบ',
@@ -2376,6 +2396,22 @@ const T = {
     js_recovery_label:'โหมดพักฟื้น',js_recovery_sub:'สะสมเกราะผิว',
     js_day_suffix:'ของรูทีน',
     js_week:'สัปดาห์ที่',js_stable:'คงที่',
+    js_sub_p1_1:'กำลังปรับตัว',js_sub_p1_2:'กำลังฟื้นฟู',js_sub_p1_3:'เกราะผิวแข็งแรง',
+    js_sub_p1_1_tip:'ดูแลผิวเบาๆ — ผิวกำลังปรับตัวเข้ากับรูทีน',
+    js_sub_p1_2_tip:'ความสม่ำเสมอตอนนี้ช่วยสร้างเกราะผิวสำหรับขั้นตอนถัดไป',
+    js_sub_p1_3_tip:'เกราะผิวแข็งแรงขึ้นแล้ว — รากฐานที่ดีมาก',
+    js_sub_p2_1:'เพิ่มความชุ่มชื้น',js_sub_p2_2:'ผิวอิ่มน้ำ',js_sub_p2_3:'ชุ่มชื้นลึก',
+    js_sub_p2_1_tip:'ทาผลิตภัณฑ์จากบางไปหนา เพื่อให้ซึมซับได้ดีที่สุด',
+    js_sub_p2_2_tip:'ผิวควรรู้สึกนุ่มและยืดหยุ่นขึ้น',
+    js_sub_p2_3_tip:'เกราะความชุ่มชื้นทำงานเต็มประสิทธิภาพ — พร้อมก้าวหน้า',
+    js_sub_p3_1:'เริ่มใช้ actives',js_sub_p3_2:'ปรับตัวกับ actives',js_sub_p3_3:'ปรับตัวสมบูรณ์',
+    js_sub_p3_1_tip:'เริ่มช้าๆ — ไม่เกิน 2 ครั้งต่อสัปดาห์สำหรับ actives ใหม่',
+    js_sub_p3_2_tip:'สังเกตอาการแพ้ — ลดความถี่ถ้ามีอาการ',
+    js_sub_p3_3_tip:'ผิวปรับตัวแล้ว — สามารถเพิ่มความถี่ actives ได้',
+    js_sub_p4_1:'กำลังสร้างผล',js_sub_p4_2:'กำลังพัฒนา',js_sub_p4_3:'ผิวสวยระยะยาว',
+    js_sub_p4_1_tip:'actives ทำงานใต้ผิวหนัง — ผลลัพธ์ใช้เวลา 6–12 สัปดาห์',
+    js_sub_p4_2_tip:'ควรเห็นผิวเนียนขึ้นและสีผิวสม่ำเสมอขึ้นแล้ว',
+    js_sub_p4_3_tip:'อยู่ในขั้น maintenance — รักษาความสม่ำเสมอต่อไป',
     js_ctx_p1:'ซ่อมแซมเกราะผิว',js_ctx_p2:'เสริมความแข็งแรง',js_ctx_p3:'บำรุง',js_ctx_p4:'ดูแลต่อเนื่อง',js_ctx_recovery:'พักฟื้น',
     phw_title:'การเดินทางของผิวคุณ',
     phw_view:'ดูรูทีน →',
@@ -2580,6 +2616,7 @@ function renderCurrentPage(){
   if(id==='builder')initBuilder();
   if(id==='myroutine')renderMyRoutines();
   if(id==='conflict')renderConflictGrid();
+  if(id==='home'){renderHomePhaseWidget();applyTranslations();}
 }
 
 /* ═══════════════════════════════════════════════
@@ -3370,14 +3407,14 @@ function _generatePhaseExplanation(r){
 // Renders the journey strip showing "Day X · Phase Y" at the top of each saved routine card.
 // Shows "Recovery Mode" when the user is in recovery. Never shown for draft routines.
 function renderJourneyStrip(){
-  // Only show on My Routine page — not on the builder result
+  // Only inject into My Routine page cards — never the builder result
   const myPage=document.getElementById('page-myroutine');
-  if(!myPage||!myPage.classList.contains('active'))return;
-  document.querySelectorAll('.builder-card[data-card-id]').forEach(function(card){
+  if(!myPage)return;
+  document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){
     const cardId=card.dataset.cardId;
     if(!cardId||cardId==='gc-draft')return;
-    // Only inject once
-    if(card.querySelector('.js-strip'))return;
+    // Remove old strip so it re-renders fresh on every renderMyRoutines call
+    const oldStrip=card.querySelector('.js-strip');if(oldStrip)oldStrip.remove();
     const routineId=cardId.replace('gc-','');
     const r=getSavedRoutines().find(function(x){return x.id===routineId;});
     if(!r)return;
@@ -3401,10 +3438,10 @@ function renderJourneyStrip(){
     } else {
       const ctx=t('js_ctx_'+activePid)||('Phase '+activePid.replace('p',''));
       icon=_phIcons[activePid]||'🗓';
-      // Show "Stable" after 28 days in same phase, otherwise show Week X
-      const timeLabel=days>28?t('js_stable'):t('js_week')+' '+weeks;
+      const timeLabel=_getPhaseSubState(activePid,days);
       dayText=ctx+' · '+timeLabel;
-      subText=t('js_day')+' '+days+' '+t('js_day_suffix');
+      const _tip=_getPhaseSubStateTip(activePid,days);
+      subText=t('js_week')+' '+weeks+' · '+t('js_day')+' '+days+(_tip?' · '+_tip:'');
     }
 
     const whyText=_generatePhaseExplanation(r);
@@ -3433,6 +3470,138 @@ function renderJourneyStrip(){
     const hd=card.querySelector('.builder-step-hd');
     if(hd)card.insertBefore(strip,hd);
     else card.prepend(strip);
+  });
+}
+
+/* ═══ PHASE SUB-STATE SYSTEM ═══ */
+// Thresholds: p1-p3 use 7/21 days, p4 uses 14/35 (longer maintenance phase)
+function _getPhaseSubStateLevel(pid,days){
+  const t=pid==='p4'?[14,35]:[7,21];
+  return days<=t[0]?1:days<=t[1]?2:3;
+}
+// Returns the emotional stage label for the strip main line
+function _getPhaseSubState(pid,days){
+  const lv=_getPhaseSubStateLevel(pid,days);
+  return t('js_sub_'+pid+'_'+lv)||t('js_stable');
+}
+// Returns the contextual tip shown as the secondary line
+function _getPhaseSubStateTip(pid,days){
+  const lv=_getPhaseSubStateLevel(pid,days);
+  return t('js_sub_'+pid+'_'+lv+'_tip')||'';
+}
+// Injects a small sub-state badge chip into a phase panel card header
+function _injectPhaseSubStateBadge(card,pid){
+  const _startDate=(function(){
+    const rid=card.dataset.cardId&&card.dataset.cardId.replace('gc-','');
+    const r=rid?getSavedRoutines().find(function(x){return x.id===rid;}):null;
+    return r?(r.phaseStartedAt||r.createdAt):null;
+  })();
+  if(!_startDate)return;
+  const days=Math.max(1,Math.floor((Date.now()-new Date(_startDate).getTime())/(1000*60*60*24))+1);
+  const label=_getPhaseSubState(pid,days);
+  if(!label||label===t('js_stable'))return;
+  // Remove existing badge if any
+  const old=card.querySelector('.js-substate-badge');if(old)old.remove();
+  const badge=document.createElement('span');
+  badge.className='js-substate-badge';
+  badge.textContent=label;
+  // Insert inside the active phase panel header, after ph-duration
+  const dur=card.querySelector('.phase-panel.active .ph-duration');
+  if(dur)dur.insertAdjacentElement('afterend',badge);
+}
+
+/* ═══ CHECK-IN SYSTEM ═══ */
+function _getTodayDate(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _hasCheckedInToday(r){
+  return !!(r.checkinHistory&&r.checkinHistory.includes(_getTodayDate()));
+}
+function _getCheckinStreak(r){
+  if(!r.checkinHistory||!r.checkinHistory.length)return 0;
+  const history=[...r.checkinHistory].sort();
+  const today=_getTodayDate();
+  let streak=0;
+  // Build streak backwards from yesterday (or today if checked in)
+  const startFrom=history.includes(today)?today:null;
+  let check=new Date();
+  if(!startFrom)check.setDate(check.getDate()-1);
+  for(let i=0;i<90;i++){
+    const ds=check.getFullYear()+'-'+String(check.getMonth()+1).padStart(2,'0')+'-'+String(check.getDate()).padStart(2,'0');
+    if(history.includes(ds)){streak++;check.setDate(check.getDate()-1);}
+    else break;
+  }
+  return streak;
+}
+function _getMissedDays(r){
+  if(!r.checkinHistory||!r.checkinHistory.length)return 0;
+  const today=_getTodayDate();
+  if(r.checkinHistory.includes(today))return 0;
+  const sorted=[...r.checkinHistory].sort();
+  const last=sorted[sorted.length-1];
+  const lastDate=new Date(last+'T12:00:00');
+  const todayDate=new Date(today+'T12:00:00');
+  const diff=Math.round((todayDate-lastDate)/(1000*60*60*24));
+  return Math.max(0,diff-1);
+}
+function logCheckin(routineId){
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(function(x){return x.id===routineId;});
+  if(idx===-1)return;
+  const today=_getTodayDate();
+  if(!routines[idx].checkinHistory)routines[idx].checkinHistory=[];
+  if(!routines[idx].checkinHistory.includes(today)){
+    routines[idx].checkinHistory.push(today);
+    setSavedRoutines(routines);
+  }
+  const card=document.querySelector('#page-myroutine .builder-card[data-card-id="gc-'+routineId+'"]');
+  if(card)_injectCheckinCard(card,routines[idx]);
+}
+function _injectCheckinCard(card,r){
+  const old=card.querySelector('.gp-checkin-wrap');if(old)old.remove();
+  const routineId=r.id;
+  const doneToday=_hasCheckedInToday(r);
+  const streak=_getCheckinStreak(r);
+  const missed=_getMissedDays(r);
+  let inner='';
+  if(!doneToday&&missed>=1){
+    const msg=missed===1?t6('checkin_missed_1'):t6('checkin_missed_n').replace('{n}',missed);
+    inner+=`<div class="gp-checkin-missed">${msg}</div>`;
+  }
+  if(doneToday){
+    const streakHtml=streak>=2?` <span class="gp-checkin-streak">${t6('checkin_streak').replace('{n}',streak)}</span>`:'';
+    inner+=`<div class="gp-checkin-card done">
+      <span class="gp-checkin-check">✓</span>
+      <span class="gp-checkin-done-text">${t6('checkin_done')}${streakHtml}</span>
+    </div>`;
+  } else {
+    inner+=`<div class="gp-checkin-card" onclick="logCheckin('${routineId}')">
+      <div class="gp-checkin-icon">🌙</div>
+      <div class="gp-checkin-body">
+        <div class="gp-checkin-title">${t6('checkin_title')}</div>
+        <div class="gp-checkin-sub">${t6('checkin_sub')}</div>
+      </div>
+      <button class="gp-checkin-btn" onclick="event.stopPropagation();logCheckin('${routineId}')">${t6('checkin_btn')}</button>
+    </div>`;
+  }
+  const wrap=document.createElement('div');
+  wrap.className='gp-checkin-wrap';
+  wrap.innerHTML=inner;
+  const jsStrip=card.querySelector('.js-strip');
+  if(jsStrip)jsStrip.insertAdjacentElement('afterend',wrap);
+  else{const hd=card.querySelector('.builder-step-hd');if(hd)hd.insertAdjacentElement('afterend',wrap);else card.prepend(wrap);}
+}
+function renderCheckinCards(){
+  const myPage=document.getElementById('page-myroutine');
+  if(!myPage)return;
+  document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){
+    const cardId=card.dataset.cardId;
+    if(!cardId||cardId==='gc-draft')return;
+    const routineId=cardId.replace('gc-','');
+    const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+    if(!r)return;
+    _injectCheckinCard(card,r);
   });
 }
 
@@ -4665,6 +4834,16 @@ function attachDayInteractions(){
     if(typeof updatePhaseCardWSCStatus==='function') updatePhaseCardWSCStatus();
     if(typeof renderPhaseShiftSuggestion==='function') renderPhaseShiftSuggestion();
     if(typeof checkAndShowWscBanner==='function') checkAndShowWscBanner();
+    if(typeof renderCheckinCards==='function') renderCheckinCards();
+    if(typeof _injectPhaseSubStateBadge==='function'){
+      document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){
+        const cardId=card.dataset.cardId;
+        if(!cardId||cardId==='gc-draft')return;
+        const routineId=cardId.replace('gc-','');
+        const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+        if(r)_injectPhaseSubStateBadge(card,r.activePhase||'p1');
+      });
+    }
   },0);
 }
 function dayClickHandler(e){
@@ -5421,27 +5600,58 @@ function addRecommendedProduct(productId){
   renderBuilderStep();
 }
 
+/* ═══ TOAST NOTIFICATION ═══ */
+function _gpToast(msg,type){
+  var old=document.getElementById('gp-toast');if(old)old.remove();
+  var el=document.createElement('div');el.id='gp-toast';
+  el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;'
+    +'padding:12px 22px;border-radius:14px;font-size:.92rem;font-weight:600;color:#fff;'
+    +'box-shadow:0 4px 24px rgba(0,0,0,.18);max-width:88vw;text-align:center;pointer-events:none;'
+    +'animation:_gpToastIn .25s ease;';
+  el.style.background=type==='error'?'#c0392b':type==='success'?'#27ae60':'linear-gradient(135deg,#E4B5BF,#CFA1AE)';
+  el.textContent=msg;
+  if(!document.getElementById('gp-toast-style')){
+    var st=document.createElement('style');st.id='gp-toast-style';
+    st.textContent='@keyframes _gpToastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .4s';setTimeout(function(){if(el.parentNode)el.remove();},400);},2800);
+}
+
 /* ═══ EXPORT / IMPORT ═══ */
 function exportRoutines(){
-  const routines=getSavedRoutines();if(!routines.length){alert(t('alert_no_export'));return;}
-  const blob=new Blob([JSON.stringify(routines,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download='glowphase-routines-'+Date.now()+'.json';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  const routines=getSavedRoutines();
+  if(!routines.length){
+    _gpToast(LANG==='th'?'ยังไม่มีรูทีนที่บันทึกไว้':'No saved routines to export','error');
+    return;
+  }
+  try{
+    const blob=new Blob([JSON.stringify(routines,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');
+    a.href=url;a.download='glowphase-routines-'+Date.now()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    _gpToast(LANG==='th'?'ส่งออก '+routines.length+' รูทีนแล้ว ✓':'Exported '+routines.length+' routine'+(routines.length!==1?'s':'')+' ✓','success');
+  }catch(err){_gpToast('Export failed: '+err.message,'error');}
 }
-function triggerImport(){document.getElementById('import-file').click();}
+function triggerImport(){var inp=document.getElementById('import-file');if(inp){inp.value='';inp.click();}}
 function importRoutines(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=ev=>{
     try{
-      const data=JSON.parse(ev.target.result);if(!Array.isArray(data))throw new Error('Invalid format');
+      const data=JSON.parse(ev.target.result);
+      if(!Array.isArray(data))throw new Error(LANG==='th'?'รูปแบบไฟล์ไม่ถูกต้อง':'Invalid file format');
       const existing=getSavedRoutines();const existingIds=existing.map(r=>r.id);
       const newOnes=data.filter(r=>!existingIds.includes(r.id));
       setSavedRoutines([...existing,...newOnes]);
-      alert(tFmt('alert_import_done',{count:newOnes.length,dup:data.length-newOnes.length}));
+      const dup=data.length-newOnes.length;
+      const msg=LANG==='th'
+        ?'นำเข้า '+newOnes.length+' รูทีนแล้ว'+(dup?' ('+dup+' ซ้ำ)':'')
+        :'Imported '+newOnes.length+' routine'+(newOnes.length!==1?'s':'')+(dup?' ('+dup+' duplicate'+(dup!==1?'s':'')+' skipped)':'');
+      _gpToast(msg,'success');
       renderMyRoutines();
-    }catch(err){alert(t('alert_import_fail')+err.message);}
+    }catch(err){_gpToast((t('alert_import_fail')||'Import failed: ')+err.message,'error');}
   };
   reader.readAsText(file);e.target.value='';
 }
@@ -5544,8 +5754,16 @@ function showPage(id,triggerBtn){
 
 /* Task 6 - Night Routine UX Polish */
 var T6={
-  en:{checkin_title:'Finished your routine?',checkin_sub:'Tap to log your progress',checkin_btn:'Log it',checkin_done:'Routine done today!',sos_title:'Skin Reacting?',sos_sub:'Follow these emergency steps',sos_close:'Got it',sos_tip1:'Stop the suspected product immediately',sos_tip2:'Rinse face with cool plain water',sos_tip3:'Apply a thin layer of Vaseline or barrier cream',sos_tip4:'Avoid acids and retinol for 5-7 days',sos_tip5:'See a doctor if swelling or hives develop'},
-  th:{checkin_title:'ทำรูทีนเสร็จแล้ว?',checkin_sub:'แตะเพื่อสะสมความคืบหน้า',checkin_btn:'สะสม',checkin_done:'ทำรูทีนวันนี้แล้ว!',sos_title:'ผิวแพ้?',sos_sub:'ทำตามขั้นตอนฉุกเฉน',sos_close:'เข้าใจแล้ว',sos_tip1:'หยุดใช้ผลิตภัณฑ์ที่สงสัยทันที',sos_tip2:'ล้างหน้าด้วน้ำสะอาด อุณหภูมิห้อง',sos_tip3:'ทา Vaseline หรือ barrier cream บางๆ',sos_tip4:'หลีกเลี่ยงกรดและเรตินอล 5-7 วัน',sos_tip5:'หากมีอาการบวมแดง ปรึกษาแพทย์'}
+  en:{checkin_title:'Finished your routine?',checkin_sub:'Tap to log your progress',checkin_btn:'Log it',checkin_done:'Routine done today!',
+    checkin_missed_1:'You missed yesterday — no worries, just keep going 💪',
+    checkin_missed_n:'You missed {n} days — let\'s get back on track 💪',
+    checkin_streak:'{n}-day streak 🔥',
+    sos_title:'Skin Reacting?',sos_sub:'Follow these emergency steps',sos_close:'Got it',sos_tip1:'Stop the suspected product immediately',sos_tip2:'Rinse face with cool plain water',sos_tip3:'Apply a thin layer of Vaseline or barrier cream',sos_tip4:'Avoid acids and retinol for 5-7 days',sos_tip5:'See a doctor if swelling or hives develop'},
+  th:{checkin_title:'ทำรูทีนเสร็จแล้ว?',checkin_sub:'แตะเพื่อสะสมความคืบหน้า',checkin_btn:'สะสม',checkin_done:'ทำรูทีนวันนี้แล้ว!',
+    checkin_missed_1:'พลาดเมื่อวาน — ไม่เป็นไร ไปต่อเลย 💪',
+    checkin_missed_n:'พลาดไป {n} วัน — กลับมาทำต่อได้เลย 💪',
+    checkin_streak:'{n} วันต่อเนื่อง 🔥',
+    sos_title:'ผิวแพ้?',sos_sub:'ทำตามขั้นตอนฉุกเฉน',sos_close:'เข้าใจแล้ว',sos_tip1:'หยุดใช้ผลิตภัณฑ์ที่สงสัยทันที',sos_tip2:'ล้างหน้าด้วน้ำสะอาด อุณหภูมิห้อง',sos_tip3:'ทา Vaseline หรือ barrier cream บางๆ',sos_tip4:'หลีกเลี่ยงกรดและเรตินอล 5-7 วัน',sos_tip5:'หากมีอาการบวมแดง ปรึกษาแพทย์'}
 };
 function t6(k){return(T6[LANG]&&T6[LANG][k])||T6.en[k]||k;}
 var GP_AMOUNT_RULES=[
