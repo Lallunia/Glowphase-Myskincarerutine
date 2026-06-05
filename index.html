@@ -220,14 +220,14 @@
 <div class="page" id="page-myroutine">
   <div class="section">
     <div class="section-head">
-      <div class="section-title">My <em>Routines</em></div>
-      <div class="section-sub">Save, manage, and revisit your personalised skincare routines</div>
+      <div class="section-title" data-i18n="myr_page_title">My <em>Routines</em></div>
+      <div class="section-sub" data-i18n="myr_page_sub">Save, manage, and revisit your personalised skincare routines</div>
     </div>
     <div class="import-export-bar">
-      <button class="btn btn-outline btn-sm" onclick="exportRoutines()">⬆ Export Routines</button>
-      <button class="btn btn-outline btn-sm" onclick="triggerImport()">⬇ Import Routines</button>
+      <button class="btn btn-outline btn-sm" data-i18n="myr_btn_export" onclick="exportRoutines()">⬆ Export Routines</button>
+      <button class="btn btn-outline btn-sm" data-i18n="myr_btn_import" onclick="triggerImport()">⬇ Import Routines</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importRoutines(event)">
-      <button class="btn btn-rose btn-sm" onclick="showPage('builder',null)">+ New Routine</button>
+      <button class="btn btn-rose btn-sm" data-i18n="myr_btn_new" onclick="showPage('builder',null)">+ New Routine</button>
     </div>
     <div id="myroutine-content"></div>
   </div>
