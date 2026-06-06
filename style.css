@@ -4490,6 +4490,7 @@ img { display: block; max-width: 100%; }
 .js-strip.recovery{background:linear-gradient(135deg,rgba(72,187,120,0.1),rgba(56,161,105,0.06));border-color:rgba(72,187,120,0.25);}
 .js-strip.recovery .js-strip-day{color:#276749;}
 .js-strip.recovery .js-strip-phase{color:#4a7c59;}
+.js-sub-badge{display:inline-block;margin:0 0 12px 2px;padding:4px 14px;background:rgba(228,181,191,0.2);border:0.5px solid rgba(228,181,191,0.45);border-radius:20px;font-size:.78rem;font-weight:600;color:#9c6070;letter-spacing:.01em;cursor:default;}
 
 /* ═══ CHECK-IN SYSTEM ═══ */
 .gp-checkin-wrap{margin:0 0 14px;}
