@@ -1784,6 +1784,10 @@ const T = {
     p4focus_glow_label:'✨ Clarity + Glow',p4focus_glow_title:'Clarity + Glow',p4focus_glow_desc:'Texture refinement, radiance, and spot control. No retinal.',
     p4focus_aging_label:'🌿 Healthy Aging',p4focus_aging_title:'Healthy Aging',p4focus_aging_desc:'Peptides, retinal pacing, and elasticity support.',
     p4focus_switch_note:'You can switch focus anytime — no progress lost.',
+    // Phase 3 focus mode UI (sub-paths)
+    p3focus_clarity_label:'🎯 Clarity',p3focus_clarity_title:'Clarity — Breakouts & Clogged Pores',p3focus_clarity_desc:'BHA-led clearing for acne and clogged pores. No retinal.',
+    p3focus_tone_label:'🌸 Even Tone',p3focus_tone_title:'Even Tone — Marks & Pigment',p3focus_tone_desc:'Azelaic, niacinamide, and Vitamin C for PIH and post-acne marks. No retinal.',
+    p3focus_renew_label:'🌿 Renew',p3focus_renew_title:'Renew — Texture & Renewal',p3focus_renew_desc:'Paced retinal and peptides for texture and early aging.',
     /* Product Library category chip labels */
     chip_oil_cleanser:'Oil Cleanser',
     chip_mist:'Mist',
@@ -2348,6 +2352,10 @@ const T = {
     p4focus_glow_label:'✨ ความสด + เปล่งปลั่ง',p4focus_glow_title:'ความสด + เปล่งปลั่ง',p4focus_glow_desc:'ปรับพื้นผิว ผิวสว่าง และควบคุมสิว ไม่มี Retinal',
     p4focus_aging_label:'🌿 ต้านวัย',p4focus_aging_title:'ต้านวัย',p4focus_aging_desc:'เพปไทด์ ปรับจังหวะ Retinal และเสริมความยืดหยุ่น',
     p4focus_switch_note:'สามารถเปลี่ยน Focus ได้ตลอดเวลา — ไม่เสียความก้าวหน้า',
+    // Phase 3 focus mode UI (sub-paths)
+    p3focus_clarity_label:'🎯 เคลียร์สิว',p3focus_clarity_title:'เคลียร์สิว — สิวอุดตัน & รูขุมขน',p3focus_clarity_desc:'เน้น BHA เพื่อจัดการสิวและรูขุมขนอุดตัน ไม่มี Retinal',
+    p3focus_tone_label:'🌸 ปรับสีผิว',p3focus_tone_title:'ปรับสีผิว — รอยดำ & จุดด่างดำ',p3focus_tone_desc:'Azelaic, Niacinamide และ Vitamin C สำหรับรอยสิวและจุดด่างดำ ไม่มี Retinal',
+    p3focus_renew_label:'🌿 ฟื้นฟูผิว',p3focus_renew_title:'ฟื้นฟูผิว — พื้นผิว & ต้านวัย',p3focus_renew_desc:'Retinal แบบค่อยเป็นค่อยไปและเพปไทด์ สำหรับพื้นผิวและริ้วรอยเริ่มต้น',
     /* Product Library category chip labels */
     chip_oil_cleanser:'คลีนซิ่งออยล์/บาล์ม',
     chip_mist:'มิสต์/สเปรย์บำรุงผิว',
@@ -3987,6 +3995,20 @@ function restorePhaseState(){
         }
       }
     }
+    // Restore p3 focus if saved (non-default). p3 tabs reuse the p4focus-tab class.
+    if(r.p3Focus&&r.p3Focus!=='renew'){
+      const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+      if(data){
+        data.p3Focus=r.p3Focus;
+        if(data._answersWithDayProducts)data._answersWithDayProducts._p3Focus=r.p3Focus;
+        // Re-render focus tabs only if p3 is currently shown
+        const phasePanel=card.querySelector('.phase-panel[data-pid="p3"]');
+        if(phasePanel){
+          const focusTab=card.querySelector('.p4focus-tab');
+          if(focusTab)switchP3Focus(r.p3Focus,focusTab.parentNode.querySelector('.p4focus-tab:nth-child('+(r.p3Focus==='clarity'?1:r.p3Focus==='tone'?2:3)+')'));
+        }
+      }
+    }
   });
 }
 
@@ -4168,6 +4190,20 @@ function toggleBuilderProduct(id,el){
 }
 function generateRoutine(){builderState.step=QUIZ_STEPS.length+1;renderBuilderStep();}
 
+/* ═══ PHASE 3 SUB-PATH INFERENCE ═══ */
+// Maps quiz goals / skin types to a Phase 3 focus sub-path: 'clarity' | 'tone' | 'renew'.
+// Priority (safest + highest-value first): acne / comedones / congested → clarity;
+// PIH / hyperpigmentation → tone; texture / aging → renew. No clear signal → renew (legacy default).
+function _inferP3Focus(a){
+  const goals=(a&&a.goals)||[];
+  const skinTypes=(a&&a.skinTypes)||[];
+  const has=(k)=>goals.includes(t(k));
+  if(has('g_acne')||has('g_comedones')||skinTypes.includes(t('o_congested'))) return 'clarity';
+  if(has('g_pih')||has('g_hyperpig')) return 'tone';
+  if(has('g_texture')||has('g_antiaging')||has('g_fine_lines')||has('g_wrinkles')) return 'renew';
+  return 'renew';
+}
+
 /* ═══ ENTRY ASSESSMENT PLACEMENT ═══ */
 // Computes the appropriate starting phase based on quiz answers.
 // Safety guards always take priority; scoring system handles nuanced cases.
@@ -4275,6 +4311,14 @@ function renderRoutineResult(c){
 function _getPhaseActives(data,pid){
   if(pid==='p1')return{bha:false,retinal:false,aha:false,peel:false};
   if(pid==='p2')return{bha:data.bha,retinal:false,aha:false,peel:false};
+  if(pid==='p3'){
+    const focus=data.p3Focus||'renew';
+    // Clarity — BHA-led clearing for acne/clogged pores. Retinal-free (barrier-safe).
+    if(focus==='clarity')return{bha:data.bha,retinal:false,aha:false,peel:data.peel};
+    // Even Tone — gentle AHA + BHA for marks/pigment. Retinal-free (barrier-safe).
+    if(focus==='tone')return{bha:data.bha,retinal:false,aha:data.aha,peel:false};
+    // renew (default) → full Phase 3 actives below (paced retinal). Legacy behavior.
+  }
   if(pid==='p4'){
     const focus=data.p4Focus||'aging';
     if(focus==='barrier')return{bha:false,retinal:false,aha:false,peel:false};
@@ -4413,7 +4457,10 @@ const sleepingPack=selected.find(p=>normalizedCategory(p)==='sleeping mask'||p.s
   // Attach computed rotation map to answers so renderPhase() can read per-day picks
   // Include p4Focus so renderPhase can pick the right day plan
   const _p4FocusInit=rd.p4Focus||'aging';
-  const _answersWithDayProducts=Object.assign({},a,{_dayProducts,_p4Focus:_p4FocusInit});
+  // Phase 3 sub-path: use saved focus if present, else auto-infer from goals. Persist it for later renders.
+  const _p3FocusInit=rd.p3Focus||_inferP3Focus(a);
+  rd.p3Focus=_p3FocusInit;
+  const _answersWithDayProducts=Object.assign({},a,{_dayProducts,_p4Focus:_p4FocusInit,_p3Focus:_p3FocusInit});
   const numPhases=rd.phases||(needsAntiAging?4:(hasActives?3:2));
   const phaseIds=['p1','p2','p3','p4'].slice(0,numPhases);
   // Entry assessment — determine starting phase
@@ -4682,6 +4729,47 @@ function switchP4Focus(focus,btn){
   setTimeout(enhanceRoutineSteps,0);
 }
 
+function switchP3Focus(focus,btn){
+  const card=btn?btn.closest('.builder-card'):null;
+  if(!card)return;
+  const cardId=card.dataset.cardId;
+  const data=window._glowPhaseData&&window._glowPhaseData[cardId];
+  if(!data)return;
+
+  // Update runtime state
+  data.p3Focus=focus;
+  // Propagate to answers so renderPhase picks up the new plan
+  if(data._answersWithDayProducts)data._answersWithDayProducts._p3Focus=focus;
+
+  // Save focus to localStorage
+  const routineId=cardId.replace('gc-','');
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(function(r){return r.id===routineId;});
+  if(idx!==-1){routines[idx].p3Focus=focus;setSavedRoutines(routines);}
+
+  // Update focus tab active state (p3 tabs reuse the p4focus-tab class)
+  card.querySelectorAll('.p4focus-tab').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+
+  // Update focus description text
+  const descEl=card.querySelector('.p4focus-desc');
+  if(descEl)descEl.textContent=t('p3focus_'+focus+'_desc');
+
+  // Re-render the active phase with new focus actives + plan
+  const pa=_getPhaseActives(data,'p3');
+  const phaseArea=card.querySelector('.active-phase-area');
+  if(!phaseArea)return;
+  phaseArea.innerHTML=renderPhase(
+    'p3',data.selected,data.c1,data.c2,
+    data.toner,data.essence,data.nightSerum,data.moist,
+    data.deviceGel,data.usesDevice,
+    pa.bha,pa.retinal,pa.aha,pa.peel,
+    data.isMature,data.isHighSens,'active',false,
+    data.eye,data.sleepingPack,data._answersWithDayProducts,data.mistProd,data.selectedDay||'Mon'
+  );
+  setTimeout(enhanceRoutineSteps,0);
+}
+
 /* ═══ PHASE RENDER ═══ */
 const DAY_PLANS={
   p1:{Mon:{type:'normal',goal:'Deep hydration + barrier sealing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'Device-boosted hydration',device:true,deviceModes:['booster','air'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Rest + deep repair overnight',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Hydration + soothing',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster mode hydration infusion',device:true,deviceModes:['booster'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Skin reset + moisture lock',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery + week prep',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
@@ -4692,14 +4780,19 @@ const DAY_PLANS={
   // Phase 4 focus plans
   p4_aging:{Mon:{type:'normal',goal:'Peptide + anti-aging hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal maintenance',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + barrier maintenance',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'Anti-aging device treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'active',goal:'AHA texture refinement',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Sat:{type:'recovery',goal:'Collagen support recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Full moisturize + week prep',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
   p4_barrier:{Mon:{type:'normal',goal:'Barrier protection + deep hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'Booster mode — hydration infusion',device:true,deviceModes:['booster','air'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'normal',goal:'Calming hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'device',goal:'Booster mode — hydration infusion',device:true,deviceModes:['booster'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Gentle radiance + moisture seal',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
-  p4_glow:{Mon:{type:'normal',goal:'Clarity + spot control',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'PDRN device — PIH + radiance',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'active',goal:'AHA texture refinement + glow',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Fri:{type:'device',goal:'Booster + glow treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Radiance prep + hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}}
+  p4_glow:{Mon:{type:'normal',goal:'Clarity + spot control',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'device',goal:'PDRN device — PIH + radiance',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'active',goal:'AHA texture refinement + glow',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Fri:{type:'device',goal:'Booster + glow treatment',device:true,deviceModes:['booster','mc'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Sat:{type:'recovery',goal:'Barrier banking + recovery',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'normal',goal:'Radiance prep + hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false}},
+  // Phase 3 focus plans (sub-paths). p3_renew is a byte-identical copy of legacy p3 (default — no behavior change).
+  p3_renew:{Mon:{type:'normal',goal:'Hydration + spot acne',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Retinal introduction — eye area only',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery after retinal',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'PDRN device + optional peel',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:true},Fri:{type:'active',goal:'Second retinal night',device:false,recovery:false,bha:false,retinal:true,aha:false,peel:false},Sat:{type:'normal',goal:'Spot acne + glow',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery night',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
+  p3_clarity:{Mon:{type:'normal',goal:'Hydration + spot BHA',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Clarifying night — BHA',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + repair',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'PDRN device + optional peel',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:true},Fri:{type:'active',goal:'Second clarify — azelaic',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Sat:{type:'normal',goal:'Spot control + glow',device:false,recovery:false,bha:true,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery night',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}},
+  p3_tone:{Mon:{type:'normal',goal:'Vitamin C + hydration',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Tue:{type:'active',goal:'Tone night — azelaic',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Wed:{type:'recovery',goal:'Recovery + repair',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false},Thu:{type:'device',goal:'PDRN device for PIH',device:true,deviceModes:['mc','derma'],recovery:false,bha:false,retinal:false,aha:false,peel:false},Fri:{type:'active',goal:'Gentle AHA + glow',device:false,recovery:false,bha:false,retinal:false,aha:true,peel:false},Sat:{type:'normal',goal:'Niacinamide + moisture',device:false,recovery:false,bha:false,retinal:false,aha:false,peel:false},Sun:{type:'recovery',goal:'Full recovery night',device:false,recovery:true,bha:false,retinal:false,aha:false,peel:false}}
 };
 const DAY_NAMES={Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday'};
 
 function renderPhase(pid,selected,c1,c2,toner,essence,serum,moist,deviceGel,usesDevice,bha,retinal,aha,peel,isMature,isHighSens,activeClass,isOptional,eye,sleepingPack,answers,mistProd,selectedDay){
   // For p4, use the focus-specific day plan based on answers or _p4CurrentFocus
   const _p4Focus=(pid==='p4')?(answers&&answers._p4Focus)||'aging':'';
-  const _planKey=pid==='p4'?('p4_'+_p4Focus):pid;
+  const _p3Focus=(pid==='p3')?(answers&&answers._p3Focus)||'renew':'';
+  const _planKey=pid==='p4'?('p4_'+_p4Focus):(pid==='p3'?('p3_'+_p3Focus):pid);
   const plan=DAY_PLANS[_planKey]||DAY_PLANS[pid]||DAY_PLANS.p1;
   const _rpA=answers||{};
   const _rpIsDry=(_rpA.skinTypes||[]).some(s=>s===t('o_dry'));
@@ -4923,7 +5016,18 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
     <div class="p4focus-note">${t('p4focus_switch_note')}</div>
   </div>`:'';
 
-  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${_focusTabs}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
+  // Phase 3 focus tabs (sub-paths) — reuse p4focus styling
+  const _p3FocusTabs=pid==='p3'?`<div class="p4focus-wrap">
+    <div class="p4focus-tabs">
+      <button class="p4focus-tab ${_p3Focus==='clarity'?'active':''}" onclick="switchP3Focus('clarity',this)">${t('p3focus_clarity_label')}</button>
+      <button class="p4focus-tab ${_p3Focus==='tone'?'active':''}" onclick="switchP3Focus('tone',this)">${t('p3focus_tone_label')}</button>
+      <button class="p4focus-tab ${_p3Focus==='renew'?'active':''}" onclick="switchP3Focus('renew',this)">${t('p3focus_renew_label')}</button>
+    </div>
+    <div class="p4focus-desc">${t('p3focus_'+_p3Focus+'_desc')}</div>
+    <div class="p4focus-note">${t('p4focus_switch_note')}</div>
+  </div>`:'';
+
+  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}"><div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${_focusTabs}${_p3FocusTabs}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
 }
 
 /* Render a single day-panel HTML string by delegating to renderPhase with
