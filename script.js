@@ -273,11 +273,14 @@ function hasExfoliantAcid(p) {
   if (p.subcategory === 'chemical exfoliant') return true;
   // Trust the curated exfoliation tag — covers genuine PHA/enzyme exfoliants by intent, not ingredient guessing.
   if (p.exfoliationIntensity) return true;
-  // Ingredient fallback: only STRONG exfoliating acids. Humectant-type PHAs (gluconolactone, lactobionic,
-  // poly hydroxy) are intentionally excluded — they appear as low-% humectants in serums/creams and were
-  // causing Vitamin-C / peptide products to be mis-flagged as exfoliants.
-  const ing = (p.ingredients || '').toLowerCase();
-  return /\b(glycolic acid|lactic acid|mandelic acid|salicylic acid|beta hydroxy|capryloyl salicylic|azelaic acid)\b/.test(ing);
+  // Azelaic is a legitimate tag-less active in some products (routes through the treatment/active slot) — keep it.
+  if (hasAzelaicAcid(p)) return true;
+  // NO generic AHA/BHA ingredient-guessing. Verified across the DB (2026-07-06): every genuine AHA/BHA/PHA
+  // exfoliant carries a curated tag (activeIngredients / category / subcategory / exfoliationIntensity),
+  // while the raw INCI keywords only ever matched TRACE pH-buffer acids — e.g. "lactic acid" in a hydrating
+  // essence / sunscreen / retinal serum, or "salicylic acid" in a cleanser — mis-flagging non-exfoliants.
+  // If a future product is a real exfoliant, tag it (or set exfoliationIntensity) rather than relying on INCI.
+  return false;
 }
 
 // Classify a leave-on exfoliant's primary acid type for sub-path routing: 'bha' | 'aha' | 'pha' | null.
@@ -2339,6 +2342,15 @@ function _wscIsDue(routineId){
 function _wscMarkDone(routineId){
   try{localStorage.setItem(_wscLastKey(routineId),Date.now().toString());}catch(e){}
 }
+// Whole days until the next weekly check is due (0 = due now). Counts from last check, or routine creation.
+function _wscDaysLeft(routineId){
+  try{
+    var r=getSavedRoutines().find(function(x){return x.id===routineId;}); if(!r)return 0;
+    var last=localStorage.getItem(_wscLastKey(routineId));
+    var base=last?parseInt(last,10):(r.createdAt?new Date(r.createdAt).getTime():Date.now());
+    return Math.max(0,Math.ceil((base+_WSC_INTERVAL_MS-Date.now())/86400000));
+  }catch(e){return 0;}
+}
 
 // Generates a 1-sentence explanation of why the user is in their current phase.
 function _generatePhaseExplanation(r){
@@ -2759,6 +2771,118 @@ function _dscShowStepBackSuggestion(routineId){
   ov.style.display='flex';
 }
 
+/* ═══ MISSED-DAYS CATCH-UP (re-sync) ═══
+   Shown when the user returns after a real gap (≥3 missed daily check-ins). Instead of trusting
+   stale progress, a short current-state check RE-SYNCS everything:
+     1) RESETS the weekly clock (_wscMarkDone) → next weekly is a fresh 7 days from now.
+     2) Closes the gap (logs today) so missed-days resets to 0.
+     3) Re-baselines progress: writes a FRESH wscHistory entry from how the skin is NOW, so the
+        "How it's going" bar reads current reality (a stale "Controlled" drops if the concern regressed).
+     4) Adjusts the routine to current skin: soften/barrier tonight via the DSC signal; if irritated,
+        OFFERS recovery (never auto-activates — the user chooses, mirroring the DSC step-back). */
+const _catchupState={routineId:null, answers:{q1:null,q2:null}};
+function openCatchupSheet(routineId){
+  _catchupState.routineId=routineId;
+  _catchupState.answers={q1:null,q2:null};
+  const ov=_catchupGetOrCreateOverlay();
+  _renderCatchupQuestions();
+  ov.style.display='flex';
+}
+function closeCatchupSheet(){const ov=document.getElementById('catchup-sheet-overlay');if(ov)ov.style.display='none';}
+function _catchupGetOrCreateOverlay(){
+  let ov=document.getElementById('catchup-sheet-overlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='catchup-sheet-overlay';
+    ov.className='sb-sheet-overlay';
+    ov.style.display='none';
+    ov.addEventListener('click',function(e){if(e.target===ov)closeCatchupSheet();});
+    const sheet=document.createElement('div');
+    sheet.id='catchup-sheet-box';
+    sheet.className='wsc-sheet';
+    ov.appendChild(sheet);
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
+function _renderCatchupQuestions(){
+  const all=_catchupState.answers;
+  const _rd=(typeof getSavedRoutines==='function')?getSavedRoutines().find(function(x){return x.id===_catchupState.routineId;}):null;
+  const _missed=(_rd&&typeof _getMissedDays==='function')?_getMissedDays(_rd):0;
+  const _cq=(_rd&&typeof _wscConcernQ==='function')?_wscConcernQ(_rd):{show:false};
+  const ready=all.q1&&(!_cq.show||all.q2);
+  const L=_mrrL;
+  function optRow(q,key,label){
+    const sel=all[q]===key?'selected':'';
+    return `<div class="wsc-option ${sel}" onclick="catchupSelectAnswer('${q}','${key}')"><div class="wsc-option-dot"></div>${label}</div>`;
+  }
+  document.getElementById('catchup-sheet-box').innerHTML=`
+    <div class="wsc-handle"></div>
+    <div class="wsc-title">${L('Welcome back','ยินดีต้อนรับกลับ')}</div>
+    <div class="wsc-sub" style="font-size:.78rem;color:#8A95A0;margin:-4px 0 12px;text-align:center;line-height:1.45">${L("It's been "+_missed+" days. Let's re-sync to how your skin is right now.","ห่างหายไป "+_missed+" วัน มาซิงค์ให้ตรงกับผิวคุณตอนนี้กันใหม่")}</div>
+    <div class="wsc-question">
+      <div class="wsc-q-label"><span class="wsc-qnum">1</span>${L('How does your skin feel right now?','ตอนนี้ผิวรู้สึกอย่างไร?')}</div>
+      <div class="wsc-options">
+        ${optRow('q1','a',L('Calm & comfortable','สงบ & สบายผิว'))}${optRow('q1','b',L('A little off / unsettled','รู้สึกแปลก ๆ เล็กน้อย'))}${optRow('q1','c',L('Irritated / reactive','ระคายเคือง / ไวง่าย'))}
+      </div>
+    </div>
+    ${_cq.show?`<div class="wsc-divider"></div>
+    <div class="wsc-question">
+      <div class="wsc-q-label"><span class="wsc-qnum">2</span>${_cq.label}</div>
+      <div class="wsc-options">
+        ${optRow('q2','a',_cq.opts[0])}${optRow('q2','b',_cq.opts[1])}${optRow('q2','c',_cq.opts[2])}
+      </div>
+    </div>`:''}
+    <div class="wsc-footer">
+      <button class="wsc-btn-submit" ${ready?'':'disabled'} onclick="catchupApply()">${L('Re-sync my routine','ซิงค์รูทีนใหม่')}</button>
+      <button class="wsc-btn-skip" onclick="_catchupSkip()">${L('Not now','ไว้ก่อน')}</button>
+    </div>`;
+}
+function catchupSelectAnswer(q,key){
+  const box=document.getElementById('catchup-sheet-box');
+  const scrollTop=box?box.scrollTop:0;
+  _catchupState.answers[q]=key;
+  _renderCatchupQuestions();
+  if(box)box.scrollTop=scrollTop;
+}
+function _catchupSkip(){ closeCatchupSheet(); }
+function catchupApply(){
+  const routineId=_catchupState.routineId;
+  const a=_catchupState.answers;
+  const reactivity={a:0,b:1,c:2}[a.q1]??0;
+  // 1) RESET the weekly clock — next weekly is a fresh 7 days from now.
+  if(typeof _wscMarkDone==='function')_wscMarkDone(routineId);
+  // 2) Close the gap + seed tonight's gentle adjustment (barrier if irritated, soften if off).
+  if(typeof _dscMarkDone==='function')_dscMarkDone(routineId);
+  if(typeof _dscHistoryPush==='function')_dscHistoryPush(routineId,reactivity,'balanced');
+  if(typeof logCheckin==='function')logCheckin(routineId); // today counts → missed-days resets to 0
+  // 3) Re-baseline progress — a FRESH weekly-history entry reflecting current skin.
+  const routines=getSavedRoutines();
+  const idx=routines.findIndex(function(x){return x.id===routineId;});
+  if(idx!==-1){
+    const rd=routines[idx];
+    const score=reactivity===0?1:(reactivity===1?4:7);        // calm→good · off→mild · irritated→stress
+    const w=reactivity===0?'a':(reactivity===1?'b':'c');       // feel proxy for the metric card
+    const cq=(typeof _wscConcernQ==='function')?_wscConcernQ(rd):{show:false};
+    const q5=cq.show?(a.q2||null):null;                        // concern-now → drives the progress bar
+    const hist=rd.wscHistory||[];
+    hist.push({date:new Date().toISOString(),score:score,q1:w,q2:w,q3:w,q4:w,q5:q5,focus:(rd.p3Focus||null),catchup:true});
+    if(hist.length>4)hist.shift();
+    rd.wscHistory=hist;
+    delete rd.pssIgnored;            // re-evaluate phase-shift on next render
+    delete rd.advanceSnoozedLen;     // clear stale advance snooze — progress has been re-based
+    routines[idx]=rd;
+    setSavedRoutines(routines);
+  }
+  closeCatchupSheet();
+  if(typeof renderMyRoutines==='function')renderMyRoutines();
+  // 4) If skin returned irritated, OFFER recovery (user chooses — never auto-activates).
+  if(reactivity>=2){
+    try{const r=getSavedRoutines().find(function(x){return x.id===routineId;});
+      if(r&&!r.inRecoveryMode&&typeof _dscShowStepBackSuggestion==='function')setTimeout(function(){_dscShowStepBackSuggestion(routineId);},320);}catch(e){}
+  }
+}
+
 function toggleWhyExplanation(id,btn){
   const row=document.getElementById(id);
   if(!row)return;
@@ -2827,7 +2951,7 @@ function checkAndShowWscBanner(){
 
 function openWscSheet(routineId){
   _wscState.routineId=routineId;
-  _wscState.answers={q1:null,q2:null,q3:null,q4:null};
+  _wscState.answers={q1:null,q2:null,q3:null,q4:null,q5:null};
   const ov=_wscGetOrCreateOverlay(); // create DOM elements first
   _renderWscQuestions();              // wsc-sheet-box now exists
   ov.style.display='flex';           // then show
@@ -2836,6 +2960,9 @@ function openWscSheet(routineId){
 function closeWscSheet(){
   const ov=document.getElementById('wsc-sheet-overlay');
   if(ov)ov.style.display='none';
+  // #Progression — if a concern-advance was queued during this weekly check, offer it now (after the result).
+  if(window._gpPendingAdvance){const _pa=window._gpPendingAdvance;window._gpPendingAdvance=null;
+    setTimeout(function(){if(typeof _gpAdvanceNotice==='function')_gpAdvanceNotice(_pa.rid,_pa.from,_pa.to);},350);}
 }
 
 function _wscGetOrCreateOverlay(){
@@ -2855,9 +2982,35 @@ function _wscGetOrCreateOverlay(){
   return ov;
 }
 
+// Adaptive weekly question (q5) — appears ONLY in Phase 3 and asks about the user's ACTIVE concern,
+// so the check-in tracks THAT concern's progress (not a fixed script). a=doing well … c=no change.
+// Kept OUT of _wscScore (barrier composite) — it's a separate concern-progress signal.
+function _wscConcernQ(rd){
+  if(!rd) return {show:false};
+  var pid=rd.activePhase||rd.startingPhase||'p1';
+  if(pid!=='p3') return {show:false};
+  var focus=rd.p3Focus||((typeof _inferP3Focus==='function'&&rd.answers)?_inferP3Focus(rd.answers):'clarity');
+  var st=((rd.focusSubtype||{})[focus])||[];
+  var L=_mrrL;
+  if(focus==='clarity') return {show:true,focus:focus,
+    label:L('How are your breakouts & congestion?','สิว & การอุดตันเป็นอย่างไรบ้าง?'),
+    opts:[L('Clear / under control','เคลียร์ / ควบคุมได้'),L('A few, on and off','มีบ้างเป็นบางครั้ง'),L('Frequent / worse','บ่อย / แย่ลง')]};
+  if(focus==='tone'){
+    var lbl=(st.indexOf('pie')!==-1&&st.indexOf('pih')===-1)?L('How is the redness from old marks?','รอยแดงจากสิวเก่าเป็นอย่างไร?')
+      :(st.indexOf('melasma')!==-1&&st.length===1)?L('How are your melasma patches?','ฝ้าเป็นอย่างไรบ้าง?')
+      :L('How are your dark marks & tone?','รอยด่างดำ & สีผิวเป็นอย่างไร?');
+    return {show:true,focus:focus,label:lbl,
+      opts:[L('Noticeably fading','จางลงชัดเจน'),L('Slowly fading','ค่อย ๆ จางลง'),L('No change yet','ยังไม่เปลี่ยน')]};
+  }
+  return {show:true,focus:focus,
+    label:L('How is your texture & firmness?','ผิวเรียบเนียน & กระชับเป็นอย่างไร?'),
+    opts:[L('Smoother / firmer','เนียน / กระชับขึ้น'),L('A little better','ดีขึ้นเล็กน้อย'),L('No change yet','ยังไม่เปลี่ยน')]};
+}
 function _renderWscQuestions(){
   const all=_wscState.answers;
-  const allAnswered=all.q1&&all.q2&&all.q3&&all.q4;
+  const _rd=(typeof getSavedRoutines==='function')?getSavedRoutines().find(function(x){return x.id===_wscState.routineId;}):null;
+  const _cq=_wscConcernQ(_rd);
+  const allAnswered=all.q1&&all.q2&&all.q3&&all.q4&&(!_cq.show||all.q5);
 
   function optRow(q,key,label){
     const sel=_wscState.answers[q]===key?'selected':'';
@@ -2895,6 +3048,13 @@ function _renderWscQuestions(){
         ${optRow('q4','a',t('wsc_q4_a'))}${optRow('q4','b',t('wsc_q4_b'))}${optRow('q4','c',t('wsc_q4_c'))}
       </div>
     </div>
+    ${_cq.show?`<div class="wsc-divider"></div>
+    <div class="wsc-question">
+      <div class="wsc-q-label"><span class="wsc-qnum">5</span>${_cq.label}</div>
+      <div class="wsc-options">
+        ${optRow('q5','a',_cq.opts[0])}${optRow('q5','b',_cq.opts[1])}${optRow('q5','c',_cq.opts[2])}
+      </div>
+    </div>`:''}
     <div class="wsc-footer">
       <button class="wsc-btn-submit" ${allAnswered?'':'disabled'} onclick="wscSubmit()">${t('wsc_btn_submit')}</button>
       <button class="wsc-btn-skip" onclick="_wscSkip()">${t('wsc_btn_skip')}</button>
@@ -2927,12 +3087,22 @@ function wscSubmit(){
     // Store per-question answers (q1 moisture, q2 irritation, q3 breakouts, q4 tolerance)
     // alongside the composite score so the My Routine progress card can show real per-metric trends.
     const _wa=_wscState.answers||{};
-    _hist.push({date:new Date().toISOString(),score:score,q1:_wa.q1||null,q2:_wa.q2||null,q3:_wa.q3||null,q4:_wa.q4||null});
+    _hist.push({date:new Date().toISOString(),score:score,q1:_wa.q1||null,q2:_wa.q2||null,q3:_wa.q3||null,q4:_wa.q4||null,q5:_wa.q5||null,focus:(_routines[_ri].p3Focus||null)});
     if(_hist.length>4)_hist.shift(); // keep last 4 only
     _routines[_ri].wscHistory=_hist;
     // Clear any existing phase-shift dismissal so next render re-evaluates
     delete _routines[_ri].pssIgnored;
     setSavedRoutines(_routines);
+    // #Progression — if the active concern now reads Controlled and a next concern exists, QUEUE the
+    // advance notice (shown after the weekly result is dismissed, in closeWscSheet). Never auto-advances.
+    try{
+      const _rAdv=_routines[_ri];
+      if((_rAdv.activePhase||_rAdv.startingPhase)==='p3'&&typeof _journeyStage==='function'&&_journeyStage(_rAdv)===2){
+        const _nx=(typeof _gpNextConcern==='function')?_gpNextConcern(_rAdv):null;
+        const _hl=(_rAdv.wscHistory||[]).length;
+        if(_nx&&_rAdv.advanceSnoozedLen!==_hl){window._gpPendingAdvance={rid:routineId,from:_rAdv.p3Focus,to:_nx};}
+      }
+    }catch(e){}
   }
 
   // Remove banner from card now that check is complete
@@ -3271,11 +3441,8 @@ function _overSelectedCategories(){
 function _selectionMetaHtml(){
   const n=builderState.selectedIds.length;
   let html=`<div class="prod-selection-badge">${t('prod_selected_count')}: ${n}</div>`;
-  const over=_overSelectedCategories();
-  if(over.length){
-    const list=over.map(o=>`${o.n}× ${o.cat}`).join(', ');
-    html+=`<div class="info-box amber" style="margin-top:8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.05em;flex-shrink:0">💡</span><div style="font-size:.8rem;line-height:1.5">${tFmt('prod_overselect_body',{list})}</div></div>`;
-  }
+  // Over-selection nudge REMOVED (2026-07-02, Bow): routines build from ALL owned products; the engine
+  // will rotate + match per night/phase (deferred engine work). No cap or "too many" message. See memory.
   // Multiple leave-on exfoliating acids (e.g. an AHA and a BHA) → explain they're split across paths, never stacked.
   const _sel=PRODUCT_DB.filter(p=>builderState.selectedIds.includes(p.id));
   const _isCl=p=>/cleanser/.test(normalizedCategory(p)||'');
@@ -3395,7 +3562,15 @@ function renderRoutineResult(c){
   const _selected=PRODUCT_DB.filter(p=>rd.selectedIds.includes(p.id));
   const _hasActives=_selected.some(p=>hasRetinoid(p)||hasExfoliantAcid(p)||hasBenzoylPeroxide(p));
   const _needsAA=rd.answers.agingConcerns===t('o_yes')||(rd.answers.goals||[]).some(g=>[t('g_antiaging'),t('g_elasticity'),t('g_fine_lines'),t('g_wrinkles')].includes(g));
-  rd.phases=_needsAA?4:(_hasActives?3:2);
+  rd.phases=(_needsAA||_hasActives)?4:2;   // Maintenance-for-all: any routine with a treatment track ends at P4 Maintenance (not aging-gated)
+  // P4 maintenance focus from the user's dominant goal (was always defaulting to 'aging')
+  if(!rd.p4Focus){
+    const _g=rd.answers.goals||[];
+    const _has=k=>_g.includes(t(k));
+    if(_needsAA) rd.p4Focus='aging';
+    else if(_has('g_barrier')||_has('g_calm')||rd.answers.sensitivity===t('o_high')||rd.answers.barrierCondition===t('o_very_damaged')||rd.answers.barrierCondition===t('o_slightly')) rd.p4Focus='barrier';
+    else rd.p4Focus='glow';   // glow = general radiance + clarity/spot maintenance (covers glow/glass/pigment/acne)
+  }
   // Entry assessment — compute and persist the starting phase
   if(!rd.startingPhase) rd.startingPhase=_computeStartingPhase(rd.answers);
   // Never place beyond the routine's phase count (e.g. p3 when only 2 phases)
@@ -3425,11 +3600,18 @@ function _getPhaseActives(data,pid){
   if(pid==='p1')return{bha:false,retinal:false,aha:false,peel:false};
   if(pid==='p2')return{bha:data.bha,retinal:false,aha:false,peel:false};
   if(pid==='p3'){
-    const focus=data.p3Focus||'renew';
-    // Clarity — BHA-led for acne/clogged pores. Prefer BHA, then azelaic, then any. Retinal-free.
-    if(focus==='clarity')return{bha:data.bha,retinal:false,aha:data.ahaBHA||data.ahaAZ||data.aha,peel:data.peel};
-    // Even Tone — marks/pigment. Prefer azelaic (best for PIH+redness), then AHA, then any. Retinal-free.
-    if(focus==='tone')return{bha:data.bha,retinal:false,aha:data.ahaAZ||data.ahaAHA||data.aha,peel:false};
+    const focus=data.p3Focus||(data._answersWithDayProducts&&data._answersWithDayProducts._p3Focus)||'renew';
+    // #3 sub-type gating — read the ACTIVE focus's 2b sub-types (empty array → identical to prior behavior).
+    const _fs=(data._answersWithDayProducts&&data._answersWithDayProducts._focusSubtype)||{};
+    const _st=_fs[focus]||[]; const _has=(k)=>_st.indexOf(k)!==-1;
+    // Clarity — BHA-led for acne/clogged pores. Retinal-free. Suppress physical peel on ACTIVE inflamed acne (irritation).
+    if(focus==='clarity')return{bha:data.bha,retinal:false,aha:data.ahaBHA||data.ahaAZ||data.aha,peel:(_has('active')?false:data.peel)};
+    // Even Tone — PIE (vascular) & melasma need CALMING, not exfoliation (SKINCARE_RESEARCH §2):
+    // azelaic-only, suppress AHA / retinal / physical peel to avoid prolonging redness / rebound.
+    if(focus==='tone'){
+      if(_has('pie')||_has('melasma'))return{bha:false,retinal:false,aha:data.ahaAZ||false,peel:false};
+      return{bha:data.bha,retinal:false,aha:data.ahaAZ||data.ahaAHA||data.aha,peel:false};
+    }
     // renew (default) → full Phase 3 actives below (paced retinal). Any exfoliant.
   }
   if(pid==='p4'){
@@ -3534,7 +3716,7 @@ const sleepingPack=_bestFit(selected.filter(p=>normalizedCategory(p)==='sleeping
   // null them out — a moisturizer containing retinol/AHA must not render twice
   // (once as moist, once as the active step). Use the product as moist only.
   const retinalProd=(()=>{
-    const cands=selected.filter(p=>hasRetinoid(p)&&p!==moist);
+    const cands=selected.filter(p=>hasRetinoid(p)&&p!==moist&&p.category!=='eye cream'&&p.subcategory!=='eye cream');
     if(!cands.length)return null;
     const scored=cands.map(p=>({p,s:scoreProductForUser(p,a)})).sort((a,b)=>b.s-a.s);
     const topScore=scored[0].s;
@@ -3598,7 +3780,7 @@ const sleepingPack=_bestFit(selected.filter(p=>normalizedCategory(p)==='sleeping
   // Daily Skin Check: resolve tonight's adjustment ONLY if an answer was logged for today.
   // Recomputed each evening; a new day with no answer → null → routine renders normally.
   const _dscTonight=(()=>{const dt=rd.dscToday;if(!dt||dt.date!==_getTodayDate())return null;return _dscResolve(dt.reactivity,dt.q2);})();
-  const _answersWithDayProducts=Object.assign({},a,{_dayProducts,_p4Focus:_p4FocusInit,_p3Focus:_p3FocusInit,_inRecoveryMode,_recentWscScore,_dscTonight});
+  const _answersWithDayProducts=Object.assign({},a,{_dayProducts,_p4Focus:_p4FocusInit,_p3Focus:_p3FocusInit,_inRecoveryMode,_recentWscScore,_dscTonight,_addedFocus:(rd.addedFocus||[]),_focusSubtype:(rd.focusSubtype||{})});
   const numPhases=rd.phases||(needsAntiAging?4:(hasActives?3:2));
   const phaseIds=['p1','p2','p3','p4'].slice(0,numPhases);
   // Entry assessment — determine starting phase
@@ -3918,6 +4100,279 @@ function switchP4Focus(focus,btn){
   },0);
 }
 
+// 2a — which P3 sub-paths the user has a concern for (→ unlocked). Others render LOCKED.
+function _p3Unlocked(a){
+  a=a||{};
+  var goals=((a.goals||[]).join(' ')).toLowerCase();
+  var types=((a.skinTypes||[]).join(' ')).toLowerCase();
+  var acne=(a.acneLevel||'').toLowerCase();
+  var aging=(a.agingConcerns||'').toLowerCase();
+  var clarity = (acne && acne.indexOf('none')===-1) || /acne|oily|congest|combinat/.test(types) || /acne|clarity|breakout|pore|congest|blemish/.test(goals);
+  var tone    = /even tone|bright|dark spot|dark mark|pigment|hyperpig|glow|radian|dull/.test(goals);
+  var renew   = (aging.indexOf('yes')!==-1) || /aging|age|texture|firm|line|wrinkle|smooth|elastic|renew/.test(goals);
+  return {clarity:!!clarity, tone:!!tone, renew:!!renew};
+}
+// 2a — tap a LOCKED sub-path: first ask which sub-type of the concern (2b popup), THEN commit.
+// The btn ref stays valid because nothing re-renders until _gp2aCommitUnlock runs switchP3Focus.
+function gp2aUnlock(focus,btn){
+  if(!btn)return;
+  if(typeof _GP2B_TYPES==='object' && _GP2B_TYPES[focus]){ gp2bOpen(focus,btn); return; }
+  _gp2aCommitUnlock(focus,btn,[]);
+}
+// 2a commit — PERSIST the added concern (+ its 2b sub-types) on the routine (stays across reloads),
+// keep the render bundle in sync, then switch focus (re-picks the products for that focus).
+// `subtypes` = ARRAY of selected sub-type keys (a user can have several — e.g. PIH + PIE).
+function _gp2aCommitUnlock(focus,btn,subtypes){
+  if(!btn)return;
+  var subs=Array.isArray(subtypes)?subtypes:(subtypes?[subtypes]:[]);
+  var card=btn.closest('.builder-card[data-card-id]');
+  var cardId=card?card.dataset.cardId:'';
+  var rid = cardId ? cardId.replace('gc-','') : (localStorage.getItem('gp_current_routine_id')||'');
+  // 1) persist on the routine so it stays unlocked across reloads
+  if(rid && typeof getSavedRoutines==='function'){
+    var rs=getSavedRoutines(); var i=rs.findIndex(function(x){return x.id===rid;});
+    if(i!==-1){ var af=rs[i].addedFocus||[]; if(af.indexOf(focus)===-1)af.push(focus);
+      rs[i].addedFocus=af;
+      if(subs.length){ var fs=rs[i].focusSubtype||{}; fs[focus]=subs; rs[i].focusSubtype=fs; }
+      if(typeof setSavedRoutines==='function')setSavedRoutines(rs); }
+  }
+  // 2) keep the in-session render bundle in sync (switchP3Focus re-renders the tabs from it)
+  var data=(cardId&&window._glowPhaseData)?window._glowPhaseData[cardId]:null;
+  if(data&&data._answersWithDayProducts){ var b=data._answersWithDayProducts;
+    var af2=b._addedFocus||[]; if(af2.indexOf(focus)===-1)af2.push(focus); b._addedFocus=af2;
+    if(subs.length){ var fs2=b._focusSubtype||{}; fs2[focus]=subs; b._focusSubtype=fs2; } }
+  // 3) switch focus to it (re-picks products + re-renders tabs → now unlocked)
+  if(typeof switchP3Focus==='function') switchP3Focus(focus,btn);
+}
+// 2b — sub-type popup. Asks which kind of the concern so the engine (concern→active map) can pick
+// the right active. The pick is stored on the routine as focusSubtype[focus], then unlock commits.
+var _GP2B_TYPES={
+  tone:['pih','pie','melasma','sunspot','dullness'],
+  clarity:['active','clogged','oil','texture'],
+  renew:['lines','firmness','texture','radiance']
+};
+function _gp2bContent(focus){
+  function L(en,th){return (typeof _mrrL==='function')?_mrrL(en,th):en;}
+  var C={
+    tone:{title:L('Even Tone','ผิวสม่ำเสมอ'),
+      sub:L('Which of these do you have? This helps us pick the right brightening actives — and skip the wrong ones.','คุณมีอาการไหนบ้าง? ช่วยให้เราเลือกสารช่วยเรื่องผิวได้ถูก'),
+      opts:[
+        ['pih',L('Brown marks (PIH)','รอยสีน้ำตาล (PIH)'),L('Flat brown or tan spots left after a breakout heals','รอยแบนสีน้ำตาลหลังสิวหาย')],
+        ['pie',L('Red marks (PIE)','รอยแดง (PIE)'),L('Flat pink or red marks where a spot used to be','รอยแดง/ชมพูตรงที่เคยเป็นสิว')],
+        ['melasma',L('Larger patches (melasma)','ฝ้า (melasma)'),L('Symmetrical brown–grey patches, often cheeks or forehead','ปื้นสีน้ำตาลเทา มักที่แก้มหรือหน้าผาก')],
+        ['sunspot',L('Sun spots','จุดกระแดด'),L('Small defined brown spots from sun exposure','จุดน้ำตาลเล็กจากแดด')],
+        ['dullness',L('Overall dullness','ผิวหมองคล้ำ'),L('No distinct spots — skin just looks tired or uneven','ไม่มีจุดชัด ผิวดูหมองหรือไม่สม่ำเสมอ')]
+      ]},
+    clarity:{title:L('Clarity','เคลียร์ผิว'),
+      sub:L('What are you mainly dealing with? This tunes the exfoliant and treatment.','ปัญหาหลักคืออะไร? ช่วยปรับตัวผลัดผิวและทรีตเมนต์')
+,
+      opts:[
+        ['active',L('Active breakouts','สิวอักเสบ'),L('Current pimples, whiteheads or inflamed spots','สิว หัวขาว หรือสิวอักเสบที่เป็นอยู่')],
+        ['clogged',L('Clogged pores & blackheads','รูขุมขนอุดตัน & สิวหัวดำ'),L('Congestion and blackheads, not much redness','การอุดตันและสิวหัวดำ ไม่ค่อยแดง')],
+        ['oil',L('Oil & shine','ความมัน'),L('Excess sebum, midday shine, enlarged pores','ผิวมัน รูขุมขนกว้าง')],
+        ['texture',L('Bumpy texture','ผิวไม่เรียบ'),L('Rough or bumpy skin, closed comedones','ผิวสาก/เป็นตุ่ม สิวอุดตันหัวปิด')]
+      ]},
+    renew:{title:L('Texture & Aging','ผิวเรียบเนียน & ริ้วรอย'),
+      sub:L('What matters most to you? This sets the strength and pace of the treatment.','อะไรสำคัญที่สุด? ช่วยตั้งความแรงและจังหวะของทรีตเมนต์'),
+      opts:[
+        ['lines',L('Fine lines & wrinkles','ริ้วรอย'),L('Early lines, expression creases','ริ้วรอยเริ่มแรก รอยพับจากการแสดงสีหน้า')],
+        ['firmness',L('Firmness & elasticity','ความกระชับ'),L('Skin feels less bouncy or firm','ผิวหย่อนคล้อย ไม่กระชับ')],
+        ['texture',L('Rough texture','ผิวสาก'),L('Uneven surface, roughness, large pores','ผิวไม่เรียบ สาก รูขุมขนกว้าง')],
+        ['radiance',L('Radiance','ผิวกระจ่างใส'),L('Mainly want smoother, more glowing skin','อยากให้ผิวเนียนและกระจ่างใสขึ้น')]
+      ]}
+  };
+  return C[focus]||null;
+}
+function gp2bClose(){var o=document.getElementById('gp2b-ov');if(o)o.remove();window._gp2bPending=null;}
+function gp2bOpen(focus,btn){
+  var c=_gp2bContent(focus); if(!c){_gp2aCommitUnlock(focus,btn,[]);return;}
+  gp2bClose(); // clears any prior overlay + pending FIRST, so we don't wipe what we set below
+  window._gp2bPending={focus:focus,btn:btn};
+  window._gp2bSel=[]; // multi-select: users can have several sub-types (e.g. PIH + PIE)
+  var ov=document.createElement('div'); ov.className='gp2b-ov'; ov.id='gp2b-ov';
+  ov.onclick=function(e){if(e.target===ov)gp2bClose();};
+  ov.innerHTML='<div class="gp2b-modal" role="dialog" aria-modal="true"><div class="gp2b-star">✦</div>'+
+    '<div class="gp2b-title">'+c.title+'</div>'+
+    '<div class="gp2b-sub">'+c.sub+'</div>'+
+    '<div class="gp2b-hint">'+_mrrL('Select all that apply','เลือกได้มากกว่าหนึ่ง')+'</div>'+
+    '<div class="gp2b-opts">'+c.opts.map(function(o){
+      return '<button type="button" class="gp2b-opt" data-k="'+o[0]+'" onclick="gp2bToggle(\''+o[0]+'\',this)">'+
+        '<span class="gp2b-tick">✓</span>'+
+        '<span class="gp2b-txt"><span class="gp2b-opt-name">'+o[1]+'</span>'+
+        '<span class="gp2b-opt-desc">'+o[2]+'</span></span></button>';
+    }).join('')+'</div>'+
+    '<div class="gp2b-foot">'+
+      '<button type="button" class="gp2b-proceed" onclick="gp2bProceed()">'+
+        _mrrL('Proceed','ดำเนินการ')+'</button>'+
+      '<button type="button" class="gp2b-unlock" onclick="gp2bJustUnlock()">'+
+        _mrrL('Not sure — just unlock','ไม่แน่ใจ — ปลดล็อกเลย')+'</button>'+
+    '</div>'+
+    '<button type="button" class="gp2b-stay" onclick="gp2bClose()">'+
+      _mrrL('Stay on current focus','คงโฟกัสเดิมไว้')+'</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+// 2b — "Not sure": unlock the concern but store NO sub-type (engine falls back to a general active).
+function gp2bJustUnlock(){
+  var p=window._gp2bPending||{}; var rid=_gp2bRidFromBtn(p.btn); gp2bClose(); window._gp2bSel=[];
+  if(!p.focus||!p.btn)return;
+  _gp2aCommitUnlock(p.focus,p.btn,[]);
+  if(rid)setTimeout(function(){ if(typeof openTreatmentGuide==='function')openTreatmentGuide(rid); },60);
+}
+// 2b — toggle a sub-type on/off (multi-select).
+function gp2bToggle(key,el){
+  var sel=window._gp2bSel||(window._gp2bSel=[]);
+  var i=sel.indexOf(key);
+  if(i===-1){sel.push(key);} else {sel.splice(i,1);}
+  if(el)el.classList.toggle('selected',sel.indexOf(key)!==-1);
+}
+// 2b — confirm: commit all selected sub-types (or none → unlock without a sub-type), then close.
+function gp2bProceed(){
+  var p=window._gp2bPending||{}; var sel=(window._gp2bSel||[]).slice();
+  var rid=_gp2bRidFromBtn(p.btn);
+  gp2bClose(); window._gp2bSel=[];
+  if(!p.focus||!p.btn)return;
+  _gp2aCommitUnlock(p.focus,p.btn,sel);
+  if(rid)setTimeout(function(){ if(typeof openTreatmentGuide==='function')openTreatmentGuide(rid); },60);
+}
+function _gp2bRidFromBtn(btn){var c=btn&&btn.closest?btn.closest('.builder-card[data-card-id]'):null;return c?c.dataset.cardId.replace('gc-',''):'';}
+// 2a — "Add a concern to unlock" hint: briefly draw attention to the locked tabs.
+function gp2aUnlockHint(btn){
+  var wrap=btn&&btn.closest('.p4focus-wrap'); if(!wrap)return;
+  wrap.querySelectorAll('.gp2a-tab.locked').forEach(function(t){
+    t.classList.add('gp2a-flash'); setTimeout(function(){t.classList.remove('gp2a-flash');},1400);
+  });
+}
+
+/* ═══ #3 CONCERN → ACTIVE MAP + TREATMENT PLAN GUIDE ═══
+   Evidence-based (see SKINCARE_RESEARCH.md): order barrier→acne→pigment→aging,
+   which maps to P3 sub-paths Clarity → Even Tone → Renew. Each sub-type has a
+   ranked prefer-list of actives; the guide consolidates to multi-taskers. */
+var GPG_ACT={azelaic:'🎯 Azelaic acid',bha:'🔬 BHA',niacinamide:'✨ Niacinamide',retinal:'🕰 Retinal',vitc:'🍋 Vitamin C',aha:'🔬 AHA',pha:'🔬 PHA',tranexamic:'🎨 Tranexamic acid',arbutin:'🌓 Arbutin',peptides:'💪 Peptides',spf:'☀️ SPF',calming:'🌿 Centella'};
+var GPG_MAP={
+  clarity:{active:['azelaic','bha'],clogged:['bha','retinal','azelaic'],oil:['niacinamide','bha'],texture:['retinal','bha','azelaic']},
+  tone:{pie:['niacinamide','azelaic','calming'],pih:['azelaic','retinal','vitc'],melasma:['tranexamic','azelaic','arbutin'],sunspot:['vitc','retinal','azelaic'],dullness:['vitc','pha','niacinamide']},
+  renew:{lines:['retinal','peptides'],firmness:['peptides','retinal','vitc'],texture:['retinal','pha'],radiance:['vitc','pha']}
+};
+// avoid / hold-back per sub-type (research: PIE & melasma dislike harsh acids/retinal)
+var GPG_AVOID={tone:{pie:['aha','peel','retinal'],melasma:['aha','peel','retinal']}};
+var GPG_ORDER={clarity:['active','clogged','oil','texture'],tone:['pie','pih','melasma','sunspot','dullness'],renew:['lines','firmness','texture','radiance']};
+var GPG_CONCERN_ORDER=['clarity','tone','renew'];
+function _gpgL(en,th){return (typeof _mrrL==='function')?_mrrL(en,th):en;}
+function _gpgSubLabel(k){var M={active:_gpgL('Active breakouts','สิวอักเสบ'),clogged:_gpgL('Clogged pores','รูขุมขนอุดตัน'),oil:_gpgL('Oil & shine','ความมัน'),texture:_gpgL('Rough texture','ผิวสาก'),pie:_gpgL('Red marks (PIE)','รอยแดง'),pih:_gpgL('Brown marks (PIH)','รอยสีน้ำตาล'),melasma:_gpgL('Melasma','ฝ้า'),sunspot:_gpgL('Sun spots','จุดกระแดด'),dullness:_gpgL('Dullness','ผิวหมองคล้ำ'),lines:_gpgL('Fine lines','ริ้วรอย'),firmness:_gpgL('Firmness','ความกระชับ'),radiance:_gpgL('Radiance','ผิวกระจ่างใส')};return M[k]||k;}
+function _gpgConcernMeta(c){var M={
+  clarity:{name:_gpgL('Clear','เคลียร์ผิว'),desc:_gpgL('breakouts & congestion','สิว & การอุดตัน'),why:_gpgL('We calm breakouts first — this also stops new marks forming.','จัดการสิวก่อน — ช่วยไม่ให้เกิดรอยใหม่')},
+  tone:{name:_gpgL('Even out','ปรับผิวสม่ำเสมอ'),desc:_gpgL('marks & tone','รอย & สีผิว'),why:_gpgL('Once skin is clear, fade what\'s left — red marks calm first, then brown.','เมื่อผิวเคลียร์แล้ว ค่อยจัดการรอย — รอยแดงก่อน แล้วรอยน้ำตาล')},
+  renew:{name:_gpgL('Refine','ผิวเนียน & กระจ่างใส'),desc:_gpgL('texture & glow','ผิวเรียบ & กระจ่างใส'),why:_gpgL('Last — smoothing & glow work best on calm, even skin.','ท้ายสุด — ผลลัพธ์ดีที่สุดบนผิวที่สงบและสม่ำเสมอ')}};return M[c];}
+// "Not sure" fallback — derive sub-types from routine-builder answers
+function _gpgDerive(a){a=a||{};var goals=((a.goals||[]).join(' ')).toLowerCase(),types=((a.skinTypes||[]).join(' ')).toLowerCase(),acne=(a.acneLevel||'').toLowerCase(),aging=(a.agingConcerns||'').toLowerCase(),b=goals+' '+types+' '+acne+' '+aging;function h(re){return re.test(b);}
+  var c=[];if(h(/acne|breakout|blemish|pimple|inflam/)||/[1-9]/.test(acne))c.push('active');if(h(/congest|blackhead|clog|comedone|pore/))c.push('clogged');if(h(/oil|shine|sebum/))c.push('oil');if(h(/bumpy|rough|texture/))c.push('texture');
+  var t=[];if(h(/red|redness|rosacea|erythema|\bpie\b/))t.push('pie');if(h(/dark mark|dark spot|pih|post.?acne|brown|hyperpig/))t.push('pih');if(h(/melasma|patch/))t.push('melasma');if(h(/sun spot|freckle|uv spot/))t.push('sunspot');if(h(/dull|uneven|glow|radian|bright/))t.push('dullness');
+  var r=[];if(h(/line|wrinkle/))r.push('lines');if(h(/firm|elasticity|sag|bounce/))r.push('firmness');if(h(/texture|rough|smooth/))r.push('texture');if(h(/glow|radian|dull/))r.push('radiance');
+  return {clarity:c,tone:t,renew:r};}
+// per-concern sub-types: use stored 2b focusSubtype[concern] if present, else derived
+function _gpgSubtypes(rd){var a=rd._answersWithDayProducts||rd.answers||rd||{};var der=_gpgDerive(a);var fs=rd.focusSubtype||{};var out={};
+  GPG_CONCERN_ORDER.forEach(function(c){var s=(fs[c]&&fs[c].length)?fs[c].slice():(der[c]||[]);
+    // keep only known keys, ordered
+    out[c]=GPG_ORDER[c].filter(function(k){return s.indexOf(k)!==-1;});});
+  return out;}
+// show each sub-type's LEAD active (prefer[0]); dedupe identical leads (multi-tasker covers several); cap 3.
+function _gpgPick(concern,subs){var m=GPG_MAP[concern]||{};var byAct={},order=[];
+  subs.forEach(function(s){var hero=(m[s]||[])[0];if(!hero)return;if(!byAct[hero]){byAct[hero]={act:hero,covers:[]};order.push(hero);}byAct[hero].covers.push(s);});
+  return order.slice(0,3).map(function(a){return byAct[a];});}
+function _gpgBuild(rd){
+  var subs=_gpgSubtypes(rd);
+  var seq=GPG_CONCERN_ORDER.filter(function(c){return (subs[c]||[]).length;});
+  if(!seq.length)seq=['clarity']; // safety
+  var _grad=rd.concernsGraduated||[];
+  var _cur=rd.p3Focus||(seq.filter(function(c){return _grad.indexOf(c)===-1;})[0])||seq[0];
+  var steps=seq.map(function(concern,i){
+    var s=subs[concern];
+    var chips=s.map(function(k,j){return (j?'<span class="gpg-arrow">→</span>':'')+'<span class="gpg-chip'+(j===0?' first':'')+'">'+_gpgSubLabel(k)+'</span>';}).join('');
+    var acts=_gpgPick(concern,s).map(function(x){return '<span class="gpg-actpill">'+GPG_ACT[x.act]+' <small>('+x.covers.map(function(k){return _gpgSubLabel(k).replace(/\s*\(.*\)/,'');}).join(', ')+')</small></span>';}).join('');
+    var M=_gpgConcernMeta(concern);
+    var isGrad=_grad.indexOf(concern)!==-1;
+    var isNow=(concern===_cur)&&!isGrad;
+    var st=isGrad?'done':(isNow?'now':'next');
+    var pill=isGrad?('✓ '+_gpgL('Done','สำเร็จ')):(isNow?_gpgL('Start here','เริ่มที่นี่'):_gpgL('Next','ถัดไป'));
+    return '<div class="gpg-step '+st+'"><div class="gpg-node">'+(isGrad?'✓':(i+1))+'</div><div class="gpg-card">'
+      +'<div class="gpg-head"><div class="gpg-name">'+M.name+' <span>'+M.desc+'</span></div><span class="gpg-pill '+st+'">'+pill+'</span></div>'
+      +'<div class="gpg-chips">'+chips+'</div>'
+      +'<div class="gpg-act">'+acts+'</div>'
+      +'<div class="gpg-why">'+M.why+'</div>'
+      +(isNow?'<button type="button" class="gpg-setup" onclick="gpgSetup(\''+concern+'\')">'+_gpgL('Set up my '+_gpgSubLabel(s[0]).toLowerCase().replace(/\s*\(.*\)/,''),'ตั้งค่า')+' →</button>':'')
+      +'</div></div>';
+  }).join('');
+  return '<div class="gpg-modal" role="dialog" aria-modal="true"><div class="gpg-star">✦</div>'
+    +'<div class="gpg-title">'+_gpgL('Your Treatment Plan','แผนการดูแลผิวของคุณ')+'</div>'
+    +'<div class="gpg-sub">'+_gpgL('The smartest order for your skin — one focus at a time, so nothing fights.','ลำดับที่ดีที่สุดสำหรับผิวคุณ — ทีละอย่าง เพื่อไม่ให้ตีกัน')+'</div>'
+    +'<div class="gpg-steps">'+steps+'</div>'
+    +'<div class="gpg-spf">☀️ '+_gpgL('SPF every morning — it protects every result, especially your marks.','ครีมกันแดดทุกเช้า — ปกป้องทุกผลลัพธ์ โดยเฉพาะรอย')+'</div>'
+    +'<button type="button" class="gpg-done" onclick="closeTreatmentGuide()">'+_gpgL('Got it','เข้าใจแล้ว')+' ✦</button>'
+    +'</div>';
+}
+function closeTreatmentGuide(){var o=document.getElementById('gpg-ov');if(o)o.remove();}
+function openTreatmentGuide(ref){
+  var rd=null,rid='';
+  if(ref&&ref.closest){var card=ref.closest('.builder-card[data-card-id]');if(card)rid=card.dataset.cardId.replace('gc-','');}
+  else if(typeof ref==='string'){rid=ref.replace('gc-','');}
+  if(rid&&typeof getSavedRoutines==='function')rd=getSavedRoutines().find(function(x){return x.id===rid;});
+  if(!rd)rd=(typeof getSavedRoutines==='function')?(getSavedRoutines().find(function(x){return x.id===(localStorage.getItem('gp_current_routine_id')||'');})||getSavedRoutines()[0]):null;
+  if(!rd)return;
+  window._gpgRid=rd.id;
+  closeTreatmentGuide();
+  var ov=document.createElement('div');ov.id='gpg-ov';ov.className='gpg-ov';
+  ov.onclick=function(e){if(e.target===ov)closeTreatmentGuide();};
+  ov.innerHTML=_gpgBuild(rd);
+  document.body.appendChild(ov);
+}
+// "Set up my …" → open the 2b sub-type quiz for that concern, anchored to this routine's card
+function gpgSetup(concern){
+  var rid=window._gpgRid||'';var card=document.querySelector('.builder-card[data-card-id="gc-'+rid+'"]')||document.querySelector('.builder-card[data-card-id]');
+  closeTreatmentGuide();
+  if(card&&typeof gp2bOpen==='function')gp2bOpen(concern,card);
+}
+// #Progression — next concern in the roadmap (Clarity→Tone→Renew) the user HAS and hasn't graduated.
+function _gpNextConcern(rd){
+  if(!rd)return null;
+  var a=rd._answersWithDayProducts||rd.answers||rd||{};
+  var u=(typeof _p3Unlocked==='function')?_p3Unlocked(a):{};
+  var added=rd.addedFocus||[]; var grad=rd.concernsGraduated||[];
+  var order=['clarity','tone','renew']; var cur=rd.p3Focus||'clarity';
+  var has=function(f){return !!(u[f]||added.indexOf(f)!==-1);};
+  for(var i=order.indexOf(cur)+1;i<order.length;i++){ if(has(order[i])&&grad.indexOf(order[i])===-1) return order[i]; }
+  return null;
+}
+function _gpAdvanceClose(){var o=document.getElementById('gpadv-ov');if(o)o.remove();}
+// Concern-done NOTICE — never auto-advances; the user chooses. Fired after a weekly check where the
+// active concern reads Controlled and a next concern exists (queued in wscSubmit, shown on closeWscSheet).
+function _gpAdvanceNotice(rid,fromFocus,toFocus){
+  if(!fromFocus||!toFocus||typeof _gpgConcernMeta!=='function')return;
+  var fromD=_gpgConcernMeta(fromFocus), toD=_gpgConcernMeta(toFocus);
+  _gpAdvanceClose();
+  var ov=document.createElement('div');ov.className='gpg-ov';ov.id='gpadv-ov';
+  ov.onclick=function(e){if(e.target===ov)_gpAdvanceClose();};
+  ov.innerHTML='<div class="gpg-modal" style="max-width:378px;text-align:center">'
+    +'<div class="gpg-star">✦</div>'
+    +'<div class="gpg-title">'+_mrrL('Nice progress','คืบหน้าดีมาก')+'</div>'
+    +'<div class="gpg-sub">'+_mrrL('Your '+fromD.desc+' look under control. Ready to start on your '+toD.desc+'?','ผิวส่วน'+fromD.desc+'ดูควบคุมได้แล้ว พร้อมเริ่มดูแล'+toD.desc+'ไหม?')+'</div>'
+    +'<div class="gpg-foot"><button type="button" class="gpg-proceed" onclick="gpAdvanceConcern(\''+rid+'\',\''+fromFocus+'\',\''+toFocus+'\')">'+_mrrL('Move to '+toD.name,'ไปที่ '+toD.name)+' →</button></div>'
+    +'<button type="button" class="gpg-stay" onclick="_gpAdvanceStay(\''+rid+'\')">'+_mrrL('Stay a bit longer','อยู่ต่ออีกสักพัก')+'</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+function gpAdvanceConcern(rid,fromFocus,toFocus){
+  var rs=getSavedRoutines();var i=rs.findIndex(function(x){return x.id===rid;});
+  if(i!==-1){var g=rs[i].concernsGraduated||[];if(g.indexOf(fromFocus)===-1)g.push(fromFocus);rs[i].concernsGraduated=g;rs[i].p3Focus=toFocus;if(rs[i].focusSubtype){} delete rs[i].advanceSnoozedLen;setSavedRoutines(rs);}
+  _gpAdvanceClose();
+  if(typeof renderMyRoutines==='function')renderMyRoutines();
+  setTimeout(function(){if(typeof openTreatmentGuide==='function')openTreatmentGuide(rid);},320);
+}
+function _gpAdvanceStay(rid){
+  var rs=getSavedRoutines();var i=rs.findIndex(function(x){return x.id===rid;});
+  if(i!==-1){rs[i].advanceSnoozedLen=(rs[i].wscHistory||[]).length;setSavedRoutines(rs);}
+  _gpAdvanceClose();
+}
 function switchP3Focus(focus,btn){
   const card=btn?btn.closest('.builder-card'):null;
   if(!card)return;
@@ -4108,10 +4563,10 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
       if(isPeel&&peel&&!isRet&&!isBarrierRecovery&&!_rpDamagedBarrier)_base++;                            // peeling gel
       if(dayToner)_base++;                                                                          // toner (device overlays are not steps — excluded from count)
       if(daySerum)_base++;                                                     // serum
-      if(isAHA&&aha&&!isBarrierRecovery)_base++;                                                   // AHA
-      if(isBHA&&bha&&!isBarrierRecovery)_base++;                                                   // BHA
+      if(isAHA&&aha&&!isBarrierRecovery&&!_rpDamagedBarrier)_base++;                                                   // AHA
+      if(isBHA&&bha&&!isBarrierRecovery&&!_dscSuppress)_base++;                                                   // BHA
       if(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))_base++;                                 // moisturizer
-      if(isRet&&retinal&&!isBarrierRecovery)_base++;                                              // retinal
+      if(isRet&&retinal&&!isBarrierRecovery&&!_dscSuppress)_base++;                                              // retinal
       if(_retinoidDayEye)_base++;                                                                  // retinoid eye (post-retinal)
       const _slots=7-_base;
       // Fill slots: essence first (prep layer), then eye (targeted treatment), mist last (lowest priority)
@@ -4126,10 +4581,10 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
       if(isPeel&&peel&&!isRet&&!isBarrierRecovery&&!_rpDamagedBarrier)_base++;
       if(dayToner)_base++;
       if(daySerum)_base++;
-      if(isAHA&&aha&&!isBarrierRecovery)_base++;
-      if(isBHA&&bha&&!isBarrierRecovery)_base++;
+      if(isAHA&&aha&&!isBarrierRecovery&&!_rpDamagedBarrier)_base++;
+      if(isBHA&&bha&&!isBarrierRecovery&&!_dscSuppress)_base++;
       if(moist&&!(sleepingPack&&!_rpNeedsExtraOcclusion))_base++;
-      if(isRet&&retinal&&!isBarrierRecovery)_base++;
+      if(isRet&&retinal&&!isBarrierRecovery&&!_dscSuppress)_base++;
       if(_retinoidDayEye)_base++;
       const _slots=7-_base;
       const _usedOptional=(_showEssence?1:0)+(_showEye?1:0);
@@ -4287,19 +4742,87 @@ const _rpIsModerate=_rpA.complexity===t('o_moderate_r');
   // Phase 3 focus tabs (sub-paths) — reuse p4focus styling
   // Fragile barrier profile → warn (don't block) when on the retinal Renew path
   const _p3Fragile=(_rpA.barrierCondition===t('o_slightly')||_rpA.barrierCondition===t('o_very_damaged')||_rpA.sensitivity===t('o_high')||_rpA.redness===t('o_high')||(_rpA.skinTypes||[]).some(s=>s===t('o_barrier')||s===t('o_reactive')||s===t('o_rosacea')));
+  const _2aU=_p3Unlocked(_rpA);
+  const _2aAdded=_rpA._addedFocus||[];
+  const _2aTab=function(f,name,desc){
+    var active=(_p3Focus===f);
+    var unlocked=_2aU[f]||active||(_2aAdded.indexOf(f)!==-1);
+    var cls='p4focus-tab gp2a-tab'+(active?' active':'')+(unlocked?'':' locked');
+    var oc=unlocked?("switchP3Focus('"+f+"',this)"):("gp2aUnlock('"+f+"',this)");
+    var pill=active?('<span class="gp2a-badge">'+_mrrL('Active','กำลังใช้')+'</span>')
+            :(unlocked?'':('<span class="gp2a-lock">🔒 '+_mrrL('Locked','ล็อก')+'</span>'));
+    return '<button class="'+cls+'" data-focus="'+f+'" onclick="'+oc+'">'+pill
+      +'<span class="gp2a-name">'+(active?'✦ ':'')+name+'</span>'
+      +'<span class="gp2a-desc">'+desc+'</span></button>';
+  };
   const _p3FocusTabs=pid==='p3'?`<div class="p4focus-wrap">
     <div class="p4focus-label">${_mrrL('FOCUS','โฟกัส')}</div>
-    <div class="p4focus-tabs">
-      <button class="p4focus-tab ${_p3Focus==='clarity'?'active':''}" onclick="switchP3Focus('clarity',this)">${t('p3focus_clarity_label')}</button>
-      <button class="p4focus-tab ${_p3Focus==='tone'?'active':''}" onclick="switchP3Focus('tone',this)">${t('p3focus_tone_label')}</button>
-      <button class="p4focus-tab ${_p3Focus==='renew'?'active':''}" onclick="switchP3Focus('renew',this)">${t('p3focus_renew_label')}</button>
+    <div class="p4focus-tabs gp2a-tabs">
+      ${_2aTab('clarity',_mrrL('Clarity','เคลียร์ผิว'),_mrrL('Breakouts, congestion, texture & pores','สิว รูขุมขน ผิวไม่เรียบ'))}
+      ${_2aTab('tone',_mrrL('Even Tone','ผิวสม่ำเสมอ'),_mrrL('Dark marks, uneven tone, dullness','จุดด่างดำ สีผิวไม่สม่ำเสมอ'))}
+      ${_2aTab('renew',_mrrL('Texture & Aging','ผิวเรียบเนียน & ริ้วรอย'),_mrrL('Fine lines, firmness, smoothness','ริ้วรอย ความกระชับ'))}
     </div>
-    <div class="p4focus-desc"><b>${t('p3focus_'+_p3Focus+'_title')}.</b> ${t('p3focus_'+_p3Focus+'_desc')}</div>
-    <div class="p4focus-note">${t('p4focus_switch_note')}</div>
     ${(_p3Focus==='renew'&&_p3Fragile)?`<div class="p4focus-warn">⚠ ${t('p3focus_retinal_warn_body')}</div>`:''}
+    <div class="gp2a-actions">
+      <div class="gp2a-unlock-hint">＋ ${_mrrL('More than one concern?','มีมากกว่าหนึ่งปัญหา?')} <button class="gp2a-unlock-btn" onclick="gp2aUnlockHint(this)">${_mrrL('Add a concern to unlock','เพิ่มปัญหาเพื่อปลดล็อก')}</button></div>
+      <button type="button" class="gpg-plan-btn" onclick="openTreatmentGuide(this)">✦ ${_mrrL('View my plan','ดูแผนของฉัน')}</button>
+    </div>
   </div>`:'';
 
-  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}">${_focusTabs}${_p3FocusTabs}<div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_sbStrip}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
+  // #3b-1 — Treatment-plan transparency note (p3 only, once per phase). Explains what 3a held back
+  // for the active sub-type + suggests a missing ideal active. Skipped during recovery / live barrier
+  // stress (that suppression is barrier-driven, not sub-type-driven — the recovery banner covers it).
+  const _gpgNote=(()=>{
+    if(pid!=='p3'||_rpA._inRecoveryMode||_liveBarrierStress)return '';
+    const focus=_p3Focus;
+    const st=((_rpA._focusSubtype||{})[focus])||[];
+    if(!st.length)return '';
+    const sel=selected||[];
+    const _ingOf=(p)=>(((p.ingredients||'')+' '+((p.activeIngredients||[]).join(' '))).toLowerCase());
+    const ownsRetinoid=sel.some(p=>hasRetinoid(p));
+    const ownsAHA=sel.some(p=>hasExfoliantAcid(p)&&_acidType(p)==='aha');
+    const owns={
+      azelaic:sel.some(p=>hasAzelaicAcid(p)||_acidType(p)==='azelaic'),
+      bha:sel.some(p=>_acidType(p)==='bha'||hasBHA(p)),
+      niacinamide:sel.some(p=>/niacinamide/.test(_ingOf(p))),
+      retinal:ownsRetinoid,
+      vitc:sel.some(p=>hasStrongVitaminC(p)||/ascorb/.test(_ingOf(p))),
+      tranexamic:sel.some(p=>/tranexamic/.test(_ingOf(p))),
+      pha:sel.some(p=>hasPHA(p)),
+      peptides:sel.some(p=>/peptide|matrixyl|palmitoyl|argireline|copper.?peptide/.test(_ingOf(p))),
+      aha:ownsAHA
+    };
+    const ownsPeel=sel.some(p=>normalizedCategory(p)==='peeling gel');
+    const _has=(k)=>st.indexOf(k)!==-1;
+    // hold-back: owned actives that 3a suppressed for this sub-type
+    let held=[];
+    if(focus==='tone'&&(_has('pie')||_has('melasma'))){
+      if(ownsRetinoid&&!retinal)held.push(_mrrL('retinal','เรตินัล'));
+      if(ownsAHA&&!(aha&&_acidType(aha)==='aha'))held.push('AHA');
+      if(ownsPeel&&!peel)held.push(_mrrL('peel','พีลลิ่ง'));
+    } else if(focus==='clarity'&&_has('active')){
+      if(ownsPeel&&!peel)held.push(_mrrL('peel','พีลลิ่ง'));
+    }
+    // consider-adding: highest-priority sub-type whose lead active isn't owned
+    let suggest='';
+    (GPG_ORDER[focus]||[]).filter(k=>_has(k)).forEach(k=>{
+      if(suggest)return; const lead=((GPG_MAP[focus]||{})[k]||[])[0];
+      if(lead&&owns[lead]===false)suggest=GPG_ACT[lead]||lead;
+    });
+    if(!held.length&&!suggest)return '';
+    let rows='';
+    if(held.length){
+      const what=held.join(', ');
+      const body=(focus==='clarity')
+        ? _mrrL('Pausing your '+what+' while breakouts settle — scrubbing can inflame active acne.','พักการใช้ '+what+' ระหว่างที่สิวยังอยู่ — การขัดถูอาจทำให้สิวอักเสบ')
+        : _mrrL('Holding your '+what+' tonight — we calm first; strong acids '+(_has('melasma')?'can trigger rebound':'can prolong redness')+'.','พัก '+what+' คืนนี้ — เน้นปลอบผิวก่อน');
+      rows+='<div class="gpg-note-row">🌿 '+body+'</div>';
+    }
+    if(suggest)rows+='<div class="gpg-note-row">✦ '+_mrrL('Your plan points to '+suggest+' — consider adding one.','แผนแนะนำ '+suggest+' — ลองเพิ่มเข้าคลัง')+'</div>';
+    return '<div class="gpg-phase-note">'+rows+'</div>';
+  })();
+
+  return `<div class="phase-panel ${activeClass}" id="rp-${pid}" data-pid="${pid}">${_focusTabs}${_p3FocusTabs}<div class="phase-hero-box ${ph.cls}"><div class="ph-tag">${tFmt('result_phase_label',{n:pid.replace('p','')})}</div><div class="ph-title">${ph.title}</div><div class="ph-desc">${ph.desc}</div><div class="ph-duration">${ph.dur}</div></div>${_gpgNote}${_sbStrip}${isOptional?`<div class="info-box amber" style="margin:10px 0 8px;display:flex;align-items:flex-start;gap:8px"><span style="font-size:1.1em;flex-shrink:0">💚</span><div><strong>${t('phase1_optional_badge')}</strong> — ${t('phase1_optional_note')}</div></div>`:''}<div class="day-nav-wrap"><div class="day-nav" id="dn-${pid}">${dayBtns}</div></div><div class="day-content-area">${dayPanels}</div></div>`;
 }
 
 /* Render a single day-panel HTML string by delegating to renderPhase with
@@ -4330,7 +4853,8 @@ function attachDayInteractions(){
     if(typeof renderPhaseShiftSuggestion==='function') renderPhaseShiftSuggestion();
     if(typeof checkAndShowWscBanner==='function') checkAndShowWscBanner();
     if(typeof renderCheckinCards==='function') renderCheckinCards();
-    if(typeof checkAndShowDscPrompt==='function') checkAndShowDscPrompt();
+    // Daily check-in no longer auto-pops on entering My Routine (Bow 2026-07-03) —
+    // it opens only when the user taps "Log it" (the .gp-checkin-card / .gp-checkin-btn → openDscSheet).
     if(typeof _injectPhaseSubStateBadge==='function'){
       document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){
         const cardId=card.dataset.cardId;
@@ -4747,6 +5271,8 @@ function mrrPhaseTab(pid,btn){
   btn.classList.add('active');
   if(unlocked){_doSwitchRoutinePhase(pid,btn);}
   else{_mrrRenderArea(card,pid);_mrrUpdateChrome(card,pid,true);}
+  // #3 — first time entering an unlocked Phase 3 this session, surface the treatment plan guide.
+  if(pid==='p3'&&unlocked){var _rid=cardId.replace('gc-','');try{if(!sessionStorage.getItem('gpg_seen_'+_rid)){sessionStorage.setItem('gpg_seen_'+_rid,'1');setTimeout(function(){if(typeof openTreatmentGuide==='function')openTreatmentGuide(_rid);},280);}}catch(e){}}
 }
 // Lock CTA → run the EXISTING phase-advance gate (openSkinGate / caution / graduation via switchRoutinePhase).
 function mrrUnlockGate(cardId,pid){
@@ -4787,20 +5313,107 @@ function _wscBaselineFromAnswers(rd){
   else if(/occasional|some|mild|moderate/i.test(acLevel)||/acne-prone|congested|clogged/i.test(types))q3='b';
   return {q1:q1,q2:q2,q3:q3,baseline:true};
 }
+// Your Journey panel — first-pass render (Bow 2026-07-02). Phase + working-on are REAL from the
+// routine; progress STAGE is a placeholder (p4=Maintain, else Treating) until the check-in-driven
+// progression engine lands. Uses the .gp-journey-* CSS shell (style.css v91). Merges atop the WSC card.
+// Progress stage (0 Treating · 1 Improving · 2 Controlled · 3 Maintain) derived from real check-ins.
+// WSC score is 0–8 where LOWER = better skin (a=0 best … c=2). Maintenance phase = Maintain.
+function _journeyStage(rd){
+  var pid=(rd&&(rd.activePhase||rd.startingPhase))||'p1';
+  if(pid==='p4') return 3;                          // Maintenance phase → Maintain
+  var hist=(rd&&rd.wscHistory)||[];
+  if(!hist.length) return 0;                        // no check-ins yet → Treating
+  // #Progression — in Phase 3 the bar tracks the ACTIVE concern via the adaptive q5 (a=doing well … c=no change).
+  if(pid==='p3'){
+    var _focus=rd.p3Focus||'clarity';
+    var _cc=hist.filter(function(h){return h.q5&&(h.focus===_focus||!h.focus);});
+    if(_cc.length){
+      var _rk={a:0,b:1,c:2};
+      var _q5a=_rk[_cc[_cc.length-1].q5];
+      if(_cc.length>=2){var _q5b=_rk[_cc[_cc.length-2].q5];
+        if(_q5a===0&&_q5b===0) return 2;            // two "doing well" in a row → Controlled
+        if(_q5a<_q5b) return 1;                     // improving trend → Improving
+      }
+      return _q5a===0?1:0;                          // one good → Improving, else Treating
+    }
+    // no concern check-ins yet → fall through to the composite-score read below
+  }
+  var a=hist[hist.length-1].score;                  // most recent (lower=better)
+  if(hist.length>=2){
+    var b=hist[hist.length-2].score;
+    if(a<=2 && b<=2) return 2;                       // two good checks in a row → Controlled
+    if(a < b) return 1;                              // trending better → Improving
+  }
+  if(a<=2) return 1;                                 // one good check → Improving
+  return 0;                                          // otherwise → Treating
+}
+function _mrrJourneyHtml(rd){
+  if(!rd) return '';
+  var pid=(rd.activePhase||rd.startingPhase||'p1');
+  var pnum=pid.replace('p','');
+  var pname=t('myr_ph'+pnum)||'';
+  var working;
+  if(pid==='p1') working=_mrrL('Barrier repair','ซ่อมเกราะผิว');
+  else if(pid==='p2') working=_mrrL('Hydration','เติมความชุ่มชื้น');
+  else if(pid==='p3'){
+    var f3=rd.p3Focus||((typeof _inferP3Focus==='function'&&rd.answers)?_inferP3Focus(rd.answers):'clarity');
+    working=(f3==='tone')?_mrrL('Even tone — dark marks','ผิวสม่ำเสมอ — จุดด่างดำ')
+           :(f3==='renew')?_mrrL('Texture & aging','ผิวเรียบเนียน & ริ้วรอย')
+           :_mrrL('Clarity — breakouts','ลดสิว & รูขุมขน');
+  } else {
+    var f4=rd.p4Focus||'aging';
+    working=(f4==='barrier')?_mrrL('Barrier maintenance','ดูแลเกราะผิว')
+           :(f4==='glow')?_mrrL('Glow & clarity','ผิวกระจ่างใส')
+           :_mrrL('Firmness & aging','ความกระชับ & ริ้วรอย');
+  }
+  var stages=[_mrrL('Treating','กำลังรักษา'),_mrrL('Improving','กำลังดีขึ้น'),_mrrL('Controlled','ควบคุมได้'),_mrrL('Maintain','คงสภาพ')];
+  var active=_journeyStage(rd);
+  var segs='',labs='';
+  for(var i=0;i<4;i++){
+    segs+='<span class="gp-seg'+(i<=active?' done':'')+(i===active?' active':'')+'"></span>';
+    labs+='<span class="gp-seg-label'+(i===active?' active':'')+'">'+stages[i]+'</span>';
+  }
+  return '<div class="gp-journey">'
+    +'<div class="gp-journey-head"><span class="gp-journey-star">✦</span>'
+      +'<span class="gp-journey-title">'+_mrrL('Your journey','เส้นทางผิวของคุณ')+'</span></div>'
+    +'<div class="gp-journey-tiles">'
+      +'<div class="gp-jtile"><div class="gp-jtile-k">'+_mrrL('Phase','เฟส')+'</div><div class="gp-jtile-v">'+pname+' · P'+pnum+'</div></div>'
+      +'<div class="gp-jtile"><div class="gp-jtile-k">'+_mrrL('Working on','กำลังดูแล')+'</div><div class="gp-jtile-v">'+working+'</div></div>'
+    +'</div>'
+    +'<div class="gp-journey-goinglbl">'+_mrrL("How it's going","เป็นอย่างไรบ้าง")+'</div>'
+    +'<div class="gp-seg-track">'+segs+'</div><div class="gp-seg-labels">'+labs+'</div>'
+    +'<div class="gp-journey-note">✧ '+_mrrL("We'll track your progress from your weekly check-ins.","เราจะติดตามความคืบหน้าจากการเช็คอินของคุณ")+'</div>'
+  +'</div>';
+}
 function _mrrWscCard(rd){
   var hist=(rd&&rd.wscHistory)||[];
   var rid=(rd&&rd.id)||'';
-  var head='<div class="wsc-head"><div class="wsc-title">◇ '+t('myr_wsc_title')+'</div><button class="wsc-btn" onclick="openWscSheet(\''+rid+'\')">'+t('myr_wsc_cta')+' →</button></div>';
-  // Missed-days note (merged in from the check-in block) — shows above the stats.
+  // Weekly check-in is gated to every 7 days (_wscIsDue). When it's not due yet, show a disabled
+  // "next check" pill instead of an always-clickable button — missed DAILY check-ins don't count
+  // toward the weekly clock; a real gap routes to the catch-up re-sync below.
+  var _wDue=(typeof _wscIsDue==='function')?_wscIsDue(rid):true;
+  var _wLeft=(typeof _wscDaysLeft==='function')?_wscDaysLeft(rid):0;
+  var _wBtn=_wDue
+    ? '<button class="wsc-btn" onclick="openWscSheet(\''+rid+'\')">'+t('myr_wsc_cta')+' →</button>'
+    : '<span class="wsc-btn wsc-btn-wait" aria-disabled="true">'+(_wLeft<=1?_mrrL('Next check tomorrow','เช็คครั้งต่อไปพรุ่งนี้'):_mrrL('Next check in '+_wLeft+' days','เช็คครั้งต่อไปใน '+_wLeft+' วัน'))+'</span>';
+  var head='<div class="wsc-head"><div class="wsc-title">◇ '+t('myr_wsc_title')+'</div>'+_wBtn+'</div>';
+  // Missed-days handling. A real gap (≥3 missed daily check-ins) routes to the catch-up re-sync —
+  // it resets the weekly clock AND re-baselines progress to how the skin is NOW. A short 1–2 day
+  // gap keeps the gentle passive note.
   var _missed=(typeof _getMissedDays==='function'&&rd)?_getMissedDays(rd):0;
   var _doneToday=(typeof _hasCheckedInToday==='function'&&rd)?_hasCheckedInToday(rd):false;
-  var missedHtml=(!_doneToday&&_missed>=1)?'<div class="wsc-missed">'+(_missed===1?t6('checkin_missed_1'):t6('checkin_missed_n').replace('{n}',_missed))+'</div>':'';
+  var missedHtml='';
+  if(!_doneToday&&_missed>=3){
+    missedHtml='<div class="wsc-catchup"><div class="wsc-catchup-txt">'+_mrrL("You've missed "+_missed+" days — how's your skin right now?","คุณห่างหายไป "+_missed+" วัน — ตอนนี้ผิวเป็นอย่างไรบ้าง?")+'</div><button class="wsc-catchup-btn" onclick="openCatchupSheet(\''+rid+'\')">'+_mrrL('Re-sync my skin','ซิงค์ผิวใหม่')+' →</button></div>';
+  } else if(!_doneToday&&_missed>=1){
+    missedHtml='<div class="wsc-missed">'+(_missed===1?t6('checkin_missed_1'):t6('checkin_missed_n').replace('{n}',_missed))+'</div>';
+  }
   var streak=(typeof _getCheckinStreak==='function')?_getCheckinStreak(rd):0;
   var last,prev=null,baselineMode=false;
   if(hist.length){ last=hist[hist.length-1]; prev=hist.length>1?hist[hist.length-2]:null; }
   else {
     var _bl=(typeof _wscBaselineFromAnswers==='function')?_wscBaselineFromAnswers(rd):null;
-    if(!_bl){ return '<div class="wsc">'+head+missedHtml+'<div class="wsc-insight">'+t('myr_wsc_empty')+'</div></div>'; }
+    if(!_bl){ return '<div class="wsc" style="position:relative;overflow:hidden">'+'<div class="gp-journey-depth"></div>'+'<div class="gp-journey-shimmer"></div>'+_mrrJourneyHtml(rd)+head+missedHtml+'<div class="wsc-insight">'+t('myr_wsc_empty')+'</div></div>'; }
     last=_bl; baselineMode=true;
   }
   var hyd=_mrrWscMetric(last.q1,['Hydrated','Slightly dry','Dry']);
@@ -4814,7 +5427,7 @@ function _mrrWscCard(rd){
   function wordCell(metric,label,key){return '<div class="wsc-stat"><div class="wsc-n sm" style="color:'+colorOf(metric.cls)+'">'+metric.txt+'</div><div class="wsc-l">'+label+'</div>'+trend(metric,key)+'</div>';}
   var cons='<div class="wsc-stat"><div class="wsc-n">'+streak+'<span>/7</span></div><div class="wsc-l">'+t('myr_wsc_consistency')+'</div><div class="wsc-d '+(streak>=5?'up':streak>=3?'warn':'neu')+'">'+(streak>=5?'↑ strong':streak>=1?'→ keep going':'start a streak')+'</div></div>';
   var insight=baselineMode?('<b>'+_mrrL('From your skin assessment','จากการประเมินผิวของคุณ')+'</b> '+_mrrL('Check in weekly to track how your skin changes.','เช็คอินทุกสัปดาห์เพื่อติดตามการเปลี่ยนแปลงของผิว')):_mrrWscInsight(last.score);
-  return '<div class="wsc">'+head+missedHtml+'<div class="wsc-stats">'+numCell(hyd,t('myr_wsc_hydration'),'q1',_HYD,'%')+numCell(brk,t('myr_wsc_breakouts'),'q3',_BRK,'/10')+cons+wordCell(sen,t('myr_wsc_sensitivity'),'q2')+'</div>'+(insight?'<div class="wsc-insight">'+insight+'</div>':'')+'</div>';
+  return '<div class="wsc" style="position:relative;overflow:hidden">'+'<div class="gp-journey-depth"></div>'+'<div class="gp-journey-shimmer"></div>'+_mrrJourneyHtml(rd)+head+missedHtml+'<div class="wsc-stats">'+numCell(hyd,t('myr_wsc_hydration'),'q1',_HYD,'%')+numCell(brk,t('myr_wsc_breakouts'),'q3',_BRK,'/10')+cons+wordCell(sen,t('myr_wsc_sensitivity'),'q2')+'</div>'+(insight?'<div class="wsc-insight">'+insight+'</div>':'')+'</div>';
 }
 function _mrrShell(parts,recsHtml,emergHtml,switcherHtml,actionsHtml,rd){
   var id=parts.cardId;
@@ -4990,6 +5603,67 @@ function _mrrFixHero(card){
   tag.appendChild(document.createTextNode(' · '));   // A-4: "Phase 1 · ICE CRYSTAL" separator like the preview
   tag.appendChild(chip);
 }
+// ── Phase sub-state guide: skin-aware coaching suffix (UI/TEXT ONLY — engine untouched) ──
+// Picks ONE clause by priority based on the user's profile + live state. '' when resilient.
+function _skinAwareTipSuffix(r){
+  if(!r)return '';
+  var a=r.answers||{};
+  // 1) reacting NOW — live signal (recovery mode or recent weekly check-in score >= 3)
+  var reacting=!!r.inRecoveryMode;
+  if(!reacting && r.wscHistory && r.wscHistory.length){
+    var last=r.wscHistory[r.wscHistory.length-1];
+    if(last && typeof last.score==='number' && last.score>=3) reacting=true;
+  }
+  if(reacting) return ' '+t('js_skin_mod_reacting');
+  // 2) fragile / sensitive / reactive / rosacea
+  if(typeof _isFragileProfile==='function' && _isFragileProfile(a)) return ' '+t('js_skin_mod_fragile');
+  var st=Array.isArray(a.skinTypes)?a.skinTypes:[];
+  var has=function(tok){return st.indexOf(t(tok))!==-1;};
+  // 3) acne-prone / congested
+  if(has('o_acneprone')||has('o_congested')) return ' '+t('js_skin_mod_acne');
+  // 4) high redness / rosacea
+  if(a.redness===t('o_high')||has('o_rosacea')) return ' '+t('js_skin_mod_redness');
+  // 5) dehydrated / dry
+  if(has('o_dehydrated')||has('o_dry')) return ' '+t('js_skin_mod_dehydrated');
+  return '';
+}
+// Adds the sub-state chip to the hero tag + the skin-aware guide tip under the phase title.
+function _mrrSubState(card){
+  if(!card)return;
+  var hero=card.querySelector('.active-phase-area .phase-hero-box')||card.querySelector('.phase-panel.active .phase-hero-box')||card.querySelector('.phase-panel .phase-hero-box');
+  if(!hero)return;
+  var tag=hero.querySelector('.ph-tag'), title=hero.querySelector('.ph-title');
+  if(!tag||!title)return;
+  var rid=card.dataset.cardId&&card.dataset.cardId.replace('gc-','');
+  var r=rid?getSavedRoutines().find(function(x){return x.id===rid;}):null;
+  if(!r)return;
+  var pid=r.activePhase||'p1';
+  // Only show on the user's ACTUAL current phase — not when previewing another phase tab.
+  var heroM=hero.className.match(/\bp([1-4])\b/);
+  if(heroM && ('p'+heroM[1])!==pid){
+    var st1=hero.querySelector('.mrr-substate-tip'); if(st1)st1.remove();
+    var st2=hero.querySelector('.ph-tag .mrr-substate'); if(st2)st2.remove();
+    return;
+  }
+  var startD=r.phaseStartedAt||r.createdAt; if(!startD)return;
+  var days=Math.max(1,Math.floor((Date.now()-new Date(startD).getTime())/86400000)+1);
+  var focus=(pid==='p4')?(r.p4Focus||'aging'):undefined;
+  var label=_getPhaseSubState(pid,days,focus);
+  if(!label||label===t('js_stable'))return;  // mirror existing badge guard
+  if(!tag.querySelector('.mrr-substate')){
+    var chip=document.createElement('span');chip.className='mrr-substate';chip.textContent=label;
+    tag.appendChild(document.createTextNode(' · '));tag.appendChild(chip);
+  }
+  var base=_getPhaseSubStateTip(pid,days,focus)||'';
+  var sfx=_skinAwareTipSuffix(r); if(sfx)sfx=sfx.replace(/^\s+/,'');
+  var tip=sfx?(base?base+'. '+sfx:sfx):base;
+  var old=hero.querySelector('.mrr-substate-tip'); if(old)old.remove();
+  if(tip && tip.trim()){
+    var line=document.createElement('div');line.className='mrr-substate-tip';
+    line.appendChild(document.createTextNode('✦ '+tip.trim()));
+    title.insertAdjacentElement('afterend',line);
+  }
+}
 // A-3: reformat the engine day header into the preview's one-line nightcap
 // "Mon · 💧 Hydration night — {goal}". Night type read from the engine's day badges (by class).
 function _mrrNightType(head){
@@ -5039,7 +5713,7 @@ function _mrrUpdateHeader(routine,switcherHTML){
 }
 function _mrrReflowAll(){
   if(!document.getElementById('page-myroutine'))return;
-  document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){_mrrReflowSteps(card);_mrrFixHero(card);_mrrCleanDays(card);});
+  document.querySelectorAll('#page-myroutine .builder-card[data-card-id]').forEach(function(card){_mrrReflowSteps(card);_mrrFixHero(card);_mrrSubState(card);_mrrCleanDays(card);});
   // Re-anchor every locked overlay AFTER _mrrFixHero/_mrrCleanDays have mutated the hero/day
   // rows above the card — otherwise the overlay was measured against a pre-mutation card
   // position and ends up ~20px taller, overhanging below the card as a frosted band.
