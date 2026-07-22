@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Glowphase ✦ Your Personalised Skin Journey</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23DDF4FF'/><stop offset='1' stop-color='%23AEEFFF'/></linearGradient><linearGradient id='st' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23FFFFFF'/><stop offset='0.5' stop-color='%238EC8DB'/><stop offset='1' stop-color='%237EC4D5'/></linearGradient></defs><rect width='100' height='100' rx='26' fill='url(%23bg)'/><path d='M50 14 L57.5 42.5 L86 50 L57.5 57.5 L50 86 L42.5 57.5 L14 50 L42.5 42.5 Z' fill='url(%23st)'/></svg>">
-  <link rel="stylesheet" href="style.css?v=107">
+  <link rel="stylesheet" href="style.css?v=184">
 </head>
 <body>
 <!-- Crystal loading veil — auto-fades (pure CSS), JS removes node after -->
@@ -149,14 +149,21 @@
       <div class="section-title">Product <em>Library</em></div>
       <div class="section-sub" data-i18n="library_sub">234 products · 52 brands worldwide · Full INCI ingredient lists · A–Z by brand</div>
     </div>
+    <div class="lib-hero">
+      <div class="lib-stat-row">
+        <div class="lib-stat"><div class="lib-stat-n" id="lib-hero-total">0</div><div class="lib-stat-l">Products</div></div>
+        <div class="lib-stat"><div class="lib-stat-n" id="lib-hero-brands">0</div><div class="lib-stat-l">Brands</div></div>
+        <div class="lib-stat"><div class="lib-stat-n" id="lib-hero-shown">0</div><div class="lib-stat-l">Showing now</div></div>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" id="lib-search" type="text" placeholder="Search brand, product, ingredient, active..." data-i18n-placeholder="lib_search_ph" oninput="renderLibrary()">
+        <button class="btn btn-ghost btn-sm" onclick="resetLibrary()">Reset</button>
+        <button class="btn btn-rose btn-sm" onclick="showPage('builder',null)">Build Routine</button>
+      </div>
+    </div>
     <div class="notice" id="lib-data-notice">
       📂 <strong>Demo Database Active.</strong>
       To load your own product database, use the import function or provide a JSON/JS data file.
-    </div>
-    <div class="search-wrap">
-      <input class="search-input" id="lib-search" type="text" placeholder="Search brand, product, ingredient, active..." data-i18n-placeholder="lib_search_ph" oninput="renderLibrary()">
-      <button class="btn btn-ghost btn-sm" onclick="resetLibrary()">Reset</button>
-      <button class="btn btn-rose btn-sm" onclick="showPage('builder',null)">Build Routine</button>
     </div>
     <div class="filter-row">
       <span class="filter-label">Category</span>
@@ -181,27 +188,32 @@
       <button class="chip" data-filter="category" data-value="peeling gel" data-i18n="chip_peeling_gel" onclick="toggleChip(this)">Peeling Gel</button>
       <button class="chip" data-filter="category" data-value="exfoliant" data-i18n="chip_exfoliant" onclick="toggleChip(this)">Exfoliant</button>
     </div>
-    <div class="filter-row">
-      <span class="filter-label">Formula</span>
-      <button class="chip" data-filter="formula" data-value="fragrance-free" onclick="toggleChip(this)">Fragrance-Free</button>
-      <button class="chip" data-filter="formula" data-value="alcohol-free" onclick="toggleChip(this)">Alcohol-Free</button>
-      <button class="chip" data-filter="formula" data-value="eo-free" onclick="toggleChip(this)">EO-Free</button>
+    <div class="lib-refine-toggle" id="lib-refine-toggle" onclick="toggleLibRefine()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleLibRefine();}" role="button" tabindex="0" aria-expanded="false">
+      <span class="arrow">▾</span><span>Refine by formula &amp; actives</span><span class="lib-refine-badge" id="lib-refine-badge" style="display:none">0</span>
     </div>
-    <div class="filter-row">
-      <span class="filter-label">Active Ingredients</span>
-      <button class="chip" data-filter="active" data-value="retinol" onclick="toggleChip(this)">Retinol/Retinal</button>
-      <button class="chip" data-filter="active" data-value="niacinamide" onclick="toggleChip(this)">Niacinamide</button>
-      <button class="chip" data-filter="active" data-value="ceramides" onclick="toggleChip(this)">Ceramides</button>
-      <button class="chip" data-filter="active" data-value="centella" onclick="toggleChip(this)">Centella</button>
-      <button class="chip" data-filter="active" data-value="peptides" onclick="toggleChip(this)">Peptides</button>
-      <button class="chip" data-filter="active" data-value="vitamin c" onclick="toggleChip(this)">Vitamin C</button>
-      <button class="chip" data-filter="active" data-value="hyaluronic acid" onclick="toggleChip(this)">Hyaluronic Acid</button>
-      <button class="chip" data-filter="active" data-value="aha" onclick="toggleChip(this)">AHA</button>
-      <button class="chip" data-filter="active" data-value="bha" onclick="toggleChip(this)">BHA</button>
-      <button class="chip" data-filter="active" data-value="azelaic acid" onclick="toggleChip(this)">Azelaic Acid</button>
-      <button class="chip" data-filter="active" data-value="pdrn" onclick="toggleChip(this)">PDRN</button>
+    <div class="lib-refine-panel" id="lib-refine-panel">
+      <div class="filter-row">
+        <span class="filter-label">Formula</span>
+        <button class="chip" data-filter="formula" data-value="fragrance-free" onclick="toggleChip(this)">Fragrance-Free</button>
+        <button class="chip" data-filter="formula" data-value="alcohol-free" onclick="toggleChip(this)">Alcohol-Free</button>
+        <button class="chip" data-filter="formula" data-value="eo-free" onclick="toggleChip(this)">EO-Free</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Active Ingredients</span>
+        <button class="chip" data-filter="active" data-value="retinol" onclick="toggleChip(this)">Retinol/Retinal</button>
+        <button class="chip" data-filter="active" data-value="niacinamide" onclick="toggleChip(this)">Niacinamide</button>
+        <button class="chip" data-filter="active" data-value="ceramides" onclick="toggleChip(this)">Ceramides</button>
+        <button class="chip" data-filter="active" data-value="centella" onclick="toggleChip(this)">Centella</button>
+        <button class="chip" data-filter="active" data-value="peptides" onclick="toggleChip(this)">Peptides</button>
+        <button class="chip" data-filter="active" data-value="vitamin c" onclick="toggleChip(this)">Vitamin C</button>
+        <button class="chip" data-filter="active" data-value="hyaluronic acid" onclick="toggleChip(this)">Hyaluronic Acid</button>
+        <button class="chip" data-filter="active" data-value="aha" onclick="toggleChip(this)">AHA</button>
+        <button class="chip" data-filter="active" data-value="bha" onclick="toggleChip(this)">BHA</button>
+        <button class="chip" data-filter="active" data-value="azelaic acid" onclick="toggleChip(this)">Azelaic Acid</button>
+        <button class="chip" data-filter="active" data-value="pdrn" onclick="toggleChip(this)">PDRN</button>
+      </div>
     </div>
-    <div class="results-count" id="lib-count"></div>
+    <div class="results-count" id="lib-count" style="display:none"></div>
     <div id="library-content"></div>
   </div>
 </div>
@@ -325,6 +337,7 @@
       <div class="search-wrap" style="margin-bottom:12px">
         <input class="search-input" id="conflict-search" type="text" placeholder="Search products..." data-i18n-placeholder="conflict_search_ph" oninput="renderConflictGrid()">
       </div>
+      <div class="conf-picker-summary" id="conf-picker-summary"><span class="conf-picker-empty" data-i18n="conf_picker_empty">No products selected yet — tap cards below to add them.</span></div>
       <div class="prod-picker-grid" id="conflict-grid"></div>
       <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-rose" onclick="runConflictCheck()">Check Conflicts</button>
@@ -361,9 +374,10 @@
   </div>
 </div>
 
-<script src="products.js?v=4"></script>
-<script src="translations.js?v=85"></script>
-<script src="script.js?v=116"></script>
+<script src="products.js?v=12"></script>
+<script src="translations.js?v=95"></script>
+<script src="ingredient-scores.js?v=5"></script>
+<script src="script.js?v=145"></script>
 
 <script>
 (function(){

@@ -1675,6 +1675,29 @@ let conflictSelected=[];
 function toggleChip(btn){ const f=btn.dataset.filter,v=btn.dataset.value,arr=activeFilters[f],i=arr.indexOf(v); if(i===-1){arr.push(v);btn.classList.add('active');}else{arr.splice(i,1);btn.classList.remove('active');} renderLibrary(); }
 function resetLibrary(){ activeFilters={category:[],concern:[],formula:[],active:[]}; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('lib-search').value=''; renderLibrary(); }
 
+/* ═══ LIBRARY HERO PANEL (§A-1 redesign, 2026-07-19) ═══
+   Stat tiles + the Formula/Active "refine" disclosure. Kept as small,
+   independent functions so the redesign doesn't entangle with the core
+   filter/render logic above. */
+function _libUpdateHero(shownCount){
+  const totalEl=document.getElementById('lib-hero-total'),brandsEl=document.getElementById('lib-hero-brands'),shownEl=document.getElementById('lib-hero-shown'),badge=document.getElementById('lib-refine-badge');
+  if(totalEl)totalEl.textContent=PRODUCT_DB.length;
+  if(brandsEl)brandsEl.textContent=new Set(PRODUCT_DB.map(p=>p.brand)).size;
+  if(shownEl)shownEl.textContent=shownCount;
+  if(badge){
+    const n=activeFilters.formula.length+activeFilters.active.length;
+    badge.style.display=n?'inline-block':'none';
+    badge.textContent=n;
+  }
+}
+function toggleLibRefine(){
+  const toggle=document.getElementById('lib-refine-toggle'),panel=document.getElementById('lib-refine-panel');
+  if(!toggle||!panel)return;
+  const open=toggle.classList.toggle('open');
+  panel.classList.toggle('open',open);
+  toggle.setAttribute('aria-expanded',open?'true':'false');
+}
+
 /* ═══ LIBRARY RENDER ═══ */
 function filterProducts(){
   const q=(document.getElementById('lib-search')||{}).value||''; const ql=q.toLowerCase();
@@ -1711,50 +1734,34 @@ function prodConcernTags(p){
   if(/hyperpig|dark spot|pih|post.?acne mark|dull/.test(txt)) tags.push('Brightening');
   return tags;
 }
-function prodSuitability(p){
-  // Three quick ratings based on actual data
-  const txt = (p.bestFor||'').toLowerCase();
-  const avoid = (p.doNotCombine||'').toLowerCase();
-  let sensitive = 3;
-  if(!p.fragranceFree) sensitive -= 1;
-  if(!p.alcoholFree) sensitive -= 1;
-  if(!p.eoFree) sensitive -= 1;
-  if(/sensitive|reactive/.test(txt)) sensitive += 2;
-  if(/not.*sensitive|NOT.*sensitive/i.test(txt)) sensitive = Math.min(sensitive,1);
-  if(/avoid|caution/.test(avoid) && /retinol|aha|bha/i.test(avoid)) sensitive -= 1;
-  sensitive = Math.max(1,Math.min(5,sensitive));
-  
-  let barrier = 2;
-  const actives = (p.activeIngredients||[]);
-  if(actives.includes('ceramides')) barrier += 2;
-  if(actives.includes('centella')) barrier += 1;
-  if(actives.includes('hyaluronic acid')) barrier += 1;
-  if(actives.includes('pdrn')) barrier += 1;
-  if(actives.some(a=>['retinol','bha','aha','azelaic acid'].includes(a))) barrier -= 1;
-  barrier = Math.max(1,Math.min(5,barrier));
-  
-  let aging = 1;
-  if(actives.includes('peptides')) aging += 2;
-  if(actives.includes('retinol')) aging += 2;
-  if(actives.includes('vitamin c')) aging += 1;
-  if(actives.includes('pdrn')) aging += 1;
-  if(actives.includes('niacinamide')) aging += 1;
-  aging = Math.max(1,Math.min(5,aging));
-  
-  return {sensitive,barrier,aging};
-}
-
 function renderLibrary(){
   const filtered=filterProducts(),countEl=document.getElementById('lib-count'),content=document.getElementById('library-content');
   if(countEl)countEl.textContent=tFmt('lib_count',{shown:filtered.length,total:PRODUCT_DB.length});
+  _libUpdateHero(filtered.length);
   if(!content)return;
   if(!filtered.length){content.innerHTML=`<div class="empty-lib"><div class="empty-lib-icon">🔍</div><div>${t('lib_empty')}</div></div>`;return;}
   const brands={};filtered.forEach(p=>{if(!brands[p.brand])brands[p.brand]=[];brands[p.brand].push(p);});
   content.innerHTML=Object.entries(brands).map(([brand,prods])=>{
     const prodHTML=prods.map(p=>{
-      const r=prodSuitability(p);
-      const concerns=prodConcernTags(p);
       const actives=prodActiveTags(p).slice(0,3);
+      // Consolidated, verified-only suitability tags, grounded entirely in
+      // the real ingredient database (same source as the Formula Score
+      // rings — see prodDbSuitability). Replaces the old loose bestFor-text
+      // concern tags, which could show unverified/conflicting claims next
+      // to these grounded ones. No grading: a product either genuinely
+      // qualifies or the tag doesn't show. Oily intentionally excluded —
+      // no texture/comedogenicity data exists yet to ground it.
+      // (2026-07-15, expanded 2026-07-19)
+      const suit=prodDbSuitability(p);
+      const suitTags=[
+        suit.sensitiveSafe?t('label_sensitive'):null,
+        suit.barrierSafe?t('label_barrier'):null,
+        suit.agingSupport?t('label_aging'):null,
+        suit.acneActiveSupport?t('label_acne'):null,
+        suit.brighteningSupport?t('label_brightening'):null,
+        suit.drySupport?t('label_dry'):null,
+        suit.rednessSupport?t('label_redness'):null
+      ].filter(Boolean);
       return `
       <div class="product-row" data-product-id="${p.id}" role="button" tabindex="0" aria-label="View details for ${p.brand} ${p.name}">
         <div class="prod-emoji-sm">${prodEmoji(p)}</div>
@@ -1764,11 +1771,11 @@ function renderLibrary(){
             ${p.fragranceFree?`<span class="prod-flag safe">${t('flag_fragrance_free')}</span>`:`<span class="prod-flag danger">${t('flag_has_fragrance')}</span>`}
             ${p.alcoholFree?'':`<span class="prod-flag warn">${t('flag_has_alcohol')}</span>`}
             ${p.eoFree?'':`<span class="prod-flag warn">${t('flag_has_eo')}</span>`}
-            ${p.medicubeMode&&p.medicubeMode!=='None'?`<span class="prod-flag safe">💡 ${p.medicubeMode}</span>`:''}
+            ${p.medicubeMode&&p.medicubeMode!=='None'?`<span class="prod-flag device">💡 ${p.medicubeMode}</span>`:''}
           </div>
-          ${actives.length?`<div class="prod-concerns">${actives.map(a=>`<span class="prod-concern">${a}</span>`).join('')}${concerns.slice(0,2).map(c=>`<span class="prod-concern">${c}</span>`).join('')}</div>`:''}
+          ${actives.length?`<div class="prod-concerns">${actives.map(a=>`<span class="prod-concern">${a}</span>`).join('')}</div>`:''}
         </div>
-        <div class="prod-ratings-sm">${ratingMini(r.sensitive,t('label_sensitive'))}${ratingMini(r.barrier,t('label_barrier'))}${r.aging>=3?ratingMini(r.aging,t('label_aging')):''}</div>
+        ${suitTags.length?`<div class="prod-ratings-sm">${suitTags.map(l=>`<span class="prod-suit-tag tag-special">${l}</span>`).join('')}</div>`:''}
       </div>`;
     }).join('');
     return `<div class="brand-group"><div class="brand-header open" onclick="toggleBrand(this)"><span class="brand-name">${brand}</span><span class="brand-count">${tFmt('brand_count',{n:prods.length})}</span><span class="brand-arrow">▼</span></div><div class="brand-products">${prodHTML}</div></div>`;
@@ -1794,10 +1801,307 @@ function renderLibrary(){
   }
 }
 function toggleBrand(h){h.classList.toggle('open');}
-function ratingMini(val,label){
-  const v=val||0;
-  const dots=Array.from({length:5},(_,i)=>`<div class="dot${i<v?' on'+((v<=2)?' danger':v<=3?' warn':''):''}"></div>`).join('');
-  return `<div class="rating-mini"><div class="rating-mini-label">${label}</div><div class="dots">${dots}</div></div>`;
+
+/* ═══ FORMULA SCORE CARD — Knowledge Hub Phase 1C (2026-07-14) ═══
+   scoreProductSafety(p) looks up each ingredient in p.ingredients against
+   INGREDIENT_SCORES / INGREDIENT_SCORES_ALNUM (loaded from
+   ingredient-scores.js, generated by Research/build_ingredient_scores_js.py
+   from the audited Research/Ingredients Database.xlsx — 1,434/1,434 matched).
+   Degrades gracefully: any ingredient that doesn't resolve is listed as
+   "Not yet scored" and excluded from the ring average, never guessed. */
+function _fscNormalize(s){
+  return (s||'').trim().toUpperCase().replace(/\s+/g,' ').replace(/[.*]+$/,'').trim();
+}
+function _fscAlnumKey(s){
+  return (s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+function _fscTokenize(ing){
+  // Split on every separator variant actually present in the product DB:
+  // ',' standard, '•' U+2022 bullet, '●' U+25CF black circle, '･' U+FF65
+  // halfwidth middle dot (JP/KR brand INCI lists), and newlines (a few
+  // pasted-from-PDF entries use line breaks instead of commas). Without
+  // this, an ingredient string using an unhandled separator collapses into
+  // one giant unmatched token — silently zeroing out that product's Formula
+  // Score and Skin Suitability instead of erroring loudly.
+  const raw=(ing||'').split(/[,•●･\n]/).map(s=>s.trim()).filter(Boolean);
+  const out=[]; let i=0;
+  while(i<raw.length){
+    const tok=raw[i];
+    // rejoin a bare-digit fragment with the next token — handles INCI names
+    // that contain an internal comma, e.g. "1,2-Hexanediol" -> "1" + "2-Hexanediol"
+    if(/^\d+$/.test(tok) && i+1<raw.length){ out.push(tok+','+raw[i+1]); i+=2; continue; }
+    // rejoin the back half of a large ppm/ppb/% figure that got split at its
+    // own thousands-comma, e.g. "...Leaf Water(94,753ppm)" -> "...Leaf Water(94"
+    // + "753ppm)". The second fragment is pure digits + unit, not a real
+    // ingredient, so glue it back onto the ingredient before it instead of
+    // leaving both halves as separate unmatched junk tokens.
+    if(/^[\d,.\s]*(ppm|ppb|%)\s*\)?$/i.test(tok) && out.length){
+      out[out.length-1]=out[out.length-1]+','+tok; i+=1; continue;
+    }
+    // rejoin a chemical name split at an internal locant comma, e.g.
+    // "...Cyclohexane-1" + "4-Dicarboxylate" -> "...Cyclohexane-1,4-Dicarboxylate",
+    // or "DIETHYLHEXYL 2" + "6-NAPHTHALATE" -> "DIETHYLHEXYL 2,6-NAPHTHALATE".
+    // Different from the bare-digit case above: here the FIRST fragment is a
+    // full ingredient name that happens to END in a short locant number, not a
+    // bare digit on its own — and this also fires correctly even when the list's
+    // primary separator is a bullet/dot, since a bare comma inside a chemical
+    // name still gets treated as a hard split by this tokenizer regardless.
+    if(/[\s-]\d{1,2}$/.test(tok) && i+1<raw.length && /^\d{1,2}-[A-Za-z]/.test(raw[i+1])){
+      out.push(tok+','+raw[i+1]); i+=2; continue;
+    }
+    out.push(tok); i+=1;
+  }
+  return out;
+}
+function _fscStripAnnotation(token){
+  // Strip a trailing/embedded concentration annotation so a real ingredient
+  // like "Oryza Sativa (Rice) Bran Water(71 %)" or "...Leaf Water(94,000ppm)"
+  // still matches its plain-name card, instead of the whole token failing
+  // to match just because a percentage or ppm figure got glued onto it.
+  return (token||'')
+    // Strip a leading FDA drug-facts label glued directly onto the first
+    // ingredient of that section (no separating comma), e.g. "ACTIVE
+    // INGREDIENTS: HOMOSALATE (8%)" -> "HOMOSALATE (8%)", or "Active
+    // Ingredient(s) & Concentration: Octinoxate 7.5%" -> "Octinoxate 7.5%".
+    .replace(/^\s*(active|inactive)\s+ingredient(s|\(s\))?\s*(&\s*concentration)?\s*:\s*/i, '')
+    .replace(/^\s*ingredients?\s*:\s*/i, '')   // plain "Ingredients: Cyclopentasiloxane" -> "Cyclopentasiloxane"
+    .replace(/\(\s*[\d,.]+\s*(%|ppm|ppb)?\s*\)/gi, '')   // "(71 %)" / "(94,000ppm)" / "(3,000ppb)"
+    .replace(/\(\s*[\d,.]+\s*(%|ppm|ppb)?\s*$/gi, '')     // truncated trailing "(94" (data cut off, no closing paren)
+    .replace(/\s*\*?\s*[\d,.]+\s*(ppm|ppb)\b/gi, '')      // bare "94,000ppm" / "3,000ppb" with no parens
+    .replace(/\s*\*?\s*[\d,.]+\s*%/gi, '')                // bare "46.5%" / "2.7%" — no \b here, "%" itself is never a word char so \b can't match right after it
+    .trim();
+}
+function _fscHasWaterWord(token){
+  // Word-boundary check for Water/Aqua/Eau as a STANDALONE word — replace
+  // anything that isn't a letter with a space first, so "Water(71%)"
+  // normalizes to "Water   71  " (still matches \bWATER\b) while
+  // "Watermelon" stays one glued word and correctly does NOT match.
+  // Capped at 6 words: real noise-prefixed water tokens in this catalog
+  // ("Inactive Ingredients: Water", "Zero Pore Pads Water", a stray batch
+  // code glued to "Aqua/Water") are all 3-5 words. A handful of products
+  // have NO separator at all in their raw ingredient string (e.g. "Aqua
+  // Glycerin Hydroxyethyl Urea Butylene Glycol Niacinamide..."), so their
+  // ENTIRE 15-20+ word ingredient list arrives as one token that happens to
+  // start with "Aqua" — without this cap, that whole token would wrongly
+  // match as plain inert water and hide every other real ingredient in it
+  // behind a falsely "perfect" score instead of correctly staying unmatched.
+  const words = (token||'').replace(/[^A-Za-z]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+  if(words.length > 6) return false;
+  return /\b(WATER|AQUA|EAU)\b/i.test(words.join(' '));
+}
+function _fscMatch(token){
+  if(typeof INGREDIENT_SCORES==='undefined') return null;
+  const nk=_fscNormalize(token);
+  if(INGREDIENT_SCORES[nk]) return INGREDIENT_SCORES[nk];
+  const ak=_fscAlnumKey(token);
+  if(typeof INGREDIENT_SCORES_ALNUM!=='undefined' && INGREDIENT_SCORES_ALNUM[ak]) return INGREDIENT_SCORES_ALNUM[ak];
+  // Retry after stripping a concentration annotation — catches botanical
+  // waters/extracts and this catalog's ppm-labeled Korean-brand INCI lists
+  // that would otherwise silently fail to match at all.
+  const stripped = _fscStripAnnotation(token);
+  if(stripped && stripped !== token){
+    const nk2=_fscNormalize(stripped);
+    if(INGREDIENT_SCORES[nk2]) return INGREDIENT_SCORES[nk2];
+    const ak2=_fscAlnumKey(stripped);
+    if(typeof INGREDIENT_SCORES_ALNUM!=='undefined' && INGREDIENT_SCORES_ALNUM[ak2]) return INGREDIENT_SCORES_ALNUM[ak2];
+  }
+  // Water/Aqua/Eau catch-all — this single ingredient appears in more
+  // naming variants than any other (combined "Water/Aqua/Eau", parenthetical
+  // "Aqua (Water)", and occasional scrape noise like "Inactive Ingredients:
+  // Water" or a batch code glued to the front of the list). It's always
+  // inert per its own DB record (a:0,i:0,b:0), so it's safe to match it
+  // generously via a word-boundary check rather than silently drop the #1
+  // most common skincare ingredient from a product's score.
+  if(typeof INGREDIENT_SCORES!=='undefined' && INGREDIENT_SCORES['WATER'] && _fscHasWaterWord(token)) return INGREDIENT_SCORES['WATER'];
+  return null;
+}
+function scoreProductSafety(p){
+  if(!p || !p.ingredients) return null;
+  const tokens=_fscTokenize(p.ingredients);
+  const matched=[], unmatched=[], seen=new Set();
+  tokens.forEach(tok=>{
+    const rec=_fscMatch(tok);
+    const nk=_fscNormalize(tok);
+    if(rec){
+      if(seen.has(nk)) return;
+      seen.add(nk);
+      matched.push({name:tok, a:rec.a, i:rec.i, b:rec.b});
+    } else {
+      unmatched.push(tok);
+    }
+  });
+  if(!matched.length) return null; // fully degrade — no card shown at all
+  function wavg(dim){
+    let num=0, den=0;
+    matched.forEach(m=>{ const s=m[dim]; const w=s>=8?2:1; num+=s*w; den+=w; });
+    return den?num/den:0;
+  }
+  function ringPct(avg){ return Math.max(0, Math.min(100, Math.round(100 - avg*10))); }
+  const rings={ G: ringPct(wavg('i')), A: ringPct(wavg('a')), B: ringPct(wavg('b')) };
+  // Keep original INCI list order (concentration order — highest first, per
+  // the real ingredient list on the product), NOT sorted by score.
+  return { rings, matched, unmatched };
+}
+
+/* Skin Suitability — SINGLE source of truth, grounded in the same real
+   ingredient-database scoring as the Formula Score rings (scoreProductSafety).
+   Reuses _fscQualText's own qualitative cutoffs (Gentle=82, Low risk=78,
+   Barrier-friendly=77) so a "suitable for X" claim always agrees with what
+   the Formula Score card itself already says — no second, independent
+   heuristic that could disagree with it. If a product has zero scored
+   ingredients (fsc===null), no sensitive/acne/barrier claim is made at all
+   (graceful degrade, matches Formula Score's own behavior) — anti-aging
+   support is the one dimension not covered by the ingredient database, so
+   it stays keyed to the product's actual formulated actives list.
+   (2026-07-15, replaces two separate bestFor-text/heuristic checks —
+   openProductModal's isSensitiveSafe/isAcneSafe/isMatureSupport and
+   renderLibrary's old prodSuitability() — that could disagree with the
+   real ingredient data and with each other.) */
+function prodDbSuitability(p, fsc){
+  fsc = fsc !== undefined ? fsc : scoreProductSafety(p);
+  const actives = p.activeIngredients||[];
+  return {
+    sensitiveSafe: !!fsc && fsc.rings.G>=82,
+    acneSafe: !!fsc && fsc.rings.A>=78,
+    barrierSafe: !!fsc && fsc.rings.B>=77,
+    agingSupport: actives.some(a=>['retinol','peptides','pdrn'].includes(a)),
+    /* Product-Library suitability chip additions (2026-07-19). Named
+       distinctly from acneSafe (FSC A-ring gentleness gate — used by the
+       product modal's "Skin Suitability" section) because these answer a
+       different question: "does this contain an active that treats the
+       concern" vs "is this safe to use if you have the concern". acneSafe
+       is saturated (246/246 pass) so it can't differentiate the library
+       list — acneActiveSupport is gated on the same safety ring PLUS a
+       real anti-acne active, so it's both correct and meaningful. Oily is
+       intentionally excluded — no texture/comedogenicity data exists yet
+       to ground it (see memory: glowphase-oily-suitability-gap). */
+    acneActiveSupport: !!fsc && fsc.rings.A>=78 && actives.some(a=>['bha','azelaic acid','niacinamide'].includes(a)),
+    brighteningSupport: actives.some(a=>['vitamin c','niacinamide','arbutin','tranexamic acid','azelaic acid'].includes(a)),
+    drySupport: actives.some(a=>['hyaluronic acid','ceramides','panthenol','centella'].includes(a)),
+    rednessSupport: !!fsc && fsc.rings.G>=82 && actives.some(a=>['centella','azelaic acid'].includes(a))
+  };
+}
+
+function _fscQualColor(s){ return s>=78?'#2B8C74':s>=55?'#5B7090':'#9A6020'; }
+function _fscQualText(dim,s){
+  if(dim==='G') return s>=82?'Gentle':s>=62?'Moderate':'Stronger formula';
+  if(dim==='A') return s>=78?'Low risk':s>=56?'Generally safe':'Higher risk';
+  return s>=77?'Barrier-friendly':s>=55?'Neutral':'Use with care';
+}
+function _fscBadgeTier(v){ return v<=3?'b-low':v<=6?'b-mid':'b-high'; }
+const _FSC_R=34,_FSC_CX=42,_FSC_CY=42,_FSC_SW=7,_FSC_CIRC=213.63;
+const _FSC_GRAD={ G:{id:'fscg-g',c1:'#C7B4FF',c2:'#9ED7EC'}, A:{id:'fscg-a',c1:'#C7B4FF',c2:'#AEEFFF'}, B:{id:'fscg-b',c1:'#C7B4FF',c2:'#DDF4FF'} };
+function _fscBuildRing(dim,score){
+  const g=_FSC_GRAD[dim];
+  const off=(_FSC_CIRC*(1-score/100)).toFixed(2);
+  const qc=_fscQualColor(score), qt=_fscQualText(dim,score);
+  const lbl={G:'Gentle',A:'Acne-safe',B:'Barrier'}[dim];
+  return `
+    <div class="fsc-ring-wrap">
+      <svg class="fsc-ring-svg" width="88" height="88" viewBox="0 0 84 84">
+        <defs>
+          <linearGradient id="${g.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${g.c1}"/>
+            <stop offset="100%" stop-color="${g.c2}"/>
+          </linearGradient>
+        </defs>
+        <circle cx="${_FSC_CX}" cy="${_FSC_CY}" r="${_FSC_R}" fill="none" stroke="rgba(186,210,228,.26)" stroke-width="${_FSC_SW}"/>
+        <circle cx="${_FSC_CX}" cy="${_FSC_CY}" r="${_FSC_R}" fill="none" stroke="url(#${g.id})" stroke-width="${_FSC_SW}"
+          stroke-linecap="round" stroke-dasharray="${_FSC_CIRC}" stroke-dashoffset="${off}"
+          transform="rotate(-90 ${_FSC_CX} ${_FSC_CY})"/>
+        <text x="${_FSC_CX}" y="${_FSC_CY+8}" text-anchor="middle" font-family="DM Sans, sans-serif"
+          font-size="20" font-weight="700" letter-spacing="-0.5" fill="#243142">${score}</text>
+      </svg>
+      <div class="fsc-label">${lbl}</div>
+      <div class="fsc-qual" style="color:${qc}">${qt}</div>
+    </div>`;
+}
+function _fscBuildTable(fsc){
+  const rows=fsc.matched.map(ing=>`
+    <div class="fsc-row">
+      <div class="fsc-ing-name">${ing.name}</div>
+      <div class="fsc-badge ${_fscBadgeTier(ing.a)}">${ing.a}</div>
+      <div class="fsc-badge ${_fscBadgeTier(ing.i)}">${ing.i}</div>
+      <div class="fsc-badge ${_fscBadgeTier(ing.b)}">${ing.b}</div>
+    </div>`).join('');
+  const unmatchedRows=(fsc.unmatched||[]).map(name=>`
+    <div class="fsc-row unmatched">
+      <div class="fsc-ing-name">${name}</div>
+      <div class="fsc-notscored">${t('fsc_not_scored')||'Not yet scored'}</div>
+    </div>`).join('');
+  return `<div class="fsc-thead">
+      <div class="fsc-th">${t('fsc_th_ingredient')||'Ingredient'}</div>
+      <div class="fsc-th">${t('fsc_th_acne')||'Acne'}</div>
+      <div class="fsc-th">${t('fsc_th_irr')||'Irr.'}</div>
+      <div class="fsc-th">${t('fsc_th_barrier')||'Barr.'}</div>
+    </div>${rows}${unmatchedRows}`;
+}
+// Hero-embedded rings block — sits beside the product image, inline with
+// the rest of the hero (no separate card background — it's visually part
+// of modal-hero, not a floating box).
+function fscBuildHeroBlock(fsc){
+  if(!fsc) return '';
+  // Info explainer (2026-07-19): click-triggered "i" button + collapsible
+  // panel, not a hover tooltip -- this is a mobile-first app and hover has
+  // no touch equivalent, and it would've been the only hover-driven pattern
+  // on the site. Mirrors the existing fsc-toggle/info-box glass-panel
+  // language used by the ingredient-breakdown section below, but uses its
+  // own toggle fn (fscInfoToggle) rather than fscToggle because that one
+  // requires the button and panel to be true DOM siblings, and here the
+  // rings sit between them. Copy is grounded directly in scoreProductSafety's
+  // real formula (wavg/ringPct) and _fscQualColor's exact 78/55 cutoffs --
+  // not invented. Approved via live preview, iterated 3x on Bow's feedback:
+  // (1) too card-heavy/redundant with the ring labels, (2) mixed warm/cool
+  // ink, (3) formula math too prominent for the app's beginner-friendly tone.
+  return `<div class="fsc-hero-block">
+    <div class="fsc-hdr"><span class="fsc-spark">✦</span><span class="fsc-title">${t('fsc_title')||'Formula Score'}</span><button type="button" class="fsc-info-btn" aria-label="${t('fsc_info_label')||'What do these scores mean?'}" onclick="fscInfoToggle(this)">i</button></div>
+    <div class="fsc-rings">${_fscBuildRing('G',fsc.rings.G)}${_fscBuildRing('A',fsc.rings.A)}${_fscBuildRing('B',fsc.rings.B)}</div>
+    <div class="fsc-info-panel">
+      <div class="fsc-info-inner">
+        <p class="fsc-info-lead">${t('fsc_info_lead')||'Each ring reflects how <b>gentle</b>, <b>breakout-safe</b>, and <b>barrier-friendly</b> this formula\'s ingredients are &mdash; the higher the %, the better the match.'}</p>
+        <div class="fsc-info-legend">
+          <span><i class="fsc-info-dot" style="background:#2B8C74"></i>${t('fsc_legend_ideal')||'&ge; 78 Ideal'}</span>
+          <span><i class="fsc-info-dot" style="background:#5B7090"></i>${t('fsc_legend_moderate')||'55&ndash;77 Moderate'}</span>
+          <span><i class="fsc-info-dot" style="background:#9A6020"></i>${t('fsc_legend_caution')||'&lt; 55 Caution'}</span>
+        </div>
+        <p class="fsc-info-trust">${t('fsc_info_trust')||'Ingredients we haven\'t scored yet are marked <b>"Not yet scored"</b> and left out of the average &mdash; never guessed.'}</p>
+        <p class="fsc-info-formula">${t('fsc_info_formula')||'Calculated from our own ingredient database (not CosDNA): weighted-average risk per ingredient (0&ndash;10, higher-risk ingredients count double), converted to a 0&ndash;100 score.'}</p>
+      </div>
+    </div>
+  </div>`;
+}
+function fscInfoToggle(btn){
+  const block=btn.closest('.fsc-hero-block');
+  const panel=block&&block.querySelector('.fsc-info-panel');
+  if(!panel) return;
+  panel.classList.toggle('open');
+}
+// Ingredient breakdown table — placed further down the modal, right after
+// the Full INCI Ingredient List section. Rows follow scoreProductSafety's
+// matched order, which is the original INCI list order (highest
+// concentration first, trace ingredients last).
+function fscBuildBreakdownBlock(fsc){
+  if(!fsc) return '';
+  const count=fsc.matched.length+(fsc.unmatched||[]).length;
+  const label=(t('fsc_show_breakdown')||'Show ingredient breakdown')+` (${count})`;
+  return `<div class="modal-sec">
+    <div class="modal-sec-title">${t('fsc_breakdown_title')||'Ingredient Breakdown'}</div>
+    <button class="fsc-toggle" onclick="fscToggle(this)"><span class="fsc-toggle-label">${label}</span><span class="fsc-chevron">▾</span></button>
+    <div class="fsc-table-wrap"><div class="fsc-table">${_fscBuildTable(fsc)}</div></div>
+    <p class="fsc-foot">${t('fsc_foot')||'Glowphase assessment · Based on ingredient research data'}</p>
+  </div>`;
+}
+function fscToggle(btn){
+  const wrap=btn.nextElementSibling;
+  if(!wrap) return;
+  const open=wrap.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  const labelEl=btn.querySelector('.fsc-toggle-label');
+  if(labelEl){
+    const m=labelEl.textContent.match(/\((\d+)\)/);
+    const count=m?m[1]:'';
+    labelEl.textContent=(open?(t('fsc_hide_breakdown')||'Hide ingredient breakdown'):(t('fsc_show_breakdown')||'Show ingredient breakdown'))+(count?` (${count})`:'');
+  }
 }
 
 /* ═══ PRODUCT MODAL — schema-aware, defensive ═══ */
@@ -1813,66 +2117,95 @@ function openProductModal(id){
   
   const actives = prodActiveTags(p);
   const concerns = prodConcernTags(p);
-  const r = prodSuitability(p);
-  
-  // Detect skin-type notes from bestFor text
+
+  // Skin Suitability — TWO distinct, separately-labeled signals (Bow's
+  // call, 2026-07-15: keep both, don't merge into one):
+  // (1) "According to the brand" — the brand's own bestFor marketing text,
+  //     unverified by us, shown as-is.
+  // (2) "Glowphase verified" — our own read, grounded in the real
+  //     ingredient database (same source as the Formula Score rings —
+  //     see prodDbSuitability). These can legitimately disagree with the
+  //     brand's claim; showing both lets the user see where they align
+  //     or diverge instead of presenting one blended, unsourced answer.
   const bestForLower = (p.bestFor||'').toLowerCase();
-  const isSensitiveSafe = /sensitive|reactive/.test(bestForLower) && !/not.*sensitive|NOT.*sensitive/i.test(p.bestFor||'');
-  const isAcneSafe = /acne|breakout/.test(bestForLower) && !/not.*acne/i.test(p.bestFor||'');
-  const isMatureSupport = /mature|aging|fine line|wrinkle|firm|elasticity/.test(bestForLower) || (p.activeIngredients||[]).some(a=>['retinol','peptides','pdrn'].includes(a));
-  
+  const brandSensitive = /sensitive|reactive/.test(bestForLower) && !/not.*sensitive|NOT.*sensitive/i.test(p.bestFor||'');
+  const brandAcne = /acne|breakout/.test(bestForLower) && !/not.*acne/i.test(p.bestFor||'');
+  const brandAging = /mature|aging|fine line|wrinkle|firm|elasticity/.test(bestForLower);
+
+  const fsc = scoreProductSafety(p);
+  const suit = prodDbSuitability(p, fsc);
+
   // Build warnings from formula
   const warnings = [];
   if(!p.fragranceFree) warnings.push(t('warn_fragrance'));
   if(!p.alcoholFree) warnings.push(t('warn_alcohol'));
   if(!p.eoFree) warnings.push(t('warn_eo'));
-  
+
   // doNotCombine: split string into chips if comma-separated, else show as text
-  const doNotChips = doNotCombine && doNotCombine.length > 5 
+  const doNotChips = doNotCombine && doNotCombine.length > 5
     ? doNotCombine.split(/[,;]|\.(?=\s)/).map(s=>s.trim()).filter(s=>s&&s.length>2&&s.toLowerCase()!=='n/a').slice(0,6)
     : [];
-  
+
+  const _added = _modalIsAdded(p.id);
+  const _descSplit = description ? _modalLeadSplit(description) : null;
+
   const modalHTML = `
     <div class="modal-hero">
       <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
-      <div class="modal-emoji">${prodEmoji(p)}</div>
-      <div>
-        <div class="modal-brand-sm">${p.brand||''}</div>
-        <div class="modal-name-lg">${p.name||''}</div>
-        <div class="modal-tag-row">
-          <span class="modal-tag cat">${displayCategory(p)}</span>
-          ${p.fragranceFree?`<span class="modal-tag ff">${t('modal_tag_ff')}</span>`:`<span class="modal-tag noff">${t('modal_tag_hf')}</span>`}
-          ${p.alcoholFree?`<span class="modal-tag ff">${t('modal_tag_af')}</span>`:`<span class="modal-tag noff">${t('modal_tag_ha')}</span>`}
-          ${p.eoFree?`<span class="modal-tag ff">${t('modal_tag_eof')}</span>`:`<span class="modal-tag noff">${t('modal_tag_heo')}</span>`}
+      <div class="modal-hero-title">
+        <div class="modal-brand-sm"><span class="modal-brand-star">✦</span>${p.brand||''}</div>
+        <div class="modal-name-row">
+          <div class="modal-name-lg">${p.name||''}</div>
+          <div class="modal-tag-row">
+            <span class="modal-tag cat">${displayCategory(p)}</span>
+            ${p.fragranceFree?`<span class="modal-tag ff">${t('modal_tag_ff')}</span>`:`<span class="modal-tag noff">${t('modal_tag_hf')}</span>`}
+            ${p.alcoholFree?`<span class="modal-tag ff">${t('modal_tag_af')}</span>`:`<span class="modal-tag noff">${t('modal_tag_ha')}</span>`}
+            ${p.eoFree?`<span class="modal-tag ff">${t('modal_tag_eof')}</span>`:`<span class="modal-tag noff">${t('modal_tag_heo')}</span>`}
+          </div>
         </div>
+      </div>
+      <div class="modal-hero-cols">
+        <div class="modal-emoji">${prodEmoji(p)}</div>
+        ${fscBuildHeroBlock(fsc)}
       </div>
     </div>
     <div class="modal-body">
-      ${description?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_what_it_does')}</div><div class="modal-text">${description}</div></div>`:''}
-      
-      ${actives.length?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_key_actives')}</div><div class="modal-key-ings">${actives.map(a=>`<span class="key-ing">${a}</span>`).join('')}</div></div>`:''}
-      
-      ${concerns.length?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_skin_concerns')}</div><div class="modal-key-ings">${concerns.map(c=>`<span class="key-ing">${c}</span>`).join('')}</div></div>`:''}
-      
-      <div class="modal-sec">
-        <div class="modal-sec-title">${t('modal_skin_suit')}</div>
-        <div style="display:flex;gap:18px;flex-wrap:wrap;padding:8px 0">
-          ${ratingMini(r.sensitive,t('modal_sensitive_skin'))}
-          ${ratingMini(r.barrier,t('modal_barrier_repair'))}
-          ${ratingMini(r.aging,t('modal_anti_aging'))}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:0.72rem;color:var(--ink2)">
-          ${isSensitiveSafe?`<div>${t('modal_suit_sensitive')}</div>`:''}
-          ${isAcneSafe?`<div>${t('modal_suit_acne')}</div>`:''}
-          ${isMatureSupport?`<div>${t('modal_suit_aging')}</div>`:''}
-        </div>
+      <div class="modal-cta-row">
+        <button class="modal-cta-btn${_added?' added':''}" id="modal-cta-btn" onclick="modalAddToRoutine(${p.id},this)"${_added?' disabled':''}>
+          <span class="modal-cta-icon">${_added?'✓':'✦'}</span>${_added?t('modal_added'):t('modal_add_routine')}${_added?'':'<span class="modal-cta-arrow">→</span>'}
+        </button>
       </div>
+      ${description?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_what_it_does')}</div><div class="modal-text"><span class="modal-text-lead">${_descSplit.lead}</span>${_descSplit.rest?' '+_descSplit.rest:''}</div></div>`:''}
+
+      ${actives.length?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_key_actives')}</div><div class="modal-active-row">${actives.map(a=>`<span class="modal-active-chip">${a}</span>`).join('')}</div></div>`:''}
+      
+      ${concerns.length?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_skin_concerns')}</div><div class="modal-concern-row">${concerns.map(c=>`<span class="modal-concern-chip">${c}</span>`).join('')}</div></div>`:''}
+      
+      ${(brandSensitive||brandAcne||brandAging||suit.sensitiveSafe||suit.acneSafe||suit.agingSupport)?`<div class="modal-sec">
+        <div class="modal-sec-title">${t('modal_skin_suit')}</div>
+        ${(brandSensitive||brandAcne||brandAging)?`<div style="margin-top:8px">
+          <div style="font:700 0.6rem 'DM Sans',sans-serif;letter-spacing:0.3px;text-transform:uppercase;color:var(--m-ink-3);margin-bottom:4px">${t('modal_suit_brand_label')}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:0.72rem;color:var(--ink2)">
+            ${brandSensitive?`<div>${t('modal_suit_sensitive_brand')}</div>`:''}
+            ${brandAcne?`<div>${t('modal_suit_acne_brand')}</div>`:''}
+            ${brandAging?`<div>${t('modal_suit_aging_brand')}</div>`:''}
+          </div>
+        </div>`:''}
+        ${(suit.sensitiveSafe||suit.acneSafe||suit.agingSupport)?`<div style="margin-top:${(brandSensitive||brandAcne||brandAging)?'14px':'8px'}">
+          <div style="font:700 0.6rem 'DM Sans',sans-serif;letter-spacing:0.3px;text-transform:uppercase;color:var(--m-ink-3);margin-bottom:4px">${t('modal_suit_verified_label')}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:0.72rem;color:var(--ink2)">
+            ${suit.sensitiveSafe?`<div>${t('modal_suit_sensitive')}</div>`:''}
+            ${suit.acneSafe?`<div>${t('modal_suit_acne')}</div>`:''}
+            ${suit.agingSupport?`<div>${t('modal_suit_aging')}</div>`:''}
+          </div>
+        </div>`:''}
+      </div>`:''}
       
       ${warnings.length?`<div class="modal-sec"><div class="modal-sec-title">${t('modal_ing_warnings')}</div><div class="info-box amber">${warnings.join('<br>')}</div></div>`:''}
       
       <div class="modal-sec">
         <div class="modal-sec-title">${t('modal_how_to_use')}</div>
-        <div class="info-box green">
+        <div class="info-box lilac">
           <strong>${t('modal_best_for')}</strong> ${bestFor}<br>
           <strong>${t('modal_how_often')}</strong> ${howOften}
         </div>
@@ -1895,12 +2228,10 @@ function openProductModal(id){
       ${p.medicubeMode && p.medicubeMode!=='None' ? `
         <div class="modal-sec">
           <div class="modal-sec-title">${t('modal_medicube_compat')}</div>
-          <div class="info-box green">
-            <strong>${t('modal_rec_mode')}</strong> ${p.medicubeMode}<br>
-            ${p.medicubeMode==='Booster'?t('modal_booster_note'):''}
-            ${p.medicubeMode==='MC'?t('modal_mc_note'):''}
-            ${p.medicubeMode==='Derma Shot'?t('modal_derma_note'):''}
-          </div>
+          <div class="info-box green"><strong>${t('modal_rec_mode')}</strong> ${p.medicubeMode}</div>
+          ${p.medicubeMode==='Booster'?`<div class="info-box amber">${t('modal_booster_note')}</div>`:''}
+          ${p.medicubeMode==='MC'?`<div class="info-box amber">${t('modal_mc_note')}</div>`:''}
+          ${p.medicubeMode==='Derma Shot'?`<div class="info-box amber">${t('modal_derma_note')}</div>`:''}
         </div>` : `
         <div class="modal-sec">
           <div class="modal-sec-title">${t('modal_medicube_title')}</div>
@@ -1910,9 +2241,11 @@ function openProductModal(id){
       
       <div class="modal-sec">
         <div class="modal-sec-title">${t('modal_inci_title')}</div>
-        <div class="full-ing">${p.ingredients?p.ingredients:`<em style="color:var(--ink2)">${t('modal_inci_missing')}</em>`}</div>
+        <div class="full-ing">${_modalInciList(p)}</div>
       </div>
-      
+
+      ${fscBuildBreakdownBlock(fsc)}
+
       <div style="text-align:center;padding-top:8px"><button class="btn btn-rose" onclick="closeModal()">${t('modal_close')}</button></div>
     </div>`;
   
@@ -1932,8 +2265,86 @@ function openProductModal(id){
   }
 }
 function highlightIngs(text,flagged){ let r=text;(flagged||[]).forEach(f=>{const re=new RegExp(f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');r=r.replace(re,`<span class="hi">${f}</span>`);});return r; }
+
+// Full INCI list: truncate to the top N tokens (INCI order = concentration
+// order, so the first ones are the most significant) with a "+N more"
+// expander, and bold any token that matches one of this product's own
+// Key Active Ingredients (p.activeIngredients, cross-referenced via
+// ACTIVE_LABELS — same source of truth prodActiveTags() uses, so this
+// never invents a match the product data doesn't actually support).
+function _modalInciMark(tok, activeStems){
+  const low = tok.toLowerCase();
+  return activeStems.some(k=>k && low.includes(k)) ? `<span class="modal-inci-active">${tok}</span>` : tok;
+}
+function _modalInciList(p){
+  if(!p.ingredients) return `<em style="color:var(--ink2)">${t('modal_inci_missing')}</em>`;
+  const tokens = p.ingredients.split(',').map(s=>s.trim()).filter(Boolean);
+  const activeStems = (p.activeIngredients||[]).map(a=>{
+    const k = String(a).toLowerCase();
+    return (k.endsWith('s') && k.length>4) ? k.slice(0,-1) : k;
+  });
+  const LIMIT = 10;
+  if(tokens.length<=LIMIT) return tokens.map(tok=>_modalInciMark(tok,activeStems)).join(', ');
+  const head = tokens.slice(0,LIMIT).map(tok=>_modalInciMark(tok,activeStems)).join(', ');
+  const tail = tokens.slice(LIMIT).map(tok=>_modalInciMark(tok,activeStems)).join(', ');
+  const restCount = tokens.length-LIMIT;
+  const moreLabel = `+${restCount} ${t('modal_inci_more')||'more ingredients'}`;
+  return `${head}<span class="modal-inci-tail">, ${tail}</span><button type="button" class="modal-inci-more" data-more-label="${moreLabel}" onclick="_inciToggle(this)">${moreLabel} ▾</button>`;
+}
+function _inciToggle(btn){
+  const tail = btn.previousElementSibling;
+  if(!tail || !tail.classList.contains('modal-inci-tail')) return;
+  const open = tail.classList.toggle('open');
+  btn.textContent = open ? `${t('modal_inci_less')||'Show less'} ▴` : `${btn.dataset.moreLabel} ▾`;
+}
 function closeModal(){const m=document.getElementById('product-modal');if(m)m.classList.remove('open');}
 function closeModalOutside(e){if(e.target.id==='product-modal')closeModal();}
+
+/* ═══ PRODUCT MODAL — CTA + two-tone description lead (2026-07-15) ═══ */
+// Mirrors addRecommendedProduct's own context branching so the modal's CTA
+// button can show an accurate "already added" state on open.
+function _modalIsAdded(pid){
+  const myPage=document.getElementById('page-myroutine');
+  const onMyRoutine=myPage&&myPage.classList.contains('active');
+  if(onMyRoutine&&myRoutineState.selectedId){
+    const routines=getSavedRoutines();
+    const r=routines.find(x=>x.id===myRoutineState.selectedId);
+    return !!(r&&r.selectedIds&&r.selectedIds.includes(pid));
+  }
+  return builderState.selectedIds.includes(pid);
+}
+function modalAddToRoutine(pid,btn){
+  if(!btn||btn.classList.contains('added'))return;
+  addRecommendedProduct(pid);
+  btn.classList.add('added');
+  btn.disabled=true;
+  btn.innerHTML=`<span class="modal-cta-icon">✓</span>${t('modal_added')}`;
+  _gpToast(t('modal_added'),'success');
+}
+// Splits a description into a bold "lead" word and a lighter "rest" — the
+// two-tone weight trick borrowed from the reference Treatment Plan modal's
+// step headings ("**Clear** breakouts & congestion"), which bolds one key
+// word rather than a whole clause. Deliberately just the first word (not a
+// full sentence, which for real product copy often runs 150-250+ chars and
+// would swallow the entire paragraph in bold).
+function _modalLeadSplit(desc){
+  if(!desc) return {lead:'',rest:''};
+  const trimmed=desc.trim();
+  const words=trimmed.split(/\s+/);
+  if(!words.length) return {lead:trimmed,rest:''};
+  // Bold just the first word ("Rich barrier-repair...") unless it's too
+  // short to read as an intentional lede on its own ("A ceramide-enriched..."
+  // bolding only "A" looked like a stray typo) — keep pulling in words
+  // until the bolded run has at least 4 letters/digits, so short articles
+  // like "A"/"An" fold into the next word instead of standing alone.
+  let lead='', i=0;
+  while(i<words.length){
+    lead = lead ? lead+' '+words[i] : words[i];
+    i++;
+    if(lead.replace(/[^a-zA-Z0-9]/g,'').length>=4) break;
+  }
+  return {lead, rest:words.slice(i).join(' ')};
+}
 
 /* ═══ SKIN READINESS GATE ═══ */
 const _sgState={answers:{q1:null,q2:null,q3:null},targetPid:null,targetBtn:null};
@@ -4913,36 +5324,52 @@ function makeStep(type,num,emoji,brand,name,note){
 
 /* ═══ ANALYSIS + CONFLICT ═══ */
 function detectConflicts(selected){
-  const has=(ai)=>selected.some(p=>(p.activeIngredients||[]).includes(ai));
+  const withAI=(ai)=>selected.filter(p=>(p.activeIngredients||[]).includes(ai));
+  const dedupe=(...arrs)=>[...new Set(arrs.flat())];
   // Retinoid detection: retinal OR retinol OR tretinoin OR adapalene
-  const hasRetinal=has('retinal')||selected.some(p=>p.ingredients&&p.ingredients.toLowerCase().includes('retinal'));
-  const hasRetinol=has('retinol')||selected.some(p=>p.ingredients&&/\bretinol\b/.test((p.ingredients||'').toLowerCase()));
-  const hasAnyRetinoid=hasRetinal||hasRetinol||selected.some(p=>hasRetinoid(p));
+  const retinalPs=dedupe(withAI('retinal'),selected.filter(p=>p.ingredients&&p.ingredients.toLowerCase().includes('retinal')));
+  const retinolPs=dedupe(withAI('retinol'),selected.filter(p=>p.ingredients&&/\bretinol\b/.test((p.ingredients||'').toLowerCase())));
+  const anyRetinoidPs=dedupe(retinalPs,retinolPs,selected.filter(p=>hasRetinoid(p)));
   // Exfoliant detection
-  const hasGlycolic=has('aha')||selected.some(p=>p.ingredients&&p.ingredients.toLowerCase().includes('glycolic acid'));
-  const hasAnyAcid=selected.some(p=>hasExfoliantAcid(p));
-  const hasBHA=selected.some(p=>p.subcategory==='spot treatment'||(p.ingredients&&p.ingredients.toLowerCase().includes('salicylic acid')));
-  const hasPeel=selected.some(p=>(p.category==='exfoliant'&&p.subcategory!=='chemical exfoliant')||normalizedCategory(p)==='peeling gel');
+  const glycolicPs=dedupe(withAI('aha'),selected.filter(p=>p.ingredients&&p.ingredients.toLowerCase().includes('glycolic acid')));
+  const anyAcidPs=selected.filter(p=>hasExfoliantAcid(p));
+  const bhaPs=selected.filter(p=>p.subcategory==='spot treatment'||(p.ingredients&&p.ingredients.toLowerCase().includes('salicylic acid')));
+  const peelPs=selected.filter(p=>(p.category==='exfoliant'&&p.subcategory!=='chemical exfoliant')||normalizedCategory(p)==='peeling gel');
   // Other actives
-  const hasBP=selected.some(p=>hasBenzoylPeroxide(p));
-  const hasStrongVC=selected.some(p=>hasStrongVitaminC(p));
+  const bpPs=selected.filter(p=>hasBenzoylPeroxide(p));
+  const strongVCPs=selected.filter(p=>hasStrongVitaminC(p));
   // Count retinoids and exfoliants to detect stacking
-  const retinoidCount=selected.filter(p=>hasRetinoid(p)).length;
-  const exfoliantCount=selected.filter(p=>hasExfoliantAcid(p)).length;
+  const retinoidCountPs=selected.filter(p=>hasRetinoid(p));
+  const exfoliantCountPs=selected.filter(p=>hasExfoliantAcid(p));
+
   const conflicts=[];
+  // Each conflict now carries `type` (danger/warn, used for the new severity
+  // summary + card styling) and `products` (which of the user's selected
+  // items actually triggered it, for the new attribution line). `combo` and
+  // `reasonKey` are unchanged so the My Routine Safety-tab consumer (which
+  // reads only those two fields) keeps working without modification.
+  const prodNames=(arr)=>{const seen=new Set();const out=[];arr.forEach(p=>{const n=`${p.brand} ${p.name}`;if(!seen.has(n)){seen.add(n);out.push(n);}});return out;};
+  const push=(combo,reasonKey,type,prods)=>conflicts.push({combo,reasonKey,type,products:prodNames(prods)});
+
   // Original rules
-  if(hasRetinal&&hasGlycolic)conflicts.push({combo:'Retinal + Glycolic Acid',reasonKey:'conf_reason_retinal_aha'});
-  if(hasRetinal&&hasBHA)conflicts.push({combo:'Retinal + Salicylic Acid (BHA)',reasonKey:'conf_reason_retinal_bha'});
-  if(hasRetinal&&hasPeel)conflicts.push({combo:'Retinal + Physical Peeling Gel',reasonKey:'conf_reason_retinal_peel'});
-  if(hasGlycolic&&hasPeel)conflicts.push({combo:'AHA + Peeling Gel',reasonKey:'conf_reason_aha_peel'});
-  if(hasGlycolic&&hasBHA)conflicts.push({combo:'AHA + BHA',reasonKey:'conf_reason_aha_bha'});
+  if(retinalPs.length&&glycolicPs.length)push('Retinal + Glycolic Acid','conf_reason_retinal_aha','danger',dedupe(retinalPs,glycolicPs));
+  if(retinalPs.length&&bhaPs.length)push('Retinal + Salicylic Acid (BHA)','conf_reason_retinal_bha','danger',dedupe(retinalPs,bhaPs));
+  if(retinalPs.length&&peelPs.length)push('Retinal + Physical Peeling Gel','conf_reason_retinal_peel','danger',dedupe(retinalPs,peelPs));
+  if(glycolicPs.length&&peelPs.length)push('AHA + Peeling Gel','conf_reason_aha_peel','danger',dedupe(glycolicPs,peelPs));
+  if(glycolicPs.length&&bhaPs.length)push('AHA + BHA','conf_reason_aha_bha','warn',dedupe(glycolicPs,bhaPs));
   // Extended rules
-  if(hasRetinol&&hasAnyAcid&&!hasRetinal)conflicts.push({combo:'Retinol + Exfoliating Acid',reasonKey:'conf_reason_retinol_acid'});
-  if(hasBP&&hasAnyRetinoid)conflicts.push({combo:'Benzoyl Peroxide + Retinoid',reasonKey:'conf_reason_bp_retinoid'});
-  if(hasBP&&hasStrongVC)conflicts.push({combo:'Benzoyl Peroxide + Vitamin C (L-Ascorbic Acid)',reasonKey:'conf_reason_bp_vitc'});
-  if(retinoidCount>1)conflicts.push({combo:'Multiple Retinoids',reasonKey:'conf_reason_multi_retinoid'});
-  if(exfoliantCount>1)conflicts.push({combo:'Multiple Exfoliating Acids',reasonKey:'conf_reason_multi_acid'});
-  if(hasStrongVC&&hasAnyAcid)conflicts.push({combo:'Strong Vitamin C + Exfoliating Acid',reasonKey:'conf_reason_vitc_acid'});
+  if(retinolPs.length&&anyAcidPs.length&&!retinalPs.length)push('Retinol + Exfoliating Acid','conf_reason_retinol_acid','danger',dedupe(retinolPs,anyAcidPs));
+  if(bpPs.length&&anyRetinoidPs.length)push('Benzoyl Peroxide + Retinoid','conf_reason_bp_retinoid','danger',dedupe(bpPs,anyRetinoidPs));
+  if(bpPs.length&&strongVCPs.length)push('Benzoyl Peroxide + Vitamin C (L-Ascorbic Acid)','conf_reason_bp_vitc','warn',dedupe(bpPs,strongVCPs));
+  if(retinoidCountPs.length>1)push('Multiple Retinoids','conf_reason_multi_retinoid','danger',retinoidCountPs);
+  if(exfoliantCountPs.length>1)push('Multiple Exfoliating Acids','conf_reason_multi_acid','danger',exfoliantCountPs);
+  if(strongVCPs.length&&anyAcidPs.length)push('Strong Vitamin C + Exfoliating Acid','conf_reason_vitc_acid','warn',dedupe(strongVCPs,anyAcidPs));
+  // NEW (2026-07-20) — grounded in Research/Ingredients/A03-Vitamin-C.md's L-Ascorbic
+  // Acid card: "if reactive, don't stack same-time with retinoids... space them out."
+  // A conditional caution (warn), not a hard block like retinal+AHA — matches the
+  // actual evidence strength rather than inventing a stricter rule than it supports.
+  if(strongVCPs.length&&anyRetinoidPs.length)push('Strong Vitamin C + Retinoid','conf_reason_vitc_retinoid','warn',dedupe(strongVCPs,anyRetinoidPs));
+
   return conflicts;
 }
 function analyzeRoutine(selected,answers){
@@ -4982,20 +5409,92 @@ function renderConflictGrid(){
     return s.includes(ql)||(p.ingredients&&p.ingredients.toLowerCase().includes(ql));
   }):PRODUCT_DB;
   g.innerHTML=filtered.map(p=>`<div class="prod-pick-card ${conflictSelected.includes(p.id)?'selected':''}" id="ck-${p.id}" onclick="toggleConflict(${p.id},this)"><div class="prod-pick-emoji">${prodEmoji(p)}</div><div class="prod-pick-info"><div class="prod-pick-brand">${p.brand}</div><div class="prod-pick-name">${p.name}</div></div><div class="prod-pick-check">✓</div></div>`).join('');
+  _confRenderPickerSummary();
+  _confUpdateHero();
 }
-function toggleConflict(id,el){const i=conflictSelected.indexOf(id);if(i===-1){conflictSelected.push(id);el.classList.add('selected');}else{conflictSelected.splice(i,1);el.classList.remove('selected');}}
-function clearConflict(){conflictSelected=[];document.querySelectorAll('[id^="ck-"]').forEach(el=>el.classList.remove('selected'));document.getElementById('conflict-results').innerHTML='';}
+function toggleConflict(id,el){
+  const i=conflictSelected.indexOf(id);
+  if(i===-1){conflictSelected.push(id);el.classList.add('selected');}
+  else{conflictSelected.splice(i,1);el.classList.remove('selected');}
+  _confRenderPickerSummary();
+  _confUpdateHero();
+  _confResetResultStats();
+}
+function clearConflict(){
+  conflictSelected=[];
+  document.querySelectorAll('[id^="ck-"]').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('conflict-results').innerHTML='';
+  _confRenderPickerSummary();
+  _confUpdateHero();
+  _confResetResultStats();
+}
+// ── §A-0 redesign helpers: hero stat strip + removable-chip picker summary ──
+function _confUpdateHero(){
+  const selEl=document.getElementById('conf-hero-selected');
+  if(selEl)selEl.textContent=conflictSelected.length;
+}
+function _confResetResultStats(){
+  // Selection changed since the last check ran — the old found/severity
+  // numbers no longer describe the current picks, so blank them out rather
+  // than leave a stale result on screen.
+  const foundEl=document.getElementById('conf-hero-found'),sevEl=document.getElementById('conf-hero-severity');
+  if(foundEl)foundEl.textContent='—';
+  if(sevEl){sevEl.textContent='—';sevEl.className='conf-stat-n conf-stat-n-sm';}
+}
+function _confRenderPickerSummary(){
+  const bar=document.getElementById('conf-picker-summary');if(!bar)return;
+  if(!conflictSelected.length){bar.innerHTML=`<span class="conf-picker-empty">${t('conf_picker_empty')}</span>`;return;}
+  bar.innerHTML=conflictSelected.map(id=>{
+    const p=PRODUCT_DB.find(pr=>pr.id===id);if(!p)return '';
+    return `<span class="conf-chip">${p.brand} ${p.name}<span class="conf-chip-x" onclick="_confRemoveSelected(${id})">✕</span></span>`;
+  }).join('');
+}
+function _confRemoveSelected(id){
+  const i=conflictSelected.indexOf(id);if(i===-1)return;
+  conflictSelected.splice(i,1);
+  const card=document.getElementById('ck-'+id);if(card)card.classList.remove('selected');
+  _confRenderPickerSummary();
+  _confUpdateHero();
+  _confResetResultStats();
+}
 function runConflictCheck(){
   const sel=PRODUCT_DB.filter(p=>conflictSelected.includes(p.id)),r=document.getElementById('conflict-results');
-  if(sel.length<2){r.innerHTML=`<div class="notice">${t('conflict_min_select')}</div>`;return;}
+  if(sel.length<2){r.innerHTML=`<div class="notice">${t('conflict_min_select')}</div>`;_confResetResultStats();return;}
   const conflicts=detectConflicts(sel),extras=[];
-  if(sel.some(p=>!p.fragranceFree))extras.push({type:'danger',title:t('conflict_frag_title'),body:t('conflict_frag_body')});
-  if(sel.some(p=>!p.eoFree))extras.push({type:'warn',title:t('conflict_eo_title'),body:t('conflict_eo_body')});
-  const acCount=sel.filter(p=>isStrongActive(p)).length;
-  if(acCount>2)extras.push({type:'danger',title:t('conflict_too_many_title'),body:tFmt('conflict_too_many_body',{count:acCount})});
-  const all=[...conflicts.map(c=>({type:'danger',title:`🚫 ${c.combo}`,body:t(c.reasonKey)})),...extras];
+  const prodNames=(arr)=>{const seen=new Set();const out=[];arr.forEach(p=>{const n=`${p.brand} ${p.name}`;if(!seen.has(n)){seen.add(n);out.push(n);}});return out;};
+  const fragPs=sel.filter(p=>!p.fragranceFree);
+  if(fragPs.length)extras.push({type:'danger',title:t('conflict_frag_title'),body:t('conflict_frag_body'),products:prodNames(fragPs)});
+  const eoPs=sel.filter(p=>!p.eoFree);
+  if(eoPs.length)extras.push({type:'warn',title:t('conflict_eo_title'),body:t('conflict_eo_body'),products:prodNames(eoPs)});
+  const acPs=sel.filter(p=>isStrongActive(p));
+  if(acPs.length>2)extras.push({type:'danger',title:t('conflict_too_many_title'),body:tFmt('conflict_too_many_body',{count:acPs.length}),products:prodNames(acPs)});
+  // Icon now matches severity (warn=caution, danger=hard-block) instead of a
+  // blanket 🚫 on rule-based conflicts and no icon at all on the "extras"
+  // checks (fragrance/EO/too-many-actives) — audit fix, 2026-07-20.
+  const sevIcon=(type)=>type==='warn'?'⚠️':'🚨';
+  const all=[
+    ...conflicts.map(c=>({type:c.type||'danger',title:`${sevIcon(c.type||'danger')} ${c.combo}`,body:t(c.reasonKey),products:c.products})),
+    ...extras.map(e=>({...e,title:`${sevIcon(e.type)} ${e.title}`}))
+  ];
+  // Hero stat strip — result count + severity summary (§A-0 redesign)
+  const foundEl=document.getElementById('conf-hero-found'),sevEl=document.getElementById('conf-hero-severity');
+  if(foundEl)foundEl.textContent=all.length;
+  if(sevEl){
+    const dangerN=all.filter(i=>i.type==='danger').length,warnN=all.filter(i=>i.type==='warn').length;
+    let label,cls;
+    if(dangerN){label=t('conf_severity_high');cls='severity-danger';}
+    else if(warnN){label=t('conf_severity_caution');cls='severity-warn';}
+    else{label=t('conf_severity_none');cls='';}
+    sevEl.textContent=label;
+    sevEl.className='conf-stat-n conf-stat-n-sm'+(cls?' '+cls:'');
+  }
   if(!all.length){r.innerHTML=`<div class="conflict-result"><div class="conflict-head ok">${tFmt('conflict_none_head',{n:sel.length})}</div><div class="conflict-body">${t('conflict_none_body')}</div></div>`;}
-  else{r.innerHTML=all.map(i=>`<div class="conflict-result"><div class="conflict-head ${i.type}">${i.title}</div><div class="conflict-body">${i.body}</div></div>`).join('');}
+  else{
+    r.innerHTML=all.map(i=>{
+      const prodLine=(i.products&&i.products.length)?`<div class="conf-body-products"><b>${t('conf_found_in')}</b> ${i.products.join(', ')}</div>`:'';
+      return `<div class="conflict-result"><div class="conflict-head ${i.type}">${i.title}</div><div class="conflict-body">${i.body}${prodLine}</div></div>`;
+    }).join('');
+  }
 }
 
 /* ═══ EMERGENCY ═══ */
@@ -6416,6 +6915,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   initBuilder();
   renderConflictGrid();
   renderMyRoutines();
+  /* Sync mobile drawer active-state on first load — previously only synced on showPage() navigation, so the drawer had no active pill until the user navigated once */
+  var _initActiveBtn=document.querySelector('.nav-btn.active');
+  if(_initActiveBtn && typeof _syncMobDrawerActive==='function') _syncMobDrawerActive(_initActiveBtn.dataset.page);
 });
 
 /* ── Mobile hamburger nav ── */

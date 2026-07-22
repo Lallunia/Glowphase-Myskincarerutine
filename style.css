@@ -13,7 +13,11 @@
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── FONTS ── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Pinyon+Script&family=Italianno&display=swap');
+/* 2026-07-15: added DM Sans 700/800 — .modal-sec-title, .fsc-toggle, .label-xs
+   etc. all specify font-weight:700 but that weight was never actually loaded,
+   so the browser was fake-bolding (or clamping to 600) instead of rendering
+   real bold glyphs, which is why the all-caps section labels looked thin. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
 
 /* ── DESIGN TOKENS ── */
 :root {
@@ -32,8 +36,19 @@
   --gp-pearl:      #FAFCFF;
   --gp-midnight:   #243142;
   --grad-ice-btn:  linear-gradient(135deg, #8EC8DB 0%, #A8E4F5 30%, #C6F0FF 55%, #9FD5E8 80%, #7EC4D5 100%);
-  --shadow-ice:    0 4px 24px rgba(174,239,255,0.30), 0 2px 8px rgba(174,239,255,0.15);
-  --shadow-aqua:   0 0 0 3px rgba(174,239,255,0.45);
+  /* Lavender-metallic — main button design site-wide (Bow, 2026-07-19); was previously scoped to commit-CTAs only, see §7a */
+  --grad-lavender-metal: linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%);
+  /* Glow (box-shadow) tokens shifted ice→lavender (2026-07-19) — Bow:
+     "many glow are still blue and not lavender as we talk about before.
+     look up all glow that is not lavender and change it to lavender."
+     Scoped strictly to box-shadow "glow" effects, per her follow-up: "i
+     mean only the glow not the gradients. revert back and make sure
+     only change the glow effects not anything else." Gradients (incl.
+     --grad-pink-glow just below, despite its name), phase-identity
+     colors (Ice/Aqua/Aurora/Moon Crystal), and base glass/surface fills
+     are all untouched. */
+  --shadow-ice:    0 4px 24px rgba(199,180,255,0.30), 0 2px 8px rgba(199,180,255,0.15);
+  --shadow-aqua:   0 0 0 3px rgba(199,180,255,0.45);
 
   /* Extended functional palette */
   --bg:            #F8F8FA;
@@ -101,8 +116,8 @@
   --shadow:        0 8px 36px rgba(75,67,72,0.14), 0 2px 8px rgba(75,67,72,0.06);
   --shadow-lg:     0 22px 70px rgba(75,67,72,0.20), 0 8px 24px rgba(75,67,72,0.08);
   --shadow-xl:     0 36px 100px rgba(75,67,72,0.28), 0 12px 36px rgba(75,67,72,0.10);
-  --shadow-glow:   0 0 32px rgba(174,239,255,0.42), 0 0 64px rgba(221,244,255,0.28), 0 0 96px rgba(174,239,255,0.14);
-  --shadow-glow-soft: 0 0 24px rgba(221,244,255,0.35), 0 0 48px rgba(174,239,255,0.18);
+  --shadow-glow:   0 0 32px rgba(199,180,255,0.42), 0 0 64px rgba(216,205,255,0.28), 0 0 96px rgba(199,180,255,0.14);
+  --shadow-glow-soft: 0 0 24px rgba(216,205,255,0.35), 0 0 48px rgba(199,180,255,0.18);
   --shadow-chrome: 0 6px 24px rgba(75,67,72,0.18), 0 2px 6px rgba(75,67,72,0.08), inset 0 1px 0 rgba(255,255,255,0.92), inset 0 -1px 0 rgba(75,67,72,0.06);
   --shadow-glass:  0 18px 60px rgba(75,67,72,0.18), 0 4px 16px rgba(174,239,255,0.10), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(217,217,222,0.35);
   --shadow-inset-hi: inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(75,67,72,0.05);
@@ -141,7 +156,18 @@
   /* Pink accents */
   --ds-petal:        #DDF4FF;
   --ds-blush:        #AEEFFF;
-  --ds-rose:         #8EC8DB;
+  /* Renamed from --ds-rose 2026-07-20 (was #8EC8DB, a pale aqua — the old
+     name was leftover from before the Crystal Chrome rebrand, when the
+     pink/rose/blush-named tokens (see --gp-pink/--gp-rose/--ds-blush,
+     still aqua and still correct where they're used) got repointed to ice
+     values but never renamed. This one drove 3 all-caps micro-labels
+     (.home-section-eyebrow, .label-xs, .selected-products-title) at only
+     ~1.6:1 contrast — effectively unreadable. Deepened to #1E5A6B (reusing
+     the teal already established for .section-title em's gradient stop)
+     for ~6.8:1, and renamed to match what it actually is. --gp-rose is a
+     separate token, untouched, still aqua, still correct for its
+     .btn-hero-outline hover-border use. */
+  --ds-teal:         #1E5A6B;
   --ds-mauve:        #6E94A6;
 
   /* Cool support (ice direction) */
@@ -235,13 +261,13 @@ img { display: block; max-width: 100%; }
   align-items: center;
   padding: 0 32px;
   height: 88px;
-  /* Whisper-soft glass: barely visible bar so pills + logo carry the eye */
+  /* Real ice-glass depth (design doc §5) — reaches genuine ice-blue instead of staying whisper-pale */
   background:
     linear-gradient(180deg,
-      rgba(255,255,255,0.48) 0%,
-      rgba(252,250,252,0.32) 40%,
-      rgba(221,244,255,0.16) 100%),
-    rgba(255,255,255,0.12);
+      rgba(250,252,255,0.92) 0%,
+      rgba(236,242,255,0.82) 45%,
+      rgba(178,227,255,0.55) 100%),
+    rgba(255,255,255,0.25);
   backdrop-filter: blur(64px) saturate(220%) brightness(1.04);
   -webkit-backdrop-filter: blur(64px) saturate(220%) brightness(1.04);
   border-bottom: 1px solid transparent;
@@ -259,7 +285,7 @@ img { display: block; max-width: 100%; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* Pink ambient bookends left/right, faintest ice shimmer mid-top */
+  /* Ice ambient bookends left/right, faintest ice shimmer mid-top */
   background:
     radial-gradient(ellipse 35% 80% at 0% 50%, rgba(174,239,255,0.18) 0%, rgba(174,239,255,0) 70%),
     radial-gradient(ellipse 35% 80% at 100% 50%, rgba(174,239,255,0.18) 0%, rgba(174,239,255,0) 70%),
@@ -346,51 +372,6 @@ img { display: block; max-width: 100%; }
   filter: drop-shadow(0 0 8px rgba(174,239,255,0.4));
 }
 
-/* ── Text logo: "Glow" chrome cursive + "phase" pink italic + sparkle ── */
-.nav-logo-word {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  line-height: 1;
-  white-space: nowrap;
-  user-select: none;
-  /* Soft float to mirror the brand glow */
-  filter: drop-shadow(0 1px 2px rgba(75,67,72,0.18));
-}
-.nav-logo-glow {
-  font-family: 'Pinyon Script', 'Italianno', 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(2.6rem, 4.4vw, 3.4rem);
-  line-height: 0.85;
-  letter-spacing: -0.01em;
-  /* Rose-chrome gradient — bright highlights with deeper mauve mids for legibility */
-  background:
-    linear-gradient(180deg,
-      #F8F6F8 0%,
-      #D9CAD0 18%,
-      #8E7682 36%,
-      #F2E4E8 50%,
-      #7E6772 66%,
-      #C8B0B8 82%,
-      #6E5862 100%);
-  -webkit-background-clip: text;
-          background-clip: text;
-  -webkit-text-fill-color: transparent;
-          color: transparent;
-  /* Crisp white-ink-and-mauve outline + pink halo for readability on light glass */
-  text-shadow:
-    0 0 1px rgba(255,255,255,1),
-    0 1px 0 rgba(255,255,255,0.85),
-    1px 0 0 rgba(110,160,178,0.55),
-    -1px 0 0 rgba(110,160,178,0.55),
-    0 -1px 0 rgba(255,255,255,0.7),
-    0 1px 1px rgba(90,108,118,0.45),
-    0 2px 8px rgba(174,239,255,0.55),
-    0 6px 18px rgba(90,108,118,0.32);
-  -webkit-text-stroke: 0.4px rgba(110,160,178,0.42);
-  padding-right: 1px;
-}
 .nav-logo-phase {
   font-family: 'Playfair Display', serif;
   font-style: italic;
@@ -451,6 +432,7 @@ img { display: block; max-width: 100%; }
   flex: 1;
   justify-content: center;
   overflow-x: auto;
+  overflow-y: visible; /* trapped-shadow fix: overflow-x:auto alone silently forces overflow-y:auto too, clipping the pills' drop shadows flat */
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   flex-wrap: nowrap;
@@ -465,25 +447,21 @@ img { display: block; max-width: 100%; }
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.2px;
-  color: rgba(44,34,40,0.88);
+  color: #243142;
   font-family: 'DM Sans', sans-serif;
-  /* Ice-pearl pill — crystal chrome */
-  background: linear-gradient(180deg,
-    rgba(250,253,255,0.80) 0%,
-    rgba(235,247,255,0.62) 50%,
-    rgba(221,244,255,0.52) 100%);
-  border: 1px solid rgba(174,239,255,0.32);
+  /* Lavender-metallic — main button design site-wide (Bow, 2026-07-19) */
+  background: var(--grad-lavender-metal);
+  border: 1px solid rgba(180,156,240,0.4);
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.28s var(--ease);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
-  /* Soft ice glow underneath — pills feel like they float */
   box-shadow:
-    0 4px 14px rgba(174,239,255,0.22),
-    0 1px 3px rgba(174,239,255,0.14),
-    inset 0 1px 0 rgba(255,255,255,0.85),
-    inset 0 -1px 0 rgba(194,189,198,0.25);
+    0 3px 10px rgba(174,239,255,0.3),
+    0 2px 6px rgba(150,180,205,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 -1px 2px rgba(60,90,120,0.15);
 }
 /* Animated chrome sheen on hover */
 .nav-btn::before {
@@ -502,32 +480,30 @@ img { display: block; max-width: 100%; }
 }
 .nav-btn:hover::before { opacity: 1; transform: translateX(60%); }
 .nav-btn:hover {
-  background: linear-gradient(180deg,
-    rgba(255,252,253,0.92) 0%,
-    rgba(232,247,255,0.78) 50%,
-    rgba(221,244,255,0.65) 100%);
   color: var(--gp-shadow);
-  border-color: rgba(174,239,255,0.50);
+  border-color: rgba(180,156,240,0.6);
   transform: translateY(-1px);
   box-shadow:
-    0 8px 22px rgba(174,239,255,0.32),
-    0 2px 5px rgba(174,239,255,0.20),
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -1px 0 rgba(194,189,198,0.28);
+    0 6px 18px rgba(174,239,255,0.36),
+    0 3px 8px rgba(150,180,205,0.26),
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    inset 0 -1px 2px rgba(60,90,120,0.18);
 }
 .nav-btn.active {
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 45%),
-    linear-gradient(180deg, rgba(232,247,255,0.95) 0%, rgba(221,244,255,0.85) 50%, rgba(174,239,255,0.65) 100%);
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%),
+    var(--grad-lavender-metal);
   color: var(--gp-shadow);
   font-weight: 600;
-  border-color: rgba(174,239,255,0.55);
+  border-color: rgba(147,216,236,0.7);
+  /* Lavender glow (design doc §6) stays the selected-state signature on top of the metallic fill */
   box-shadow:
     0 6px 22px rgba(174,239,255,0.42),
-    0 2px 6px rgba(174,239,255,0.22),
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -1px 0 rgba(110,160,178,0.24),
-    0 0 0 1px rgba(174,239,255,0.45);
+    0 0 18px rgba(199,180,255,0.45),
+    0 3px 8px rgba(150,180,205,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 2px rgba(60,90,120,0.2),
+    0 0 0 1px rgba(199,180,255,0.4);
   text-shadow: 0 1px 0 rgba(255,255,255,0.7);
 }
 .nav-btn::after { display: none; }
@@ -1002,7 +978,7 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   letter-spacing: 3.5px;
   text-transform: uppercase;
-  color: var(--ds-rose);
+  color: var(--ds-teal);
   margin-bottom: var(--sp-3);
 }
 .home-section-title {
@@ -1191,6 +1167,14 @@ img { display: block; max-width: 100%; }
     inset 0 1px 0 rgba(255,255,255,0.55);
   text-shadow: 0 1px 0 rgba(255,255,255,0.45);
 }
+/* Product modal close/CTA — scoped to #modal-box only (2026-07-15, matches
+   the newer lilac→ice metallic gradient used by .gpg-star/.gp2b-star/guide-preview,
+   per Bow: don't touch .btn-rose globally, product modal only). */
+#modal-box .btn-rose {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%);
+}
 .btn-rose:hover, .btn-sage:hover {
   transform: translateY(-1.5px);
   box-shadow:
@@ -1228,6 +1212,17 @@ img { display: block; max-width: 100%; }
   border-color: var(--gp-pink);
   color: var(--gp-rose);
   background: rgba(221,244,255,0.18);
+}
+/* Library search-bar Reset button: lavender on hover instead of the
+   default ice-blue .btn-ghost hover (2026-07-19) — Bow: "the reset
+   button should be lavender when hover" (to balance the ice glow now
+   on the search bar next to it). Scoped to .search-wrap so the
+   Conflict Checker "Clear" and modal "Cancel" buttons, which also use
+   .btn-ghost, are untouched. */
+.search-wrap .btn-ghost:hover {
+  border-color: rgba(199,180,255,0.6);
+  color: #3A2F62;
+  background: rgba(199,180,255,0.16);
 }
 .btn-danger {
   background: linear-gradient(135deg, #c24040, #a03030);
@@ -1299,53 +1294,61 @@ img { display: block; max-width: 100%; }
 ════════════════════════════════════════════════ */
 .search-wrap { display: flex; gap: var(--sp-3); margin-bottom: var(--sp-6); flex-wrap: wrap; }
 .search-input {
+  /* Premium/clean redesign (2026-07-19) — Bow: "i want it to look more
+     premium and clean." Single clean fill + one soft ambient shadow
+     instead of the old 4-stop grey/white/blue gradient + 5-layer shadow
+     stack, a hairline border instead of a visible grey one, and a
+     magnifying-glass icon (muted --ds-chrome-deep tone) baked in as a
+     background layer so the DOM didn't need to change. */
   flex: 1;
   min-width: 220px;
-  padding: 14px 24px;
-  border-radius: var(--r-pill);
-  border: 1.5px solid rgba(217,217,222,0.85);
-  /* Icy crystal field: Glacier top, pearl middle, faint Petal at base */
-  background: linear-gradient(180deg,
-    rgba(232,238,242,0.42) 0%,
-    rgba(255,255,255,0.85) 35%,
-    rgba(255,255,255,0.95) 65%,
-    rgba(221,244,255,0.18) 100%);
+  padding: 13px 22px 13px 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(222,227,236,0.65);
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A858E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat 18px center / 17px 17px,
+    linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
   font-size: 0.875rem;
   color: var(--ds-ink);
   letter-spacing: 0.1px;
   outline: none;
   transition: all 0.28s var(--ease);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
-    0 3px 12px rgba(75,67,72,0.08),
-    0 1px 3px rgba(220,232,240,0.20),
-    inset 0 1px 2px rgba(75,67,72,0.05),
-    inset 0 1px 0 rgba(255,255,255,0.85),
-    inset 0 -1px 0 rgba(194,189,198,0.22);
+    0 4px 16px rgba(75,67,72,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9);
 }
 .search-input:hover {
+  /* Ice glow (2026-07-19) — kept ice rather than lavender to balance
+     against the lavender accents nearby (Reset hover, brand-count pill). */
   border-color: rgba(174,239,255,0.55);
   box-shadow:
-    0 5px 16px rgba(174,239,255,0.16),
-    inset 0 1px 0 rgba(255,255,255,0.92);
+    0 6px 20px rgba(174,239,255,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.9);
 }
 .search-input:focus {
-  border-color: var(--gp-rose);
-  background: linear-gradient(180deg, #FFFFFF 0%, rgba(221,244,255,0.10) 100%);
+  /* Ice glow on focus (2026-07-19) — Bow: "the glow around the search
+     bar should be ice this time to balance the lavender." Icon layer
+     repeated here since :focus previously replaced the whole background. */
+  border-color: rgba(174,239,255,0.7);
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A858E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat 18px center / 17px 17px,
+    linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
   box-shadow:
-    0 0 0 4px rgba(174,239,255,0.22),
-    0 0 24px rgba(174,239,255,0.32),
-    0 4px 14px rgba(174,239,255,0.18),
+    0 0 0 4px rgba(174,239,255,0.24),
+    0 6px 22px rgba(174,239,255,0.28),
     inset 0 1px 0 rgba(255,255,255,0.95);
 }
 .search-input::placeholder {
-  color: var(--ds-chrome-deep);
-  font-style: italic;
-  font-family: 'Playfair Display', serif;
-  font-size: 0.92rem;
-  letter-spacing: 0;
-  opacity: 0.65;
+  /* Switched from italic Playfair (decorative) to DM Sans (functional) —
+     part of the premium/clean redesign, 2026-07-19. */
+  color: #8A858E;
+  font-family: 'DM Sans', sans-serif;
+  font-style: normal;
+  font-size: 0.84rem;
+  letter-spacing: 0.1px;
+  opacity: 0.8;
 }
 
 .filter-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-4); align-items: center; }
@@ -1477,6 +1480,77 @@ img { display: block; max-width: 100%; }
 }
 
 /* ════════════════════════════════════════════════
+   PRODUCT LIBRARY — hero stat panel + refine tier
+   (§A-1 redesign, 2026-07-19). Colorway matches My
+   Routine's .wsc card family 1:1 — Bow asked for the
+   same lavender→aqua glass, not a new recipe.
+════════════════════════════════════════════════ */
+.lib-hero {
+  position: relative;
+  margin-bottom: var(--sp-6);
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
+  border: 1px solid rgba(174,239,255,0.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.lib-stat-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.lib-stat {
+  flex: 1;
+  min-width: 120px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 13px;
+  padding: 10px 12px;
+}
+.lib-stat-n { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 700; color: var(--gp-midnight); line-height: 1; }
+.lib-stat-l { font-size: 0.68rem; color: var(--ink2); margin-top: 4px; font-weight: 600; }
+.lib-hero .search-wrap { margin-bottom: 0; }
+
+.lib-refine-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(232,238,242,.5) 0%, rgba(255,255,255,.4) 100%);
+  border: 1.5px solid rgba(217,217,222,.85);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ds-ink);
+  letter-spacing: 0.3px;
+  margin-bottom: var(--sp-3);
+  user-select: none;
+  transition: all 0.26s var(--ease);
+  width: fit-content;
+}
+.lib-refine-toggle:hover { border-color: rgba(174,239,255,.55); }
+.lib-refine-toggle .arrow { transition: transform 0.26s var(--ease); font-size: 0.6rem; }
+.lib-refine-toggle.open .arrow { transform: rotate(180deg); }
+.lib-refine-badge {
+  background: linear-gradient(135deg, rgba(221,244,255,.85), #8EC8DB);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+}
+.lib-refine-panel {
+  display: none;
+  padding: 14px 16px;
+  border-radius: 16px;
+  margin-bottom: var(--sp-4);
+  background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(232,238,242,.35) 100%);
+  border: 1px solid rgba(217,217,222,.6);
+}
+.lib-refine-panel.open { display: block; }
+.lib-refine-panel .filter-row { margin-bottom: 10px; }
+.lib-refine-panel .filter-row:last-child { margin-bottom: 0; }
+
+/* ════════════════════════════════════════════════
    PRODUCT LIBRARY — Chrome brand groups
 ════════════════════════════════════════════════ */
 .brand-group {
@@ -1599,29 +1673,19 @@ img { display: block; max-width: 100%; }
 .brand-header:hover .brand-name,
 .brand-header.open .brand-name { color: var(--gp-shadow); }
 .brand-count {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  color: var(--ds-chrome-deep);
-  padding: 3px 10px;
-  border-radius: var(--r-pill);
-  /* Chrome capsule */
-  background: linear-gradient(180deg,
-    rgba(255,255,255,0.92) 0%,
-    rgba(237,238,241,0.78) 100%);
-  border: 1px solid var(--ds-chrome-silver);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.85),
-    inset 0 -1px 0 rgba(194,189,198,0.20);
+  /* Matches .gpg-pill.now ("START HERE" pill) exactly (2026-07-19) —
+     Bow: "i want this pill to look like the start here button." */
+  font: 700 0.62rem 'DM Sans', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #B49CF0, #9ED7EC);
+  color: #233;
+  border: none;
+  box-shadow: none;
   transition: all 0.26s var(--ease);
-}
-.brand-header:hover .brand-count,
-.brand-header.open .brand-count {
-  background: linear-gradient(180deg,
-    rgba(255,255,255,0.95) 0%,
-    rgba(221,244,255,0.62) 100%);
-  border-color: rgba(174,239,255,0.42);
-  color: var(--gp-shadow);
 }
 .brand-arrow {
   display: inline-flex;
@@ -1785,13 +1849,15 @@ img { display: block; max-width: 100%; }
   transition: all 0.28s var(--ease);
 }
 .product-row:hover .prod-emoji-sm {
+  /* Thumbnail hover glow shifted ice→lavender (2026-07-19), part of the
+     card-glow sweep — see --shadow-glow comment above. */
   transform: scale(1.05);
   box-shadow:
-    0 8px 22px rgba(174,239,255,0.38),
-    0 2px 6px rgba(174,239,255,0.24),
+    0 8px 22px rgba(199,180,255,0.38),
+    0 2px 6px rgba(199,180,255,0.24),
     0 0 0 1px rgba(255,255,255,0.65) inset,
     inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -1px 0 rgba(110,160,178,0.24);
+    inset 0 -1px 0 rgba(150,120,178,0.24);
 }
 
 /* ─── Product image & placeholder sizing ────────────────────────────────
@@ -1836,6 +1902,9 @@ img { display: block; max-width: 100%; }
   padding: 3px;
   background: rgba(255,255,255,0.6);
 }
+/* modal-emoji is much bigger than the other thumbnail contexts above —
+   give the real product image more breathing room inside it */
+.modal-emoji .prod-img-real { padding: 12px; }
 .rs-emoji .prod-img-real {
   object-fit: contain;
   background: rgba(255,255,255,0.6);
@@ -1847,22 +1916,21 @@ img { display: block; max-width: 100%; }
 .prod-name-sm { font-size: 0.875rem; font-weight: 500; color: var(--ink); letter-spacing: -0.005em; line-height: 1.35; transition: color 0.24s var(--ease); }
 .product-row:hover .prod-name-sm { color: var(--ds-ink); }
 .prod-cat-tag {
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  padding: 3px 10px;
+  /* Matches .modal-tag.cat exactly (2026-07-19) — Bow: "this have to match the
+     one in the product modal too." Pulled straight from the modal's own
+     category-tag rule instead of the old flat "Chrome-tinted pink capsule"
+     look. */
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  padding: 4px 12px;
   border-radius: var(--r-pill);
-  /* Chrome-tinted pink capsule: ice top, pearl mid, pink underbelly */
-  background:
-    linear-gradient(180deg,
-      rgba(232,238,242,0.55) 0%,
-      rgba(255,255,255,0.45) 50%,
-      rgba(221,244,255,0.42) 100%);
-  color: var(--gp-shadow);
-  border: 1px solid rgba(174,239,255,0.38);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.85),
-    inset 0 -1px 0 rgba(174,239,255,0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(135deg, rgba(199,180,255,0.22), rgba(174,239,255,0.22));
+  color: var(--m-ink-1);
+  border: 1px solid rgba(199,180,255,0.4);
+  box-shadow: none;
 }
 .prod-flags { display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-bottom: var(--sp-1); }
 .prod-flag {
@@ -1876,9 +1944,17 @@ img { display: block; max-width: 100%; }
     inset 0 1px 0 rgba(255,255,255,0.55);
 }
 .prod-flag.safe {
-  background: linear-gradient(180deg, rgba(235,244,238,0.95) 0%, rgba(218,236,224,0.85) 100%);
+  /* Flat mint (2026-07-19): flattened to match the other redesigned
+     pills in this row (tag-special, prod-cat-tag, prod-concern) —
+     Bow: "but there is gradient" pointed out this was the one pill
+     in the family still using a gradient fill. Kept flat; only the
+     color was realigned (2026-07-19 audit) from a one-off #2B7A54
+     green to --ds-sage, the token the design doc actually assigns to
+     suitability/status pills — the old value matched none of the
+     app's three documented status-color triads. */
+  background: rgba(92,141,111,0.14);
   color: var(--ds-sage);
-  border-color: rgba(92,141,111,0.22);
+  border-color: rgba(92,141,111,0.30);
 }
 .prod-flag.warn {
   background: linear-gradient(180deg, rgba(253,245,232,0.95) 0%, rgba(248,234,205,0.85) 100%);
@@ -1890,20 +1966,57 @@ img { display: block; max-width: 100%; }
   color: var(--ds-coral);
   border-color: rgba(181,87,94,0.22);
 }
+/* Device-mode pills (Medicube Derma Shot/Booster/MC Mode/Air Shot) — split
+   out from .prod-flag.safe (2026-07-19) so device compatibility reads as
+   a distinct concept from formula-safety flags (Fragrance-Free etc).
+   White fill + lavender border per Bow's reference. */
+.prod-flag.device {
+  background: #FFFFFF;
+  color: #3E4257;
+  border-color: rgba(199,180,255,0.55);
+}
+/* Consolidated, verified-only skin-suitability tags on product-list rows
+   (.prod-ratings-sm). Product either genuinely qualifies or the tag
+   doesn't show — no graded Excellent/Moderate/Limited pills (removed
+   2026-07-15 per feedback: grading duplicated the modal's plain yes/no
+   suitability info). Styled as a standalone ice→lavender gradient badge
+   (.tag-special, 2026-07-19) rather than reusing .prod-flag.safe, so
+   these read as a distinct "verified suitability" family vs the
+   formula-safety flags above them. */
+.prod-ratings-sm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex-shrink: 0; max-width: 190px; justify-content: flex-end; }
+.prod-suit-tag { white-space: nowrap; }
+.tag-special {
+  /* Matches .modal-concern-chip exactly (2026-07-19) — Bow: "i want it to
+     completely look like the one in product modal. look up every
+     details." Pulled straight from the modal's own "Skin Concerns
+     Addressed" chip rule (font-size, padding, gradient, border, color)
+     instead of a hand-guessed flat approximation. */
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  background: linear-gradient(135deg, rgba(199,180,255,0.4), rgba(174,206,230,0.35));
+  color: #3A2F62;
+  border: 1px solid rgba(185,174,224,0.6);
+  border-radius: 100px;
+  box-shadow: none;
+}
 .prod-concerns { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
 .prod-concern {
-  font-size: 0.58rem;
-  padding: 2px 9px;
   border-radius: var(--r-pill);
   letter-spacing: 0.2px;
-  /* Icy chrome chip: glacier top, frost middle */
-  background: linear-gradient(180deg,
-    rgba(232,238,242,0.85) 0%,
-    rgba(237,238,241,0.95) 100%);
-  color: var(--ink3);
-  border: 1px solid var(--ds-chrome-silver);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.75);
+  /* Matches .modal-active-chip exactly (2026-07-19) — Bow: "just make it
+     look like the tag chip in the product modal". Pulled the live values
+     straight from the product modal's Niacinamide/Ceramides chip so the
+     card-row pill and the modal pill render identically, including
+     font-size/padding (confirmed against the modal chip, not just color). */
+  font-size: 0.73rem;
+  padding: 4px 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(200,240,255,0.7), rgba(224,246,255,0.5));
+  color: #1E4A57;
+  border: 1px solid rgba(150,210,230,0.6);
+  box-shadow: none;
 }
 .empty-lib {
   position: relative;
@@ -1925,14 +2038,27 @@ img { display: block; max-width: 100%; }
 /* ════════════════════════════════════════════════
    PRODUCT MODAL — Glassmorphism
 ════════════════════════════════════════════════ */
+/* Product-modal unified ink/glow tokens (2026-07-15 audit pass) — one
+   canonical cool navy-slate scale + one canonical lilac glow, replacing
+   the 4 competing color families (warm --ink, pale --ds-teal, FSC's own
+   slate set, ad hoc hex) that had drifted apart across prior passes. */
+:root {
+  --m-ink-1: #26324A;              /* headline / product name */
+  --m-ink-2: #4A5670;              /* body copy */
+  --m-ink-3: #41506E;              /* section labels / eyebrow text */
+  --m-line:  rgba(65,80,110,0.22); /* visible ice-slate divider */
+}
 .overlay {
   display: none;
   position: fixed;
   inset: 0;
+  /* Lightened + de-blurred to match the airy reference backdrop
+     (.gp2b-ov / .sb-sheet-overlay use ~0.34 alpha, 3-4px blur) —
+     was 0.5/0.68 alpha at 20px blur, which read as dark and heavy. */
   background:
-    radial-gradient(ellipse at center, rgba(75,55,68,0.55) 0%, rgba(25,18,22,0.72) 100%);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+    radial-gradient(ellipse at center, rgba(74,85,120,0.30) 0%, rgba(43,51,80,0.42) 100%);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
   z-index: 9999;
   align-items: center;
   justify-content: center;
@@ -1944,7 +2070,7 @@ img { display: block; max-width: 100%; }
     linear-gradient(150deg, rgba(250,252,255,0.98) 0%, rgba(238,242,255,0.92) 34%, rgba(178,227,255,0.72) 100%);
   border-radius: var(--r-slab);
   width: 100%;
-  max-width: 660px;
+  max-width: 740px;
   max-height: 92vh;
   overflow-y: auto;
   backdrop-filter: blur(28px) saturate(180%);
@@ -2127,40 +2253,65 @@ img { display: block; max-width: 100%; }
   background:
     linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 60%),
     linear-gradient(145deg, var(--pink-lt) 0%, rgba(221,244,255,0.55) 60%, rgba(174,239,255,0.18) 100%);
-  padding: 30px 28px;
+  padding: 34px 30px;
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 22px;
   border-bottom: 1px solid rgba(174,239,255,0.28);
   position: relative;
   overflow: hidden;
+}
+/* Corner crystal motif — the ✦ brand mark, same lilac→ice gradient as
+   .gpg-star/.gp2b-star, watermarked large + faint in the top-right corner
+   (mirrors .phase-hero-box::before's per-phase emoji watermark). 2026-07-15.
+   Uses ::before (not ::after) because .modal-hero::after is already taken
+   by the bottom-divider shine line below — an element only gets one ::after. */
+.modal-hero::before {
+  content: none;
+  pointer-events: none;
+  z-index: 0;
+}
+.modal-hero-title, .modal-hero-cols { position: relative; z-index: 1; }
+/* Title (brand+name+tags) is its own full-width row up top; the picture
+   and Formula Score sit beneath it as two stretched columns so the score
+   naturally fills to match the picture's height (see .modal-hero-cols). */
+.modal-hero-title { width: 100%; }
+.modal-hero-cols {
+  display: flex;
+  align-items: stretch;
+  gap: 26px;
 }
 .modal-hero::after {
   content: '';
   position: absolute;
   bottom: 0; left: 8%; right: 8%;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 50%, transparent 100%);
+  /* was white-on-white (invisible against the pale hero gradient);
+     now a soft lilac hairline so it actually reads as a divider */
+  background: linear-gradient(90deg, transparent 0%, rgba(199,180,255,0.4) 50%, transparent 100%);
   pointer-events: none;
 }
 .modal-emoji {
-  width: 84px;
-  height: 84px;
-  border-radius: 22px;
+  width: 176px;
+  height: 176px;
+  border-radius: 32px;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%),
     linear-gradient(135deg, var(--white) 0%, var(--pink-lt) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 3.1rem;
   flex-shrink: 0;
-  border: 1px solid rgba(174,239,255,0.35);
+  border: 1px solid rgba(199,180,255,0.35);
+  /* glow re-keyed from aqua to the same lilac family as the modal's
+     outer halo / brand star / FSC rings, so the picture frame stops
+     competing with the rest of the modal's glow color */
   box-shadow:
-    0 8px 24px rgba(174,239,255,0.28),
-    0 2px 6px rgba(174,239,255,0.16),
+    0 8px 24px rgba(199,180,255,0.28),
+    0 2px 6px rgba(199,180,255,0.16),
     inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -1px 0 rgba(174,239,255,0.15);
+    inset 0 -1px 0 rgba(199,180,255,0.15);
 }
 .modal-close {
   position: absolute;
@@ -2193,8 +2344,29 @@ img { display: block; max-width: 100%; }
   font-size: 0.58rem;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--gp-rose);
-  margin-bottom: 5px;
+  color: var(--m-ink-3);
+  margin-bottom: 3px;
+}
+/* Bumped up 2026-07-15 to carry the "hero moment" that a separate centered
+   star (tried, then rejected — didn't look good) was meant to add. Same
+   gradient/glow, just scaled up and given room to breathe so it reads as
+   an intentional brand mark next to the name, not a tiny inline accent. */
+.modal-brand-star {
+  font-size: 1.05rem;
+  margin-right: 5px;
+  vertical-align: -1px;
+  background: linear-gradient(135deg,#B49CF0,#9ED7EC 60%,#EAF9FF);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(199,180,255,0.6));
+}
+/* Name + tags share one row (title is now its own full-width row above
+   the picture/score columns, so they never have to compete with the
+   image for horizontal space). */
+.modal-name-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
 }
 .modal-name-lg {
   font-family: 'Playfair Display', serif;
@@ -2202,29 +2374,274 @@ img { display: block; max-width: 100%; }
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: -0.01em;
-  margin-bottom: var(--sp-3);
-  color: var(--ink);
+  margin-bottom: 0;
+  color: var(--m-ink-1);
 }
-.modal-tag-row { display: flex; gap: 5px; flex-wrap: wrap; }
-.modal-tag { font-size: 0.6rem; font-weight: 600; padding: 3px 10px; border-radius: var(--r-pill); }
-.modal-tag.cat { background: linear-gradient(135deg, rgba(174,239,255,0.2), rgba(221,244,255,0.3)); color: var(--gp-shadow); border: 1px solid rgba(174,239,255,0.25); }
-.modal-tag.ff { background: var(--green-lt); color: var(--green); }
-.modal-tag.noff { background: var(--red-lt); color: var(--red); }
-.modal-tag.warn-t { background: var(--amber-lt); color: var(--amber); }
+.modal-tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.modal-tag {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal-tag.cat { background: linear-gradient(135deg, rgba(199,180,255,0.22), rgba(174,239,255,0.22)); color: var(--m-ink-1); border: 1px solid rgba(199,180,255,0.4); }
+.modal-tag.ff { background: rgba(127,209,176,0.16); color: var(--green); border: 1px solid rgba(74,122,90,0.35); }
+.modal-tag.noff { background: rgba(224,120,120,0.14); color: var(--red); border: 1px solid rgba(184,64,64,0.32); }
+.modal-tag.warn-t { background: rgba(224,153,42,0.14); color: var(--amber); border: 1px solid rgba(168,120,48,0.32); }
 .modal-body { padding: var(--sp-8) var(--sp-8); }
 .modal-sec { margin-bottom: var(--sp-6); }
 .modal-sec-title {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 3.5px;
+  font-size: 0.64rem;
+  /* 800 now that DM Sans 800 is actually loaded (see @import above) —
+     at 700 with 3.5px tracking the letters were too spread out to read
+     as a solid "label"; tightened tracking + heavier weight fixes it */
+  font-weight: 800;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--ds-rose);
+  color: var(--m-ink-3);
   margin-bottom: var(--sp-3);
   padding-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--m-line);
 }
-.modal-text { font-size: 0.875rem; color: var(--ink2); line-height: 1.75; }
+.modal-text { font-size: 0.875rem; color: var(--m-ink-2); line-height: 1.75; }
+/* Two-tone description lead (2026-07-15) — bold first sentence in
+   --m-ink-1, lighter rest in --m-ink-2 (.modal-text's own color), the
+   same weight-contrast trick the reference Treatment Plan modal uses on
+   its step headings ("**Clear** breakouts & congestion"). */
+.modal-text-lead { font-weight: 700; color: var(--m-ink-1); }
 .modal-key-ings { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ════════════════════════════════════════════════
+   ✦ PRODUCT MODAL CTA — "Add to My Routine" (2026-07-15)
+   Full-width glossy lilac→ice pill, the modal's one big
+   "pop" moment — borrowed from the reference Treatment
+   Plan modal's gradient CTA button. Reuses the same
+   metallic gradient already scoped to #modal-box .btn-rose
+   so it stays visually consistent with Close, just bigger
+   and bolder since this is now the primary action. */
+.modal-cta-row { margin-bottom: var(--sp-6); }
+.modal-cta-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 24px;
+  border: none;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #1B3C4D;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%);
+  box-shadow:
+    0 8px 26px rgba(199,180,255,0.4),
+    0 2px 8px rgba(174,239,255,0.24),
+    inset 0 1px 0 rgba(255,255,255,0.55);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+.modal-cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.55s var(--ease);
+  pointer-events: none;
+}
+.modal-cta-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow:
+    0 14px 38px rgba(199,180,255,0.5),
+    0 4px 12px rgba(174,239,255,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.modal-cta-btn:hover:not(:disabled)::before { left: 120%; }
+.modal-cta-btn:active:not(:disabled) { transform: translateY(0); }
+.modal-cta-icon { font-size: 0.9rem; }
+.modal-cta-arrow { font-size: 0.9rem; transition: transform 0.25s var(--ease); }
+.modal-cta-btn:hover:not(:disabled) .modal-cta-arrow { transform: translateX(3px); }
+.modal-cta-btn.added,
+.modal-cta-btn:disabled {
+  cursor: default;
+  color: #1E5347;
+  background: linear-gradient(135deg, rgba(127,209,176,0.55), rgba(158,215,236,0.45));
+  box-shadow: 0 4px 14px rgba(127,209,176,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.modal-cta-btn.added:hover, .modal-cta-btn:disabled:hover { transform: none; }
+
+/* ════════════════════════════════════════════════
+   ✦ FORMULA SCORE — Knowledge Hub Phase 1C
+   (2026-07-14, redesigned same day, twice) 3-ring
+   ingredient-safety rings live INSIDE modal-hero,
+   beside the product image — no separate floating
+   card. Title (brand+name+tags) is its own full-width
+   row above (.modal-hero-title); the picture and this
+   block then sit side-by-side as two columns
+   (.modal-hero-cols, align-items:stretch), so
+   .fsc-hero-block naturally stretches to match the
+   picture's height — a thin left border connects it to
+   the image rather than boxing it in. The full
+   per-ingredient breakdown table lives further down the
+   modal, in its own .modal-sec right after the Full
+   INCI Ingredient List (see fscBuildBreakdownBlock in
+   script.js). Data via scoreProductSafety(p), which
+   looks up Acne/Irritation/Barrier risk per ingredient
+   from ingredient-scores.js (generated from
+   Research/Ingredients Database.xlsx), preserving the
+   product's real INCI order (highest concentration
+   first). Degrades gracefully — unmatched ingredients
+   show as "Not yet scored" and are excluded from the
+   ring average. Prefix .fsc- (NOT .pss- — that prefix
+   already belongs to the skin-readiness step-back
+   nudge cards below; reusing it would bleed styles
+   into that component).
+   ════════════════════════════════════════════════ */
+.fsc-hero-block {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid rgba(174,239,255,0.28);
+  padding-left: 24px;
+}
+.fsc-hdr { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.fsc-spark {
+  font-size: 0.85rem; line-height: 1;
+  background: linear-gradient(135deg,#B49CF0,#9ED7EC 60%,#EAF9FF);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 6px rgba(180,156,240,0.5));
+}
+.fsc-title { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: #4A6780; }
+/* Formula Score info explainer (2026-07-19) -- click-triggered "i" button
+   beside the header, expanding a glass-panel explainer below the rings.
+   Reuses the .info-box glass recipe (blur+ice border+soft shadow) already
+   established for this modal. Text is one cool ink family throughout
+   (var(--gp-midnight) + #4A6780, matching .fsc-title) -- no warm ink, per
+   the same cool-ink pass applied to the Library notice banner this session. */
+.fsc-info-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; border-radius:50%;
+  font-size:0.62rem; font-weight:700; line-height:1;
+  color:#6B7A8D; background:rgba(255,255,255,0.55);
+  border:1px solid rgba(174,239,255,0.5);
+  cursor:pointer; flex-shrink:0; margin-left:2px; padding:0;
+  transition: all 0.22s ease;
+}
+.fsc-info-btn:hover{ background:rgba(255,255,255,0.85); border-color:rgba(174,239,255,0.8); color:#3A4C5C; }
+.fsc-info-panel{ overflow:hidden; max-height:0; transition:max-height 0.35s ease; margin-top:0; }
+.fsc-info-panel.open{ max-height:420px; margin-top:14px; }
+.fsc-info-inner{
+  background: rgba(255,255,255,0.44);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(174,239,255,0.4);
+  box-shadow: 0 2px 10px rgba(120,150,190,0.14);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align:center;
+}
+.fsc-info-lead{ font-size:0.7rem; line-height:1.55; color:var(--gp-midnight); margin:0 0 12px; }
+.fsc-info-lead b{ color:var(--gp-midnight); }
+.fsc-info-legend{ display:flex; justify-content:center; flex-wrap:wrap; gap:16px; font-size:0.66rem; color:#4A6780; margin-bottom:10px; }
+.fsc-info-legend span{ display:inline-flex; align-items:center; gap:6px; }
+.fsc-info-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+.fsc-info-trust{ font-size:0.64rem; line-height:1.6; color:#4A6780; margin:0 0 10px; }
+.fsc-info-trust b{ color:var(--gp-midnight); }
+.fsc-info-formula{
+  font-size:0.58rem; line-height:1.5; color:rgba(74,103,128,0.65);
+  border-top:1px solid rgba(174,239,255,0.35); padding-top:8px; margin-top:2px;
+}
+.fsc-rings { display: flex; justify-content: center; align-items: flex-start; gap: 32px; }
+.fsc-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+/* Glow added 2026-07-15 — the rings themselves (94/92/93) were rendering
+   flat/graphic-only with no depth, unlike everything else in the modal
+   (picture frame, brand star, CTA button) which all carry the same lilac
+   halo. Same rgba(199,180,255,...) family, two layered drop-shadows for
+   a soft directional lift + a tighter close-in glow. */
+.fsc-ring-svg {
+  display: block;
+  width: 92px;
+  height: 92px;
+  filter:
+    drop-shadow(0 4px 14px rgba(199,180,255,0.4))
+    drop-shadow(0 0 8px rgba(199,180,255,0.35));
+}
+.fsc-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4A6780; text-align: center; }
+.fsc-qual { font-size: 0.56rem; font-weight: 500; text-align: center; margin-top: -1px; line-height: 1.25; }
+.fsc-foot { margin-top: 12px; font-size: 0.59rem; color: #9AAABB; text-align: center; letter-spacing: 0.02em; }
+
+.fsc-toggle {
+  width: 100%;
+  margin-top: 2px;
+  background: rgba(255,255,255,0.42);
+  border: 1px solid rgba(174,239,255,0.4);
+  border-radius: 12px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  /* bumped from 600/0.72rem/#3A5168 — next to the bold uppercase section
+     titles this read as plain sentence text with no label weight; now
+     matches the dark, heavy treatment used by "Best for:"/"How often:" */
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--m-ink-1);
+  letter-spacing: 0.01em;
+  transition: background 0.2s, border-color 0.2s;
+}
+.fsc-toggle:hover { background: rgba(255,255,255,0.68); border-color: rgba(174,239,255,0.65); }
+.fsc-chevron { font-size: 0.62rem; color: var(--m-ink-3); transition: transform 0.25s ease; flex-shrink: 0; margin-left: 8px; }
+.fsc-toggle.open .fsc-chevron { transform: rotate(180deg); }
+.fsc-table-wrap { overflow: hidden; max-height: 0; transition: max-height 0.32s ease; }
+.fsc-table-wrap.open { max-height: 2600px; }
+.fsc-table { margin-top: 10px; border-radius: 12px; background: rgba(255,255,255,0.38); border: 1px solid rgba(174,239,255,0.28); overflow: hidden; }
+.fsc-thead { display: grid; grid-template-columns: 1fr 44px 44px 50px; gap: 6px; padding: 8px 12px 7px; border-bottom: 1px solid rgba(174,239,255,0.3); }
+.fsc-th { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7A8D; text-align: center; }
+.fsc-th:first-child { text-align: left; }
+.fsc-row { display: grid; grid-template-columns: 1fr 44px 44px 50px; gap: 6px; align-items: center; padding: 7px 12px; border-bottom: 1px solid rgba(174,239,255,0.14); }
+.fsc-row:last-child { border-bottom: none; }
+.fsc-row.unmatched { opacity: 0.62; }
+.fsc-ing-name { font-size: 0.71rem; color: #3A4C5C; line-height: 1.3; padding-right: 4px; }
+.fsc-badge { font-size: 0.68rem; font-weight: 700; text-align: center; border-radius: 8px; padding: 2px 0; }
+.fsc-badge.b-low  { background: rgba(43,140,116,0.12); color: #2B8C74; }
+.fsc-badge.b-mid  { background: rgba(91,112,144,0.13); color: #5B7090; }
+.fsc-badge.b-high { background: rgba(154,96,32,0.13);  color: #9A6020; }
+.fsc-notscored { grid-column: 2 / 5; font-size: 0.62rem; font-weight: 500; color: #9AAABB; text-align: center; letter-spacing: 0.01em; }
+@media (max-width: 640px) {
+  /* Picture + score no longer fit side-by-side at this width — stack them,
+     and switch the connecting divider from left (column) to top (stack). */
+  .modal-hero-cols { flex-direction: column; }
+  /* Center just the picture in the stacked mobile layout (Bow: "i want the
+     picture to be in the center") -- .modal-hero-cols itself stays
+     align-items:stretch (its base/default value) so .fsc-hero-block and its
+     .fsc-rings row keep the full width they already had (space-between
+     below); centering the whole column made the rings look cramped instead
+     of spread out. */
+  .modal-emoji { align-self: center; }
+  .fsc-hero-block {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid rgba(174,239,255,0.28);
+    padding-top: 16px;
+    margin-top: 4px;
+  }
+  .fsc-rings { justify-content: space-between; gap: 8px; }
+  .fsc-ring-svg { width: 68px; height: 68px; }
+}
+/* ══ END FORMULA SCORE ══ */
 .key-ing {
   font-size: 0.67rem;
   padding: 5px 12px;
@@ -2233,6 +2650,32 @@ img { display: block; max-width: 100%; }
   color: var(--gp-shadow);
   border: 1px solid rgba(174,239,255,0.3);
   font-weight: 500;
+}
+/* ════════════════════════════════════════════════
+   PRODUCT MODAL — concern/active chips (2026-07-15)
+   Ported from the reference Treatment Plan modal's own
+   .gpg-chip/.gpg-actpill recipe, then de-sequenced per
+   Bow's feedback: concerns are a set, not ordered steps,
+   so no arrows and no single "first" chip — every chip
+   gets the same lilac-highlighted treatment.
+   ════════════════════════════════════════════════ */
+.modal-concern-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.modal-concern-chip {
+  font: 600 0.72rem 'DM Sans', sans-serif;
+  background: linear-gradient(135deg, rgba(199,180,255,0.4), rgba(174,206,230,0.35));
+  border: 1px solid rgba(185,174,224,0.6);
+  border-radius: 999px;
+  padding: 3px 10px;
+  color: #3A2F62;
+}
+.modal-active-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.modal-active-chip {
+  font: 600 0.73rem 'DM Sans', sans-serif;
+  color: #1E4A57;
+  background: linear-gradient(135deg, rgba(200,240,255,0.7), rgba(224,246,255,0.5));
+  border: 1px solid rgba(150,210,230,0.6);
+  border-radius: 10px;
+  padding: 4px 10px;
 }
 .full-ing {
   font-size: 0.72rem;
@@ -2245,6 +2688,24 @@ img { display: block; max-width: 100%; }
   box-shadow: var(--shadow-recess);
 }
 .full-ing .hi { background: #ffd4cc; color: #8b2020; border-radius: 3px; padding: 0 4px; font-weight: 600; }
+/* Full INCI list — key-active highlight + truncation expander (2026-07-15) */
+.modal-inci-active { color: #6B4FA0; font-weight: 700; background: linear-gradient(135deg, rgba(199,180,255,0.3), rgba(174,239,255,0.22)); border-radius: 4px; padding: 0 3px; }
+.modal-inci-tail { display: none; }
+.modal-inci-tail.open { display: inline; }
+.modal-inci-more {
+  display: inline-block;
+  margin-left: 6px;
+  font: 700 0.66rem 'DM Sans', sans-serif;
+  color: #6B4FA0;
+  background: rgba(199,180,255,0.16);
+  border: 1px solid rgba(199,180,255,0.42);
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background 0.2s ease;
+}
+.modal-inci-more:hover { background: rgba(199,180,255,0.3); }
 
 /* Info boxes — Recessed Panel archetype */
 .info-box { border-radius: var(--r-recess); padding: var(--sp-4) var(--sp-4); font-size: 0.8rem; line-height: 1.7; margin-bottom: var(--sp-3); box-shadow: var(--shadow-recess); }
@@ -2254,13 +2715,35 @@ img { display: block; max-width: 100%; }
 .info-box.blue { background: var(--blue-lt); border: 1px solid rgba(74,104,136,0.18); color: #2a4a68; }
 .info-box.rose { background: var(--pink-lt); border: 1px solid rgba(174,239,255,0.35); color: var(--gp-shadow); }
 
+/* Product-modal-only glass treatment for info-box/full-ing — the flat solid
+   status-alert fills read as cheap/disconnected inside the frosted-glass modal
+   (Bow, 2026-07-15). Keeps the semantic color as a left accent + soft tinted
+   wash instead of an opaque fill, matching the .fsc-toggle/.fsc-table recipe. */
+#modal-box .info-box {
+  background: rgba(255,255,255,0.44);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(174,239,255,0.4);
+  box-shadow: 0 2px 10px rgba(120,150,190,0.14);
+}
+#modal-box .info-box.green { background: linear-gradient(135deg, rgba(235,244,238,0.55), rgba(255,255,255,0.42)); border: 1px solid rgba(174,239,255,0.4); border-left: 3px solid var(--green); color: #2a5a3a; }
+#modal-box .info-box.amber { background: linear-gradient(135deg, rgba(253,245,232,0.55), rgba(255,255,255,0.42)); border: 1px solid rgba(174,239,255,0.4); border-left: 3px solid var(--amber); color: #6a4010; }
+#modal-box .info-box.red { background: linear-gradient(135deg, rgba(253,240,240,0.55), rgba(255,255,255,0.42)); border: 1px solid rgba(174,239,255,0.4); border-left: 3px solid var(--red); color: #7a2020; }
+#modal-box .info-box.blue { background: linear-gradient(135deg, rgba(235,241,248,0.55), rgba(255,255,255,0.42)); border: 1px solid rgba(174,239,255,0.4); border-left: 3px solid var(--blue); color: #2a4a68; }
+/* Neutral/descriptive info (e.g. Best for / How often) — not a status,
+   so no green "success" implication. Matches the modal's own lilac-glass
+   identity instead of borrowing the semantic color system. (2026-07-15) */
+#modal-box .info-box.lilac { background: linear-gradient(135deg, rgba(199,180,255,0.18), rgba(224,213,255,0.14)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(199,180,255,0.4); border-left: 3px solid #A98FE0; color: var(--m-ink-2); box-shadow: 0 2px 10px rgba(120,150,190,0.14); }
+#modal-box .info-box.lilac strong { color: var(--m-ink-1); }
+#modal-box .full-ing { background: rgba(255,255,255,0.38); border: 1px solid rgba(174,239,255,0.28); color: #4A5670; }
+
 /* Tags */
 .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag { font-size: 0.62rem; padding: 4px 10px; border-radius: var(--r-pill); background: var(--pink-lt); color: var(--gp-shadow); font-weight: 500; border: 1px solid rgba(174,239,255,0.3); }
 .tag.red { background: var(--red-lt); color: var(--red); border-color: rgba(184,64,64,0.2); }
 .tag.blue { background: var(--blue-lt); color: var(--blue); border-color: rgba(74,104,136,0.2); }
-.label-xs { font-size: 0.6rem; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase; color: var(--ds-rose); margin-bottom: var(--sp-3); display: block; }
-.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.label-xs { font-size: 0.6rem; font-weight: 700; letter-spacing: 3.5px; text-transform: uppercase; color: var(--ds-teal); margin-bottom: var(--sp-3); display: block; }
+.divider { height: 1px; background: var(--m-line); margin: 24px 0; }
 
 /* ════════════════════════════════════════════════
    ROUTINE BUILDER
@@ -2567,7 +3050,7 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   letter-spacing: 3.5px;
   text-transform: uppercase;
-  color: var(--ds-rose);
+  color: var(--ds-teal);
   margin-bottom: var(--sp-3);
 }
 .selected-product-tags { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
@@ -3220,19 +3703,141 @@ img { display: block; max-width: 100%; }
 .device-avoid-text { font-size: 0.62rem; color: var(--red); margin-top: 8px; line-height: 1.55; }
 
 /* ════════════════════════════════════════════════
-   CONFLICT CHECKER
+   CONFLICT CHECKER — picker card, same glass recipe as
+   .conf-hero/.conflict-result (Bow, 2026-07-20: wants
+   one consistent card design across the whole page).
+   Scoped to #page-conflict so the shared .builder-card
+   class elsewhere on the site is untouched.
+   [Reverted 2026-07-20 back to this v=177 state — the
+   "cleaner/premium" ice-glass attempt (v178/v179) didn't
+   land, Bow asked to go back to this recipe.]
+════════════════════════════════════════════════ */
+#page-conflict .builder-card {
+  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
+  border: 1px solid rgba(174,239,255,0.5);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+#page-conflict .builder-card::before {
+  display: none;
+}
+/* "Make it pop" pass (Bow, 2026-07-20): swapped the decorative pink
+   corner-blob (::after, inherited from the base .builder-card recipe)
+   for a small lavender-metal accent bar along the top edge — a static
+   color pop, not motion, so the card still reads calm/premium. */
+#page-conflict .builder-card::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--grad-lavender-metal);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════
+   CONFLICT CHECKER — hero stat panel + picker summary
+   (§A-0 redesign, 2026-07-20). Same lavender→aqua glass
+   family as Product Library's .lib-hero (§A-1) — reuse
+   the recipe, don't invent a new one.
+════════════════════════════════════════════════ */
+.conf-hero {
+  position: relative;
+  margin-bottom: var(--sp-6);
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
+  border: 1px solid rgba(174,239,255,0.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.conf-stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.conf-stat {
+  flex: 1;
+  min-width: 120px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(174,239,255,0.4);
+  border-radius: 13px;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.conf-stat-n { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 700; color: var(--gp-midnight); line-height: 1; }
+.conf-stat-n-sm { font-size: 1.05rem; }
+.conf-stat-n.severity-warn { color: var(--ds-honey); }
+.conf-stat-n.severity-danger { color: var(--ds-coral); }
+.conf-stat-l { font-size: 0.68rem; color: var(--ink2); margin-top: 4px; font-weight: 600; }
+
+/* Picker summary bar — replaces the "flat wall of cards" feeling with a
+   running list of what's actually selected + one-tap removal, without
+   restructuring the proven picker-grid interaction (Bow, 2026-07-20:
+   summary bar only, not a brand-group rebuild). */
+.conf-picker-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 20px;
+  margin-bottom: var(--sp-3);
+}
+.conf-picker-empty { font-size: 0.76rem; color: var(--ink3); font-style: italic; font-family: 'Playfair Display', serif; opacity: 0.75; }
+.conf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 12px;
+  border-radius: var(--r-pill);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--gp-midnight);
+  background: linear-gradient(135deg, rgba(255,255,255,0.75), rgba(174,239,255,0.25));
+  border: 1px solid rgba(174,239,255,0.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.conf-chip-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.62rem;
+  line-height: 1;
+  color: var(--ds-chrome-deep);
+  background: rgba(255,255,255,0.65);
+  transition: all 0.2s var(--ease);
+}
+.conf-chip-x:hover { background: rgba(255,255,255,0.95); color: var(--ds-coral); }
+
+/* ════════════════════════════════════════════════
+   CONFLICT CHECKER — results
 ════════════════════════════════════════════════ */
 .conflict-result {
+  /* Same card recipe as the (now-removed) .conf-hero stat strip, so
+     results read as one consistent card style on this page.
+     [Reverted 2026-07-20 back to this v=177 state — the "cleaner/premium"
+     ice-glass attempt (v178/v179) didn't land, Bow asked to go back.] */
   position: relative;
-  border-radius: var(--r-editor);
+  border-radius: 18px;
   overflow: hidden;
   margin-bottom: var(--sp-3);
-  border: 1px solid var(--ds-chrome-silver);
-  background: linear-gradient(180deg, #FFFFFF 0%, var(--ds-pearl-off) 100%);
-  box-shadow:
-    0 4px 16px rgba(75,67,72,0.08),
-    0 1px 3px rgba(174,239,255,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.95);
+  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
+  border: 1px solid rgba(174,239,255,0.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* "Make it pop" pass (Bow, 2026-07-20): result cards now pop-in on
+     arrival instead of just appearing flat. */
+  animation: conf-result-pop 0.4s var(--ease);
+}
+@keyframes conf-result-pop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 /* Chrome hairline along the top edge */
 .conflict-result::before {
@@ -3282,6 +3887,16 @@ img { display: block; max-width: 100%; }
   line-height: 1.75;
   color: var(--ink2);
 }
+/* Which of the user's selected products triggered this specific result —
+   previously the combo name (e.g. "Retinal + Glycolic Acid") gave no way
+   to tell which of your own products it meant. */
+.conf-body-products {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  font-style: italic;
+}
+.conf-body-products b { font-style: normal; font-weight: 600; color: var(--ink2); }
 .prod-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -3290,6 +3905,33 @@ img { display: block; max-width: 100%; }
   max-height: 380px;
   overflow-y: auto;
   padding-right: var(--sp-1);
+}
+/* Conflict Checker's picker grid — reuses the .prod-picker-scroll
+   "recessed crystal tray" frame that already exists elsewhere on the
+   site, so the scroll boundary reads as an intentional inset panel
+   instead of getting sliced off (Bow, 2026-07-20: "i want a frame
+   around this so it doesnt look cut off"). */
+#conflict-grid {
+  border: 1px solid var(--ds-chrome-silver);
+  border-radius: var(--r-editor);
+  background: linear-gradient(180deg,
+    rgba(232,238,242,0.32) 0%,
+    rgba(255,255,255,0.85) 30%,
+    rgba(255,255,255,0.95) 70%,
+    rgba(221,244,255,0.10) 100%);
+  padding: var(--sp-4);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow:
+    inset 0 1px 2px rgba(75,67,72,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -1px 0 rgba(194,189,198,0.22);
+}
+#conflict-grid::-webkit-scrollbar { width: 4px; }
+#conflict-grid::-webkit-scrollbar-track { background: transparent; }
+#conflict-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--ds-chrome-mid) 0%, var(--ds-chrome-deep) 100%);
+  border-radius: var(--r-pill);
 }
 
 /* Product search field + button */
@@ -3536,14 +4178,26 @@ img { display: block; max-width: 100%; }
   background:
     linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 50%),
     linear-gradient(135deg, rgba(221,244,255,0.78) 0%, rgba(174,239,255,0.55) 60%, rgba(174,239,255,0.32) 100%);
+  /* "Make it pop" pass (Bow, 2026-07-20): layered a lavender accent ring
+     + glow on top of the existing aqua jewel look, and a one-shot bounce
+     (see @keyframes conf-pick-pop below) so picking a product feels
+     tactile, not just a flat border-color swap. */
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.55),
-    0 8px 22px rgba(174,239,255,0.42),
-    0 2px 6px rgba(174,239,255,0.22),
+    0 0 0 3px rgba(199,180,255,0.30),
+    0 10px 24px rgba(199,180,255,0.28),
+    0 8px 22px rgba(174,239,255,0.38),
+    0 2px 6px rgba(174,239,255,0.20),
     inset 0 1px 0 rgba(255,255,255,0.98),
     inset 0 -1px 0 rgba(110,160,178,0.22);
+  animation: conf-pick-pop 0.32s var(--ease);
 }
 .prod-pick-card.selected::before { opacity: 1; }
+@keyframes conf-pick-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
 .prod-pick-emoji {
   position: relative;
   display: flex;
@@ -3613,11 +4267,17 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
   opacity: 0;
   transform: scale(0.6);
-  transition: all 0.32s var(--ease);
+  transition: all 0.36s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .prod-pick-card.selected .prod-pick-check {
   opacity: 1;
   transform: scale(1);
+  /* Small lavender glow on top of the existing chrome bead — the bead
+     "pops" in with a slight overshoot bounce via the cubic-bezier above. */
+  box-shadow:
+    0 1px 4px rgba(110,160,178,0.45),
+    0 0 10px rgba(199,180,255,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.55);
 }
 
 /* Empty state — luxurious editorial */
@@ -3732,12 +4392,9 @@ img { display: block; max-width: 100%; }
 /* ════════════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════════════ */
-/* Hamburger + mobile drawer: hidden on desktop by default */
+/* Hamburger + mobile drawer: hidden on desktop by default (activated at ≤768px, see nav block below) */
 .nav-hamburger { display: none; }
 .mobile-nav-drawer { display: none; }
-@media (max-width: 480px) {
-  .mobile-nav-drawer { display: flex; }
-}
 /* iOS Safari auto-zoom prevention: inputs must be ≥16px font-size */
 @media (max-width: 1024px) {
   .search-input, .prod-search-input, .rename-input { font-size: 1rem; }
@@ -3750,7 +4407,6 @@ img { display: block; max-width: 100%; }
     backdrop-filter: blur(48px) saturate(200%);
     -webkit-backdrop-filter: blur(48px) saturate(200%);
   }
-  .nav-btn { padding: 10px 18px; font-size: 0.72rem; min-height: 44px; }
   .nav-logo-img { display: block; }
   .nav-logo { padding: 4px 16px 4px 14px; }
   .nav-logo::before { font-size: 10px; top: -8px; left: -2px; }
@@ -3758,10 +4414,141 @@ img { display: block; max-width: 100%; }
   .nav-logo-glow { font-size: clamp(2.1rem, 5.2vw, 2.5rem); }
   .nav-logo-phase { font-size: clamp(0.82rem, 1.6vw, 0.98rem); padding-bottom: 5px; }
   .nav-logo-spark { font-size: 0.68rem; transform: translateY(-6px); }
-  .nav-links { gap: var(--sp-1); padding-bottom: 2px; scroll-snap-type: x mandatory; }
-  .nav-links > * { scroll-snap-align: center; }
   .lang-switcher { padding: 2px; }
   .lang-btn { min-height: 36px; padding: 6px 12px; }
+
+  /* ── Hamburger takes over from here down — pill row hidden, ice-glass drawer instead ── */
+  .nav-links { display: none !important; }
+  .nav-right { margin-left: auto; gap: 6px; align-items: center; }
+
+  .nav-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: linear-gradient(180deg,
+      rgba(250,253,255,0.80) 0%,
+      rgba(235,247,255,0.62) 50%,
+      rgba(221,244,255,0.52) 100%);
+    border: 1px solid rgba(174,239,255,0.32);
+    border-radius: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    box-shadow:
+      0 4px 14px rgba(174,239,255,0.22),
+      0 1px 3px rgba(174,239,255,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.85);
+    transition: all 0.28s var(--ease);
+  }
+  .nav-hamburger span {
+    display: block;
+    height: 1.5px;
+    background: var(--gp-shadow);
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+  .nav-hamburger span:last-child { width: 70%; }
+  .nav-hamburger.open {
+    background: linear-gradient(180deg, rgba(232,247,255,0.95) 0%, rgba(221,244,255,0.85) 50%, rgba(174,239,255,0.65) 100%);
+    border-color: rgba(174,239,255,0.55);
+  }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-hamburger.open span:nth-child(3) { width: 100%; transform: translateY(-6px) rotate(-45deg); }
+
+  /* ── Mobile nav drawer — same glass recipe as .site-nav/.builder-card (design doc §5), not a flat tint ── */
+  .mobile-nav-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    padding: 18px 16px 22px;
+    border-radius: 0 0 28px 28px;
+    background: linear-gradient(150deg,
+      rgba(250,252,255,.98) 0%,
+      rgba(232,240,255,.90) 32%,
+      rgba(178,227,255,.68) 100%);
+    border-bottom: 1px solid rgba(255,255,255,.8);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow:
+      0 20px 56px rgba(120,180,210,0.28),
+      0 6px 20px rgba(75,67,72,0.14),
+      inset 0 1px 0 rgba(255,255,255,.98);
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+  .mobile-nav-drawer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.98) 50%, transparent);
+    pointer-events: none;
+  }
+  .mobile-nav-drawer::after {
+    content: '';
+    position: absolute;
+    left: 24px; right: 24px; bottom: 10px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(120,180,210,.5) 50%, transparent);
+    pointer-events: none;
+  }
+  .mobile-nav-drawer.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mob-nav-btn {
+    width: 100%;
+    text-align: left;
+    padding: 14px 20px;
+    border-radius: 100px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    font-family: 'DM Sans', sans-serif;
+    color: #243142;
+    /* Lavender-metallic — main button design site-wide (Bow, 2026-07-19) */
+    background: var(--grad-lavender-metal);
+    border: 1px solid rgba(180,156,240,0.4);
+    cursor: pointer;
+    transition: all 0.28s var(--ease);
+    min-height: 48px;
+    box-shadow:
+      0 3px 10px rgba(174,239,255,0.28),
+      0 2px 6px rgba(150,180,205,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .mob-nav-btn:active {
+    color: var(--gp-shadow);
+    border-color: rgba(180,156,240,0.6);
+  }
+  .mob-nav-btn.mob-active {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%),
+      var(--grad-lavender-metal);
+    color: var(--gp-shadow);
+    font-weight: 600;
+    border-color: rgba(147,216,236,0.7);
+    box-shadow:
+      0 6px 20px rgba(174,239,255,0.4),
+      0 0 16px rgba(199,180,255,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      0 0 0 1px rgba(199,180,255,0.4);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+  }
 
   /* ── Sections & cards: tighter rhythm, gentler shadows ── */
   .section { padding: var(--section-py-tab) var(--sp-4); }
@@ -3797,7 +4584,7 @@ img { display: block; max-width: 100%; }
   .day-badges { justify-content: flex-start; }
 
   /* ── Modal: bottom-sheet feel ── */
-  .modal-hero { flex-direction: column; padding: var(--sp-6); }
+  .modal-hero { padding: var(--sp-6); }
   .modal-body { padding: var(--sp-6); }
   .modal-name-lg { font-size: 1.55rem; }
   .modal-sec { margin-bottom: var(--sp-5, 20px); }
@@ -3827,7 +4614,10 @@ img { display: block; max-width: 100%; }
   .myr-chip-name { font-size: 0.95rem; }
 
   /* ── Forms: chunkier inputs on tablet ── */
-  .search-input, .prod-search-input, .rename-input { font-size: 1rem; padding: 14px 20px; }
+  .prod-search-input, .rename-input { font-size: 1rem; padding: 14px 20px; }
+  /* .search-input kept separate (2026-07-19) so its 46px left padding
+     for the search icon isn't clobbered on tablet. */
+  .search-input { font-size: 1rem; padding: 14px 20px 14px 46px; }
 
   /* ── Filter row: horizontal scroll for chips, no wrap ── */
   .filter-row {
@@ -3869,86 +4659,8 @@ img { display: block; max-width: 100%; }
   .nav-logo-phase { font-size: 0.65rem; padding-bottom: 3px; }
   .nav-logo-spark { font-size: 0.55rem; margin-left: 2px; }
 
-  /* ── Hide desktop pill nav on mobile ── */
-  .nav-links { display: none !important; }
-
-  /* ── Nav right: shrink gap ── */
-  .nav-right { margin-left: auto; gap: 6px; align-items: center; }
-
-  /* ── Hamburger button ── */
-  .nav-hamburger {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-    width: 36px;
-    height: 36px;
-    padding: 6px;
-    background: rgba(142,200,219,0.15);
-    border: 0.5px solid rgba(142,200,219,0.4);
-    border-radius: 10px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .nav-hamburger span {
-    display: block;
-    height: 1.5px;
-    background: #2E7A8F;
-    border-radius: 2px;
-    transition: transform 0.25s ease, opacity 0.2s ease;
-  }
-  .nav-hamburger span:last-child { width: 70%; }
-  .nav-hamburger.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
-  .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-  .nav-hamburger.open span:nth-child(3) { width: 100%; transform: translateY(-5.5px) rotate(-45deg); }
-
-  /* ── Mobile nav drawer ── */
-  .mobile-nav-drawer {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    z-index: 999;
-    padding: 12px;
-    background: rgba(248,242,246,0.96);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 0.5px solid rgba(142,200,219,0.3);
-    transform: translateY(-8px);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.25s ease, opacity 0.2s ease;
-  }
-  .mobile-nav-drawer.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .mob-nav-btn {
-    width: 100%;
-    text-align: left;
-    padding: 13px 16px;
-    background: rgba(255,255,255,0.6);
-    border: 0.5px solid rgba(142,200,219,0.25);
-    border-radius: 12px;
-    font-size: 0.88rem;
-    font-family: inherit;
-    color: #6b4a57;
-    letter-spacing: 0.3px;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-    min-height: 48px;
-  }
-  .mob-nav-btn:active { background: rgba(142,200,219,0.2); color: #4b3040; }
-  .mob-nav-btn.mob-active {
-    background: rgba(142,200,219,0.25);
-    border-color: rgba(142,200,219,0.5);
-    font-weight: 600;
-    color: #4b3040;
-  }
+  /* ── Nav height shrinks here — drawer offset follows (hamburger/drawer styling itself lives in the ≤768px block above) ── */
+  .mobile-nav-drawer { top: 64px; }
 
   /* ── Hero ── */
   .hero { padding-top: 64px; }
@@ -3987,7 +4699,7 @@ img { display: block; max-width: 100%; }
     max-height: 94vh;
   }
   .modal-hero { padding: var(--sp-6); gap: var(--sp-4); }
-  .modal-emoji { width: 64px; height: 64px; font-size: 1.6rem; border-radius: 18px; }
+  .modal-emoji { width: 128px; height: 128px; font-size: 2.4rem; border-radius: 26px; }
   .modal-name-lg { font-size: 1.4rem; line-height: 1.2; }
   .modal-body { padding: var(--sp-5, 20px) var(--sp-5, 20px) var(--sp-8); }
   .modal-close { top: 12px; right: 12px; }
@@ -4016,6 +4728,10 @@ img { display: block; max-width: 100%; }
   .conflict-head { padding: var(--sp-3) var(--sp-4); font-size: 0.78rem; }
   .conflict-body { padding: var(--sp-4); font-size: 0.82rem; }
   .prod-picker-grid { grid-template-columns: 1fr; }
+  .conf-stat-row { gap: 8px; }
+  .conf-stat { min-width: 0; padding: 8px 10px; }
+  .conf-stat-n { font-size: 1.2rem; }
+  .conf-stat-n-sm { font-size: 0.9rem; }
 
   /* ── My routine ── */
   .myr-chip { min-width: 0; flex: 1 1 100%; padding: var(--sp-3) var(--sp-4); }
@@ -4027,9 +4743,15 @@ img { display: block; max-width: 100%; }
   .day-btn, .phase-tab { padding: 11px 18px; }
 
   /* ── Forms: chunkier ── */
-  .search-input, .prod-search-input, .rename-input {
+  .prod-search-input, .rename-input {
     font-size: 1rem; padding: 14px 20px;
     /* Prevent iOS auto-zoom (font-size must be ≥ 16px on inputs) */
+    min-height: 48px;
+  }
+  /* .search-input kept separate (2026-07-19) so its 46px left padding
+     for the search icon isn't clobbered on mobile. */
+  .search-input {
+    font-size: 1rem; padding: 14px 20px 14px 46px;
     min-height: 48px;
   }
   .prod-search-container { flex-direction: column; align-items: stretch; gap: var(--sp-2); }
@@ -4089,7 +4811,7 @@ img { display: block; max-width: 100%; }
   .nav-logo-glow { font-size: 1.7rem; }
   .nav-logo-phase { font-size: 0.72rem; padding-bottom: 3px; }
   .nav-logo-spark { font-size: 0.56rem; transform: translateY(-4px); }
-  .nav-btn { padding: 9px 10px; font-size: 0.64rem; }
+  .mobile-nav-drawer { top: 60px; }
   .home-section, .section { padding: var(--section-py-mob) var(--sp-3); }
   .hero-content { padding: var(--sp-6) var(--sp-3) var(--sp-10, 40px); }
   .hero-glass-panel { padding: var(--sp-8) var(--sp-4) var(--sp-5, 20px); border-radius: 20px; }
@@ -4098,7 +4820,7 @@ img { display: block; max-width: 100%; }
   .feat-grid { grid-template-columns: 1fr; gap: var(--sp-3); }
   .home-section-title, .section-title { font-size: clamp(1.5rem, 8vw, 1.95rem); }
   .modal-name-lg { font-size: 1.25rem; }
-  .modal-emoji { width: 56px; height: 56px; font-size: 1.4rem; border-radius: 16px; }
+  .modal-emoji { width: 92px; height: 92px; font-size: 2rem; border-radius: 22px; }
   .builder-card { padding: var(--sp-4); }
   .saved-card, .device-card, .feat-card { padding: var(--sp-4); }
   .product-row { padding: var(--sp-3); gap: var(--sp-3); }
@@ -4542,7 +5264,7 @@ img { display: block; max-width: 100%; }
 
 .rs-amount{font-size:.72rem;color:#2E7A8F;font-weight:600;margin-top:4px;}
 .rs-wait-chip{display:flex;font-size:.72rem;color:#b08a94;font-style:italic;padding:4px 12px 4px 48px;margin:-2px 0;}
-.gp-checkin-banner{position:sticky;bottom:72px;margin:16px 0 0;padding:14px 16px;background:var(--grad-ice-btn);border-radius:16px;box-shadow:0 4px 24px rgba(174,239,255,.35);z-index:50;}
+.gp-checkin-banner{position:sticky;bottom:72px;margin:16px 0 0;padding:14px 16px;background:var(--grad-lavender-metal);border-radius:16px;box-shadow:0 4px 24px rgba(174,239,255,.35),0 8px 20px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.6);z-index:50;}
 .gp-checkin-banner--done{background:linear-gradient(135deg,rgba(72,187,120,.9),rgba(56,161,105,.9));display:flex;align-items:center;gap:10px;}
 .gp-checkin-check{font-size:1.3rem;font-weight:900;color:white;}
 .gp-checkin-label{font-size:.9rem;font-weight:700;color:white;}
@@ -4559,7 +5281,7 @@ img { display: block; max-width: 100%; }
 .gp-sos-tip{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(142,200,219,.25);font-size:.88rem;line-height:1.45;}
 .gp-sos-tip:last-of-type{border-bottom:none;}
 .gp-sos-tip-dot{flex-shrink:0;width:7px;height:7px;border-radius:50%;background:#AEEFFF;margin-top:5px;}
-.gp-sos-close-btn{width:100%;margin-top:14px;padding:13px;background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;}
+.gp-sos-close-btn{width:100%;margin-top:14px;padding:13px;background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(174,239,255,.42),0 6px 18px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.7);}
 
 
 /* ═══ SKIN READINESS GATE ═══ */
@@ -4609,14 +5331,14 @@ img { display: block; max-width: 100%; }
 #skin-gate-modal .sg-option{ display:inline-flex !important; align-items:center; flex:0 1 auto !important; padding:8px 14px !important; border-radius:100px !important; background:rgba(255,255,255,0.7) !important; border:1px solid rgba(201,206,216,0.6) !important; font-size:.76rem !important; font-weight:600 !important; color:var(--ink2) !important; box-shadow:none !important; }
 #skin-gate-modal .sg-option .sg-option-dot{ display:none !important; }
 #skin-gate-modal .sg-option:hover{ border-color:rgba(174,239,255,0.6) !important; }
-#skin-gate-modal .sg-option.selected{ border-color:transparent !important; background:var(--grad-ice-btn) !important; color:#1B3C4D !important; font-weight:600 !important; box-shadow:none !important; }
+#skin-gate-modal .sg-option.selected{ border-color:transparent !important; background:var(--grad-lavender-metal) !important; color:#1B3C4D !important; font-weight:600 !important; box-shadow:0 2px 8px rgba(174,239,255,.35),inset 0 1px 0 rgba(255,255,255,.6) !important; }
 #skin-gate-modal .sg-body{ padding:0 !important; }
 /* footer: two buttons side by side like the preview (primary ice + secondary white outline) */
 #skin-gate-modal .sg-footer{ position:static !important; margin-top:18px !important; padding:0 !important; background:none !important; display:flex !important; flex-direction:row !important; gap:10px !important; }
 #skin-gate-modal .sg-btn-check{ flex:1 !important; width:auto !important; border-radius:13px !important; padding:13px 10px !important; font-size:.82rem !important; }
 #skin-gate-modal .sg-btn-skip{ flex:1 !important; width:auto !important; padding:13px 10px !important; background:rgba(255,255,255,0.7) !important; border:1px solid rgba(201,206,216,0.6) !important; color:var(--ink2) !important; border-radius:13px !important; font-size:.82rem !important; font-weight:600 !important; text-decoration:none !important; }
 /* result screens (Ready/Caution/Not-ready) share #skin-gate-box; swap the off-brand green 'Continue' button to ice */
-#skin-gate-modal .sg-btn-proceed{ background:var(--grad-ice-btn) !important; color:#1B3C4D !important; box-shadow:0 4px 14px rgba(174,239,255,.4) !important; }
+#skin-gate-modal .sg-btn-proceed{ background:var(--grad-lavender-metal) !important; color:#1B3C4D !important; box-shadow:0 4px 14px rgba(174,239,255,.4),0 8px 20px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65) !important; }
 
 /* ═══ STEP BACK / RECOVERY MODE ═══ */
 .sb-strip{margin:10px 0 8px;display:flex;align-items:center;justify-content:center;}
@@ -4630,7 +5352,7 @@ img { display: block; max-width: 100%; }
 .sb-recovery-content{flex:1;}
 .sb-recovery-title{font-size:.86rem;font-weight:700;color:var(--gp-midnight);margin-bottom:3px;}
 .sb-recovery-body{font-size:.78rem;color:var(--ink2);line-height:1.5;}
-.sb-recovery-return{margin-left:auto;flex-shrink:0;white-space:nowrap;padding:9px 18px;background:var(--grad-ice-btn);border:none;border-radius:100px;font-size:.78rem;font-weight:700;color:#1B3C4D;cursor:pointer;box-shadow:0 4px 14px rgba(174,239,255,.4);transition:all .2s;}
+.sb-recovery-return{margin-left:auto;flex-shrink:0;white-space:nowrap;padding:9px 18px;background:var(--grad-lavender-metal);border:none;border-radius:100px;font-size:.78rem;font-weight:700;color:#1B3C4D;cursor:pointer;box-shadow:0 4px 14px rgba(174,239,255,.4),0 7px 18px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65);transition:all .2s;}
 .sb-recovery-return:hover{transform:translateY(-1px);}
 /* Step-back bottom sheet */
 .sb-sheet-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(75,67,72,.45);z-index:9200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
@@ -4652,7 +5374,7 @@ img { display: block; max-width: 100%; }
 .wsc-banner-content{flex:1;}
 .wsc-banner-title{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:2px;}
 .wsc-banner-sub{font-size:.75rem;color:#6E8896;}
-.wsc-banner-btn{padding:9px 16px;background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.wsc-banner-btn{padding:9px 16px;background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;box-shadow:0 3px 10px rgba(174,239,255,.4),0 6px 16px rgba(150,180,205,.28),inset 0 1px 0 rgba(255,255,255,.65);}
 /* WSC sheet — reuses sb-sheet-overlay pattern */
 .wsc-sheet{background:rgba(248,248,250,.98);backdrop-filter:blur(24px);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 22px 44px;box-shadow:0 -8px 40px rgba(75,67,72,.2);max-height:88vh;overflow-y:auto;}
 .wsc-handle{width:40px;height:4px;background:rgba(75,67,72,.18);border-radius:2px;margin:0 auto 16px;}
@@ -4716,7 +5438,7 @@ img { display: block; max-width: 100%; }
 .pss-msg{font-size:.8rem;color:#78716c;line-height:1.55;margin-bottom:10px;}
 .pss-tip{font-size:.78rem;color:#92400e;background:rgba(251,191,36,0.12);border-radius:8px;padding:7px 10px;margin-bottom:10px;line-height:1.45;}
 .pss-actions{display:flex;flex-direction:column;gap:7px;}
-.pss-btn-main{width:100%;padding:11px;background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;}
+.pss-btn-main{width:100%;padding:11px;background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(174,239,255,.4),0 6px 16px rgba(150,180,205,.28),inset 0 1px 0 rgba(255,255,255,.65);}
 .pss-btn-stepback{width:100%;padding:11px;background:linear-gradient(135deg,#f87171,#ef4444);color:white;border:none;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer;}
 .pss-btn-dismiss{width:100%;padding:8px;background:transparent;color:#8A95A0;border:none;font-size:.78rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 
@@ -4730,7 +5452,7 @@ img { display: block; max-width: 100%; }
 .pss-tip{font-size:.75rem;color:#6E8896;margin-top:2px;}
 .pss-msg{font-size:.82rem;color:#5E6E76;line-height:1.6;margin-bottom:12px;}
 .pss-actions{display:flex;flex-wrap:wrap;gap:8px;}
-.pss-btn-main{padding:9px 16px;background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.pss-btn-main{padding:9px 16px;background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(174,239,255,.4),0 6px 16px rgba(150,180,205,.28),inset 0 1px 0 rgba(255,255,255,.65);}
 .pss-btn-secondary{padding:9px 16px;background:transparent;color:#8A95A0;border:1.5px solid rgba(174,239,255,0.4);border-radius:20px;font-size:.8rem;cursor:pointer;}
 .pss-btn-dismiss{padding:9px 14px;background:transparent;color:#8A95A0;border:none;font-size:.78rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 
@@ -4744,7 +5466,7 @@ img { display: block; max-width: 100%; }
 .phw-content{flex:1;}
 .phw-label{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.2;}
 .phw-sub{font-size:.75rem;color:#6E8896;margin-top:3px;}
-.phw-view-btn{padding:8px 16px;background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:20px;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;box-shadow:0 3px 12px rgba(174,239,255,.3);}
+.phw-view-btn{padding:8px 16px;background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:20px;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;box-shadow:0 3px 12px rgba(174,239,255,.3),0 6px 16px rgba(150,180,205,.28),inset 0 1px 0 rgba(255,255,255,.65);}
 
 /* ═══ PHASE GRADUATION ═══ */
 #grad-overlay{
@@ -4792,11 +5514,11 @@ img { display: block; max-width: 100%; }
 
 .grad-btn{
   padding:14px 36px;
-  background:var(--grad-ice-btn);
+  background:var(--grad-lavender-metal);
   color:#1B3C4D;border:none;border-radius:50px;
   font-size:.95rem;font-weight:700;cursor:pointer;
   letter-spacing:.03em;
-  box-shadow:0 6px 28px rgba(174,239,255,.45);
+  box-shadow:0 6px 28px rgba(174,239,255,.45),0 10px 30px rgba(150,180,205,.32),inset 0 1px 0 rgba(255,255,255,.65);
   animation:gradFadeUp .6s .5s var(--ease) both;
   transition:opacity .2s,transform .2s;
 }
@@ -4839,9 +5561,9 @@ img { display: block; max-width: 100%; }
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-style:italic;}
 
 /* Hero CTAs → reference pill buttons */
-.btn-hero-primary{background:var(--grad-ice-btn);color:#1B3C4D;border:none;border-radius:var(--r-pill);
+.btn-hero-primary{background:var(--grad-lavender-metal);color:#1B3C4D;border:none;border-radius:var(--r-pill);
   padding:14px 30px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
-  box-shadow:0 4px 24px rgba(174,239,255,.45),0 2px 8px rgba(36,49,66,.08);}
+  box-shadow:0 4px 24px rgba(174,239,255,.45),0 8px 22px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65),0 2px 8px rgba(36,49,66,.08);}
 .btn-hero-outline{border:1.5px solid rgba(201,206,216,.6);border-radius:var(--r-pill);
   padding:14px 30px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--ink2);
   background:rgba(255,255,255,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
@@ -4863,8 +5585,8 @@ img { display: block; max-width: 100%; }
 .gp-pill b{font-weight:700;}
 .icon-ice{background:rgba(174,239,255,0.30);} .icon-mint{background:rgba(223,255,239,0.40);} .icon-aurora{background:rgba(199,180,255,0.32);}
 .gp-snap-cta{width:100%;margin-top:4px;padding:13px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;
-  font-size:.9rem;font-weight:700;color:#1B3C4D;background:var(--grad-ice-btn);
-  box-shadow:0 4px 20px rgba(174,239,255,.45),inset 0 1px 0 rgba(255,255,255,.6);transition:var(--transition);}
+  font-size:.9rem;font-weight:700;color:#1B3C4D;background:var(--grad-lavender-metal);
+  box-shadow:0 4px 20px rgba(174,239,255,.45),0 8px 22px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.6);transition:var(--transition);}
 .gp-snap-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(174,239,255,.55),inset 0 1px 0 rgba(255,255,255,.7);}
 
 /* Feature cards → reference glass 'phase-card' treatment */
@@ -5040,7 +5762,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .rs-emoji{ background:linear-gradient(135deg,rgba(223,255,239,0.7),rgba(174,239,255,0.5))!important; box-shadow:inset 0 1px 0 rgba(255,255,255,.85); }
 .day-btn{ background:rgba(255,255,255,0.34); border:1px solid rgba(255,255,255,0.55); box-shadow:inset 0 1px 0 rgba(255,255,255,0.7);
   backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
-.day-btn.active{ background:var(--grad-ice-btn); color:#1B3C4D; border-color:rgba(174,239,255,0.95); box-shadow:var(--shadow-ice); }
+.day-btn.active{ background:var(--grad-lavender-metal); color:#1B3C4D; border-color:rgba(180,156,240,0.7); box-shadow:var(--shadow-ice),0 0 12px rgba(199,180,255,.35),inset 0 1px 0 rgba(255,255,255,.65); }
 
 /* ════════ MY ROUTINE REDESIGN — tabbed shell chrome (mrr-) ════════ */
 /* Header + routine switcher */
@@ -5050,7 +5772,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .mrr-rsw-chip{ text-align:left; padding:8px 14px; border-radius:13px; font-size:.78rem; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.5); border:1px solid rgba(201,206,216,0.55); color:var(--ink2); transition:all .2s; }
 .mrr-rsw-chip .mrr-rsw-meta{ display:block; font-size:.62rem; font-weight:500; color:var(--ink3); margin-top:1px; }
 .mrr-rsw-chip:hover{ border-color:rgba(174,239,255,0.6); }
-.mrr-rsw-chip.active{ background:var(--grad-ice-btn); color:#1B3C4D; border-color:transparent; box-shadow:0 4px 14px rgba(174,239,255,.4); }
+.mrr-rsw-chip.active{ background:var(--grad-lavender-metal); color:#1B3C4D; border-color:transparent; box-shadow:0 4px 14px rgba(174,239,255,.4),0 7px 18px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65); }
 .mrr-rsw-chip.active .mrr-rsw-meta{ color:#2E6373; }
 /* Weekly skin-check banner */
 .mrr-skbanner{ display:flex; align-items:center; gap:13px; padding:13px 18px; border-radius:16px; margin-bottom:18px;
@@ -5058,7 +5780,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
 .mrr-skb-i{ width:34px; height:34px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.05rem; background:rgba(255,255,255,0.55); }
 .mrr-skb-t{ font-size:.84rem; font-weight:600; color:var(--gp-midnight); } .mrr-skb-s{ font-size:.72rem; color:var(--ink2); }
-.mrr-skb-btn{ margin-left:auto; flex-shrink:0; padding:8px 15px; border-radius:100px; font-size:.74rem; font-weight:700; cursor:pointer; background:var(--grad-ice-btn); color:#1B3C4D; border:none; box-shadow:0 3px 10px rgba(174,239,255,.4); }
+.mrr-skb-btn{ margin-left:auto; flex-shrink:0; padding:8px 15px; border-radius:100px; font-size:.74rem; font-weight:700; cursor:pointer; background:var(--grad-lavender-metal); color:#1B3C4D; border:none; box-shadow:0 3px 10px rgba(174,239,255,.4),0 6px 16px rgba(150,180,205,.28),inset 0 1px 0 rgba(255,255,255,.65); }
 .mrr-skb-x{ flex-shrink:0; cursor:pointer; color:var(--ink3); font-size:1.1rem; padding:2px 5px; line-height:1; background:none; border:none; }
 /* Tabs — underline */
 .mrr-tabs{ display:flex; gap:26px; border-bottom:1px solid rgba(201,206,216,0.4); margin:0 0 18px; padding:0 2px; flex-wrap:wrap; }
@@ -5094,16 +5816,17 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .wsc-insight{ margin-top:11px; font-size:.74rem; line-height:1.5; color:var(--ink2); background:rgba(255,255,255,0.4); border-radius:11px; padding:9px 12px; }
 .wsc-insight b{ color:#236B7E; }
 /* Missed-days note merged into the WSC card — slim ice pill (B) with amber text (C) */
-.wsc-missed{ display:inline-flex; align-items:center; gap:6px; margin:0 0 12px 2px; padding:5px 13px; background:rgba(255,255,255,0.55); border:1px solid rgba(174,239,255,0.6); border-radius:100px; font-size:.71rem; font-weight:600; color:#C2680E; line-height:1.4; }
+.wsc-missed{ display:inline-flex; align-items:center; gap:6px; margin:0 0 12px 2px; padding:5px 13px; background:rgba(255,255,255,0.55); border:1px solid rgba(174,239,255,0.6); border-radius:100px; font-size:.71rem; font-weight:600; color:var(--gp-midnight); line-height:1.4; }
 .wsc-missed::before{ content:'🌙'; font-size:.8rem; flex-shrink:0; }
 #myroutine-content .wsc-missed{ background:rgba(255,255,255,0.55) !important; border:1px solid rgba(174,239,255,0.6) !important; border-radius:100px !important; }
 /* Weekly button when not yet due — disabled "next check in X days" pill (keeps the ice look, muted) */
 .wsc-btn-wait{ background:rgba(255,255,255,0.5) !important; color:#8A95A0 !important; box-shadow:none !important; border:1px solid rgba(201,206,216,0.55) !important; cursor:default !important; }
-/* Missed-days catch-up card (≥3-day gap) — amber-accented ice glass with a re-sync action */
-.wsc-catchup{ position:relative; z-index:1; display:flex; align-items:center; gap:12px; margin:0 0 12px; padding:11px 14px; background:linear-gradient(135deg,rgba(255,247,235,0.72),rgba(255,255,255,0.55)); border:1px solid rgba(224,153,42,0.45); border-radius:15px; }
-.wsc-catchup-txt{ flex:1; font-size:.76rem; font-weight:600; color:#9A6B1A; line-height:1.4; }
+/* Missed-days catch-up card (≥3-day gap) — ice/lavender glass (§2/§5), matches parent .wsc card's own lavender-forward tint (§5a) instead of the old off-palette amber */
+.wsc-catchup{ position:relative; z-index:1; display:flex; align-items:center; gap:12px; margin:0 0 12px; padding:11px 14px; background:linear-gradient(135deg,rgba(199,180,255,0.16),rgba(174,239,255,0.22)); border:1px solid rgba(199,180,255,0.42); border-radius:15px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.75); }
+.wsc-catchup-txt{ flex:1; font-size:.76rem; font-weight:600; color:var(--gp-midnight); line-height:1.4; }
 .wsc-catchup-txt::before{ content:'🌙'; margin-right:5px; }
-.wsc-catchup-btn{ flex-shrink:0; padding:8px 15px; border-radius:100px; font-size:.72rem; font-weight:700; cursor:pointer; background:var(--grad-ice-btn); color:#1B3C4D; border:none; box-shadow:0 3px 10px rgba(174,239,255,.4); }
+.wsc-catchup-btn{ flex-shrink:0; padding:8px 15px; border-radius:100px; font-size:.72rem; font-weight:700; cursor:pointer; background:var(--grad-lavender-metal); color:#1B3C4D; border:1px solid rgba(180,156,240,0.4); box-shadow:0 4px 14px rgba(174,239,255,.35), 0 6px 16px rgba(150,180,205,.28), inset 0 1px 0 rgba(255,255,255,.75); transition:transform .15s ease, box-shadow .15s ease; }
+.wsc-catchup-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(174,239,255,.42), 0 8px 20px rgba(150,180,205,.32), inset 0 1px 0 rgba(255,255,255,.85); }
 /* FOCUS sub-path selector — full match to preview (.subbtn look, FOCUS label, caption + compact warning). Placed above the hero by the engine reorder. */
 #myroutine-content .p4focus-wrap{ padding:0 !important; margin:0 0 18px !important; }
 #myroutine-content .p4focus-label{ font-size:.66rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin:2px 0 9px 2px; }
@@ -5166,7 +5889,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 #wsc-sheet-box .wsc-option-dot{ display:none !important; }
 #wsc-sheet-box .wsc-footer{ position:static !important; background:none !important; padding:10px 0 0 !important; }
 #wsc-sheet-box .wsc-btn-submit{ border-radius:14px !important; font-weight:700 !important; }
-#wsc-sheet-box .wsc-btn-proceed{ background:var(--grad-ice-btn) !important; color:#1B3C4D !important; box-shadow:0 4px 16px rgba(174,239,255,.4) !important; }
+#wsc-sheet-box .wsc-btn-proceed{ background:var(--grad-lavender-metal) !important; color:#1B3C4D !important; box-shadow:0 4px 16px rgba(174,239,255,.4),0 8px 22px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65) !important; }
 #wsc-sheet-box .wsc-btn-stay{ border-radius:14px !important; }
 #wsc-sheet-box .wsc-result-tip{ background:rgba(255,255,255,0.5) !important; }
 
@@ -5184,7 +5907,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 /* hide the leftover bottom-sheet drag handles now that these are centered cards */
 .sb-sheet-handle, .gp-sos-handle, .wsc-handle{ display:none !important; }
 /* ice-ify the remaining green confirm buttons (gate "ready" + step-back "recover") */
-.sg-btn-proceed, .sb-sheet-confirm{ background:var(--grad-ice-btn) !important; color:#1B3C4D !important; box-shadow:0 4px 16px rgba(174,239,255,.4) !important; }
+.sg-btn-proceed, .sb-sheet-confirm{ background:var(--grad-lavender-metal) !important; color:#1B3C4D !important; box-shadow:0 4px 16px rgba(174,239,255,.4),0 8px 22px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65) !important; }
 /* quiz footers: submit + skip SIDE-BY-SIDE like the gate / preview */
 #wsc-sheet-box .wsc-footer, #dsc-sheet-box .wsc-footer, #catchup-sheet-box .wsc-footer{ display:flex !important; flex-direction:row !important; gap:10px !important; padding:10px 0 0 !important; }
 #wsc-sheet-box .wsc-btn-submit, #dsc-sheet-box .wsc-btn-submit, #catchup-sheet-box .wsc-btn-submit{ flex:1 !important; margin:0 !important; }
@@ -5232,7 +5955,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .mrr-stepslock .sl-i{ font-size:2.1rem; filter:drop-shadow(0 4px 14px rgba(174,239,255,.6)); }
 .mrr-stepslock .sl-t{ font-weight:700; font-size:1.02rem; color:var(--gp-midnight); }
 .mrr-stepslock .sl-d{ font-size:.8rem; color:var(--ink2); max-width:360px; line-height:1.55; }
-.mrr-stepslock .sl-btn{ margin-top:4px; padding:11px 20px; border-radius:13px; font-size:.82rem; font-weight:700; cursor:pointer; background:var(--grad-ice-btn); color:#1B3C4D; border:none; box-shadow:0 6px 18px rgba(174,239,255,.45); }
+.mrr-stepslock .sl-btn{ margin-top:4px; padding:11px 20px; border-radius:13px; font-size:.82rem; font-weight:700; cursor:pointer; background:var(--grad-lavender-metal); color:#1B3C4D; border:none; box-shadow:0 6px 18px rgba(174,239,255,.45),0 10px 26px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.65); }
 .mrr-stepslock .sl-peek{ margin-top:2px; font-size:.73rem; color:var(--ink3); cursor:pointer; text-decoration:underline; background:none; border:none; }
 @media(max-width:760px){ .wsc-stats{ grid-template-columns:1fr 1fr; } }
 /* Night routine — sidebar + detail glass panel (reflow of engine step cards) */
@@ -5328,7 +6051,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
    rule (id + 2 classes) or it gets overridden — that override is what kept this page looking washed. */
 .page#page-myroutine.active{ background:
     radial-gradient(circle at 12% 16%, rgba(174,239,255,0.5), transparent 38%),
-    radial-gradient(circle at 86% 18%, rgba(251,220,232,0.4), transparent 40%),
+    radial-gradient(circle at 86% 18%, rgba(250,252,255,0.4), transparent 40%),
     radial-gradient(circle at 75% 82%, rgba(223,255,239,0.55), transparent 45%),
     radial-gradient(circle at 22% 80%, rgba(199,180,255,0.38), transparent 42%),
     linear-gradient(160deg,#EAF6FF,#FAFCFF 45%,#DFFFEF) !important;
@@ -5435,3 +6158,431 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 
 /* ===== MY ROUTINE — release the trapped shadow: the .builder-card wrapper had overflow:hidden which clipped the inner cards' drop-shadows at its boundary. Preview has no such box (steps/checkin are flat siblings of the pane). Make it non-clipping + rectangular like the preview pane. CSS-only, no markup/JS change; only touches .builder-card overflow + radius so the Morning/Evening toggle (display:none on .mrr-morning/.mrr-evening) is unaffected. (2026-06-29) ===== */
 #myroutine-content .builder-card{ overflow:visible !important; border-radius:0 !important; }
+
+/* ════════════════════════════════════════════════
+   PRODUCT LIBRARY — ICE ALIGNMENT TO MY ROUTINE (2026-07-19)
+   My Routine is the design reference. This block brings the Library
+   page's background, chip family colors, hero CTA, and headline
+   typography into line with it. Scoped to #page-library so no other
+   page is affected. Approved by Bow in-session, live-previewed via
+   javascript_tool before being written here.
+════════════════════════════════════════════════ */
+
+/* Background — same color recipe as My Routine's override, but painted on a
+   dedicated fixed full-viewport backdrop layer instead of the .page element
+   itself. Two things went wrong trying to reuse .page's own box directly:
+   1) `background-attachment:scroll` (My Routine's own setting) positions the
+      radial-gradient %-anchors relative to the ELEMENT's box height. My
+      Routine's height barely changes, so that's safe there; Library's height
+      swings wildly with filtering (246 products vs. e.g. 3), which squished
+      the whole gradient into a tiny box and visibly shifted every color
+      underneath (Bow, 2026-07-19: "background changed when I click the
+      category pill... pills look slightly different").
+   2) Switching to plain `background-attachment:fixed` computes those same
+      %-anchors against the real browser viewport instead — but on a long,
+      densely-carded page (up to 9000+px tall unfiltered) the product rows
+      fill nearly the whole viewport, leaving almost no gutter for that
+      viewport-sized swatch to show through, so it read as washed out /
+      "gone" (Bow, 2026-07-19).
+   Fix: a `position:fixed; inset:0` pseudo-element behind everything (z-index
+   -1) carries the gradient. It's always exactly 100vw×100vh — immune to both
+   Library's page height AND scroll position — same visual richness as My
+   Routine's page-level background, permanently. */
+.page#page-library.active{ background: none !important; }
+.page#page-library.active::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(174,239,255,0.5), transparent 38%),
+    radial-gradient(circle at 86% 18%, rgba(250,252,255,0.4), transparent 40%),
+    radial-gradient(circle at 75% 82%, rgba(223,255,239,0.55), transparent 45%),
+    radial-gradient(circle at 22% 80%, rgba(199,180,255,0.38), transparent 42%),
+    linear-gradient(160deg,#EAF6FF,#FAFCFF 45%,#DFFFEF);
+}
+
+/* Headline — bold navy-slate base (matches my_routine_redesign_preview.html
+   .pv-h2) instead of the site-wide thin Playfair 400 + warm --ink. */
+#page-library .section-head .section-title{
+  font-weight: 700;
+  color: var(--gp-midnight);
+}
+/* Italic emphasis — deep teal duotone (.pv-h2 em), not the paler --grad-pink
+   used elsewhere. Corrected per Bow's "Barrier Repair" reference screenshot. */
+#page-library .section-title em{
+  background: linear-gradient(135deg,#1E5A6B,#2B8398);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#page-library .section-sub{ color: #6A7590; }
+#page-library .brand-name{ color: var(--gp-midnight); font-weight: 600; }
+#page-library .prod-name-sm{ color: var(--gp-midnight); }
+
+/* Hero "Build Routine" CTA — extend the lilac→ice metallic gradient
+   (previously #modal-box .btn-rose only) to this button specifically,
+   per Bow's direct request. Existing #modal-box scoping is untouched. */
+.lib-hero .btn-rose{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 55%),
+    linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%);
+}
+
+/* "Check Conflicts" CTA — was still on the old plain-aqua --grad-btn
+   token, missed by the 2026-07-19 site-wide lavender-metallic pass
+   (that pass's class list didn't include .btn-rose/.btn-sage). Scoped
+   to this page only, same precedent as .lib-hero .btn-rose above —
+   the base .btn-rose class stays plain aqua everywhere else until
+   Bow decides to extend the swap globally. */
+#page-conflict .btn-rose{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 55%),
+    var(--grad-lavender-metal);
+}
+
+/* Chip family colors — replace the generic grey-chrome-coin look with
+   pastel families matching the product modal's own tag palette
+   (.modal-tag.cat / .modal-tag.ff / .tag-aqua), per Bow's reference
+   screenshots of the pastel category/formula/active pills. */
+.chip[data-filter="category"]{
+  background: linear-gradient(135deg, rgba(199,180,255,0.18), rgba(174,239,255,0.18));
+  border-color: rgba(199,180,255,0.4);
+  color: #26324A;
+}
+.chip[data-filter="category"]:hover{
+  background: linear-gradient(135deg, rgba(199,180,255,0.3), rgba(174,239,255,0.3));
+  border-color: rgba(199,180,255,0.55);
+  color: #26324A;
+}
+.chip[data-filter="category"].active{
+  background: linear-gradient(135deg, rgba(199,180,255,0.45), rgba(174,239,255,0.45));
+  border-color: rgba(199,180,255,0.7);
+  color: #26324A;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 8px 22px rgba(199,180,255,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.chip[data-filter="formula"]{
+  background: rgba(127,209,176,0.14);
+  border-color: rgba(74,122,90,0.32);
+  color: #4A7A5A;
+}
+.chip[data-filter="formula"]:hover{
+  background: rgba(127,209,176,0.24);
+  border-color: rgba(74,122,90,0.45);
+  color: #3A6248;
+}
+.chip[data-filter="formula"].active{
+  background: rgba(127,209,176,0.38);
+  border-color: rgba(74,122,90,0.55);
+  color: #2E4E38;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 8px 22px rgba(127,209,176,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.chip[data-filter="active"]{
+  background: rgba(174,239,255,0.2);
+  border-color: rgba(174,239,255,0.42);
+  color: #2A7E92;
+}
+.chip[data-filter="active"]:hover{
+  background: rgba(174,239,255,0.32);
+  border-color: rgba(174,239,255,0.55);
+  color: #1E5A6B;
+}
+.chip[data-filter="active"].active{
+  background: rgba(174,239,255,0.48);
+  border-color: rgba(174,239,255,0.65);
+  color: #1E5A6B;
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 8px 22px rgba(174,239,255,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* ============================================================
+   PRODUCT LIBRARY — cohesive redesign to match My Routine's
+   premium/clean crystal-chrome look (approved in-progress, 2026-07-19).
+   More tweaks may follow; this locks in what's been approved so far.
+   ============================================================ */
+
+/* ROOT-CAUSE FIX (corrected 2026-07-19): the actual bug was never the
+   ::before layer's own positioning -- it was that #page-library's shared
+   'pageIn' entrance animation (animation-fill-mode:both) permanently
+   leaves a lingering `transform: translateY(0)` on the page container
+   after the animation ends. Any non-`none` transform on an ancestor
+   creates a new containing block for position:fixed descendants, so the
+   ::before layer above (position:fixed; inset:0) was computing against
+   #page-library's full scroll height (37,000px+) instead of the actual
+   viewport -- scattering the ice/mint/lavender blooms across an
+   invisible giant canvas and leaving the visible viewport looking flat.
+   A previous attempt "fixed" this by switching the layer itself to
+   position:absolute + background-attachment:fixed, but that silently
+   overrode the ::before rule above (which was deliberately engineered as
+   position:fixed;inset:0 to survive Library's height swinging wildly
+   with filtering -- see the comment on that rule). The correct fix
+   leaves that rule alone and instead gives #page-library its own
+   transform-free version of the entrance animation, so no lingering
+   transform is ever created in the first place. */
+@keyframes pageInLibrary{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
+}
+#page-library.active{
+  animation: pageInLibrary 0.38s var(--ease) both !important;
+}
+
+/* Brand card: softened, lavender-inclusive glass (previous pass was
+   too saturated/neon-teal). Mirrors .builder-card's translucent glass
+   recipe instead of sitting on an opaque #FFFFFF base. */
+.brand-group{
+  background: linear-gradient(150deg, rgba(255,255,255,0.42) 0%, rgba(199,180,255,0.09) 55%, rgba(174,239,255,0.08) 100%) !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+  backdrop-filter: blur(26px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(130%) !important;
+  box-shadow:
+    0 16px 40px rgba(120,160,180,0.12),
+    inset 0 1px 1px rgba(255,255,255,0.9) !important;
+  position: relative; overflow: hidden;
+}
+.brand-group::after{
+  content:""; position:absolute; top:-30%; right:-15%; width:55%; height:70%;
+  background: radial-gradient(ellipse at center, rgba(199,180,255,0.22) 0%, transparent 68%);
+  pointer-events:none; z-index:0;
+}
+.brand-header, .brand-products{ position:relative; z-index:1; }
+.brand-header.open + .brand-products{
+  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(199,180,255,0.05) 60%, rgba(174,239,255,0.06) 100%) !important;
+}
+
+/* Brand header strip: diagonal ice/lavender/mint sweep (Bow's
+   preferred direction over a pearl-centered version), lavender dialed
+   back to a soft whisper rather than a strong presence. */
+.brand-header{
+  background: linear-gradient(120deg,
+    rgba(199,180,255,0.15) 0%,
+    rgba(207,192,255,0.13) 30%,
+    rgba(174,239,255,0.26) 65%,
+    rgba(223,255,239,0.22) 100%) !important;
+  border-bottom: 1px solid rgba(174,239,255,0.4) !important;
+}
+.brand-header:hover{
+  background: linear-gradient(120deg,
+    rgba(199,180,255,0.20) 0%,
+    rgba(207,192,255,0.17) 30%,
+    rgba(174,239,255,0.34) 65%,
+    rgba(223,255,239,0.30) 100%) !important;
+}
+.brand-name{
+  font-size: 1.32rem !important;
+}
+.brand-count{
+  /* Overrides the older chrome-capsule border/shadow so the new
+     "START HERE"-style gradient pill (see base .brand-count rule) can
+     show through cleanly (2026-07-19). */
+  border: none !important;
+  box-shadow: none !important;
+  background: linear-gradient(135deg, #B49CF0, #9ED7EC) !important;
+  color: #233 !important;
+}
+
+/* Arrow bead: rebuilt from a flat, solid deep-purple filled circle
+   into a pearl/ice glass bead (same recipe as .brand-count) with a
+   crisp ink glyph for contrast, plus a soft lavender glow halo. */
+.brand-arrow{
+  width:26px !important; height:26px !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  border: 1px solid rgba(255,255,255,0.65) !important;
+  background: radial-gradient(circle at 30% 25%,
+    rgba(255,255,255,0.97) 0%,
+    rgba(250,252,255,0.93) 42%,
+    rgba(221,244,255,0.78) 78%,
+    rgba(199,180,255,0.40) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 -2px 3px rgba(174,239,255,0.16),
+    0 0 9px rgba(199,180,255,0.28),
+    0 2px 6px rgba(174,239,255,0.18) !important;
+  color: var(--gp-midnight, #243142) !important;
+  font-size: 0.85rem !important; font-weight: 700 !important; line-height: 1 !important;
+  transition: all 0.28s var(--ease, ease) !important;
+}
+.brand-header.open .brand-arrow{
+  background: radial-gradient(circle at 30% 25%,
+    rgba(255,255,255,0.98) 0%,
+    rgba(250,252,255,0.95) 38%,
+    rgba(221,244,255,0.85) 72%,
+    rgba(199,180,255,0.50) 100%) !important;
+  border-color: rgba(174,239,255,0.75) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 0 13px rgba(199,180,255,0.38),
+    0 3px 9px rgba(174,239,255,0.28) !important;
+  color: var(--gp-midnight, #243142) !important;
+}
+.brand-header:hover .brand-arrow{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 0 11px rgba(199,180,255,0.32),
+    0 2px 7px rgba(174,239,255,0.22) !important;
+}
+
+/* Product row: transparent glass card (border + shadow only, no fill)
+   so the page's own background blooms show through underneath.
+   NOTE (2026-07-19): deliberately no backdrop-filter here. With 246
+   rows each running their own blur, the browser's compositor couldn't
+   keep up and individual rows would intermittently paint blank (no
+   name/image/tags) until something forced a repaint (Bow: "the
+   product display" looking broken -- confirmed via repro: a 1px
+   scroll nudge made the "missing" row reappear with identical
+   content, proving it was a paint glitch, not a data bug). The
+   brand-group card above already carries blur(26px), and the fixed
+   background layer behind everything is rich enough that individual
+   rows don't need their own blur to read as glass -- border + inset
+   highlight + shadow do that job here. */
+.product-row{
+  /* Soft white fill (Bow-approved 2026-07-19). An earlier pass had this
+     fully transparent, so each card only read via its border+shadow and
+     visually dissolved into the brand-group behind it -- that missing
+     fill was the last "something is missing" gap vs Bow's reference. */
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.75) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 6px 18px rgba(140,170,200,0.10) !important;
+  transition:
+    background 0.32s var(--ease),
+    border-color 0.32s var(--ease),
+    box-shadow 0.32s var(--ease),
+    transform 0.32s var(--ease) !important;
+  /* Interior rhythm (Bow-approved 2026-07-19): 24px top/bottom lets the
+     three stacked lines (name / formula chips / actives) breathe, and
+     24px gap sets the thumbnail off from the text block. */
+  padding: 24px 28px !important;
+  gap: 24px !important;
+  margin-bottom: 20px !important;
+  /* (2026-07-19) Keeps rows visually even now that the right-side
+     suitability tags can wrap to 2 lines on some products — without
+     this, rows with more tags looked taller/uneven vs rows with fewer. */
+  min-height: 92px !important;
+}
+/* Hover: ice -> aqua -> lavender gradient sweep with a brighter rim,
+   a deeper lavender glow and a 1px lift. Needed here (rather than
+   relying on the base .product-row:hover rule at ~line 1776) because
+   the !important white fill above would otherwise win over it.
+   (2026-07-19) Gradient fill + border-color reverted to their original
+   ice-blue values — Bow: "i mean only the glow not the gradients.
+   revert back and make sure only change the glow effects not anything
+   else." Only the box-shadow (the actual glow) below stays lavender. */
+.product-row:hover{
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0.92) 0%,
+    rgba(221,244,255,0.78) 34%,
+    rgba(199,180,255,0.30) 72%,
+    rgba(255,255,255,0.70) 100%) !important;
+  border-color: rgba(174,239,255,0.85) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.98),
+    0 10px 26px rgba(199,180,255,0.30),
+    0 2px 8px rgba(199,180,255,0.24) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Card inset: product cards sit INSIDE the brand-group card with a
+   visible margin on all sides, rather than flush against its edges.
+   Previously the inset measured 1px, which made each row read as a
+   table stripe filling the group instead of a card floating within it
+   (Bow, 2026-07-19: "the spacing between the card inside and the outer
+   card is more space"). */
+.brand-products{
+  padding: 16px 16px 0 !important;
+}
+/* Product thumbnail: sized to stand nearly as tall as the three-line
+   text block beside it. At the old 46px it left an empty gutter on the
+   left and made the card look unbalanced. Bumped again 2026-07-19
+   (Bow: "make the product picture a little bigger too"). */
+.prod-emoji-sm{
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 18px !important;
+  font-size: 1.6rem !important;
+}
+/* Vertical spacing between the three text lines inside a card. */
+.prod-name-row{ margin-bottom: 10px !important; }
+.prod-flags{ margin-bottom: 10px !important; gap: 6px !important; }
+.prod-concerns{ gap: 6px !important; }
+
+/* Left accent bar: carries the same ice->lavender->ice identity as the
+   "Your journey" shimmer bar on My Routine (gpShimmerSweep), but held
+   static -- no sweep animation.
+   NOTE (2026-07-19): kept HIDDEN at rest and revealed on hover/focus,
+   which is the original design intent. An earlier pass here forced
+   opacity:1 on all 246 rows; that permanent lavender sliver on every
+   card was the clutter Bow kept flagging when comparing against her
+   reference screenshot. Hover/focus reveal lives in the base rules
+   at ~line 1768/1798 and still applies. */
+.product-row::before{
+  width: 5px !important;
+  /* Reverted to original ice->lavender->ice gradient (2026-07-19) — Bow:
+     "i mean only the glow not the gradients." This is a background
+     gradient, not a box-shadow glow, so it's back to its pre-sweep
+     values. */
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.95) 0%,
+    rgba(174,239,255,0.85) 32%,
+    rgba(199,180,255,0.72) 58%,
+    rgba(174,239,255,0.55) 82%,
+    rgba(174,239,255,0.25) 100%) !important;
+  animation: none !important;
+}
+
+/* Category label: restored to a pill/chip (2026-07-19 — reverses the
+   flattened-text pass above; Bow: "these chip tags are rectangular, i
+   want them as pill"). Lavender-tinted translucent wash, distinct from
+   the ice-tinted base .prod-cat-tag recipe at ~line 1890 so it reads as
+   intentional rather than duplicated. */
+.prod-cat-tag{
+  background: linear-gradient(135deg, rgba(199,180,255,0.24), rgba(174,239,255,0.24)) !important;
+  border: 1px solid rgba(199,180,255,0.45) !important;
+  box-shadow: none !important;
+  border-radius: var(--r-pill) !important;
+  padding: 3px 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: rgba(75,67,72,0.75) !important;
+}
+
+/* Notice banner (Library scope only): pearl + ice tones balancing a
+   lavender accent, instead of the honey/warm palette used elsewhere in
+   the app. Text color added 2026-07-19 audit fix -- the base .notice
+   rule's warm #5a4010 was never overridden here, so it sat on top of
+   this cool background. Switched to --gp-midnight, the same cool ink
+   already used for section-title/brand-name/prod-name-sm on this page.
+   Border + shadow follow-up fix (2026-07-19): the base rule's warm
+   honey border/shadow were only ever overridden on the LEFT edge
+   (border-left) -- top/right/bottom and the ambient box-shadow were
+   still rgba(167,129,48,...), which read as a lingering "brown hint"
+   even after the text-color fix (Bow: "i want this to be more ice and
+   pearl so it balance out the lavender"). Now the full border and
+   shadow are pearl/ice, with lavender kept only on the 3px left accent,
+   and the fill leans more pearl-white + ice, less lavender. */
+#page-library .notice{
+  background: linear-gradient(rgba(250,252,255,0.85) 0%, rgba(199,180,255,0.10) 35%, rgba(221,244,255,0.28) 100%) !important;
+  border: 1px solid rgba(174,239,255,0.35) !important;
+  border-left: 3px solid #A692E0 !important;
+  box-shadow: 0 2px 10px rgba(174,239,255,0.22), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  color: var(--gp-midnight) !important;
+}
