@@ -38,6 +38,7 @@ const CAT_EMOJI = {
   'lightweight cream': '🧴',
   'rich cream': '🧴',
   'sleeping cream': '🌙',
+  'lip care': '💋',
   'treatment': '🌿',
   'mask': '🌿',
   'sheet mask': '🎭',
@@ -76,6 +77,9 @@ function normalizedCategory(p) {
       _sub === 'wash-off mask') return 'wash-off mask';
   // Sheet Mask — must resolve BEFORE treatment/mask to avoid wrong bucket
   if (/sheet\s*mask|mask\s*pack/.test(_n) || /sheet\s*mask|mask\s*pack/.test(_sub)) return 'sheet mask';
+  // Lip care — NON-FACIAL product. Must resolve BEFORE sleeping mask so that
+  // "Lip Sleeping Mask" cannot be slotted into a facial routine step.
+  if (/\blips?\b/.test(_n) || /\blips?\b/.test(_sub) || _sub === 'lip care') return 'lip care';
   // Sleeping Mask / Sleeping Pack
   if (/sleeping\s*mask|overnight\s*mask/.test(_n) ||
       /sleeping\s*mask|overnight\s*mask/.test(_sub)) return 'sleeping mask';
@@ -123,6 +127,7 @@ const GLOWPHASE_SCHEMA = {
     'wash-off mask',  // rinse-off masks (clay, mud, etc.)
     'occlusive',      // balms, occlusives, sealing layers
     'oil cleanser',
+    'lip care',      // NON-FACIAL — excluded from face routine steps
     'other'
   ],
   // ── Subcategory values (value of p.subcategory) ──────────────────────────
@@ -141,7 +146,8 @@ const GLOWPHASE_SCHEMA = {
     'wash-off mask':  ['clay mask', 'mud mask'],
     occlusive:      ['balm', 'occlusive'],
     exfoliant:      ['peeling gel', 'chemical exfoliant', 'physical exfoliant'],
-    sunscreen:      []
+    sunscreen:      [],
+    'lip care':     ['lip balm', 'lip mask', 'lip serum']
   },
   // ── Texture tags (stored as array on p.texture) ───────────────────────
   // Describes the physical feel / weight of the product
@@ -338,13 +344,66 @@ function hasBenzoylPeroxide(p) {
 }
 
 // Detect strong Vitamin C (L-ascorbic acid only — MAP/SAP are gentler)
+/* Derivative forms — ascorbyl-*, 3-O-ethyl ascorbic acid, ascorbate salts,
+   ascorbyl glucoside/palmitate. Research/Ingredients/A03-Vitamin-C.md gives every
+   one of these "Avoid: no hard conflicts (stable, gentle)" and recommends them
+   specifically FOR reactive skin. Only L-ascorbic acid carries the clash:
+   "if reactive, don't stack same-time with retinoids or strong AHA/BHA". */
+const _VITC_DERIVATIVE = /ascorbyl|ethyl\s+ascorbic|ascorbate|glucoside|palmitate/i;
+
+/* Split an INCI string into ordered ingredient tokens.
+   ─────────────────────────────────────────────────────────────────────────────
+   Shared helper for any rule that cares about INCI POSITION (order = descending
+   concentration above 1%). A naive split on commas-and-periods gets this wrong
+   twice, both verified against the live DB on 2026-07-25:
+     · 177 products contain numeric commas — "1,2-Hexanediol", "3,000ppb" — which
+       a plain comma split shreds into fake tokens, inflating every later position
+     · 6 products (La Roche-Posay imports) separate with "●"/"•" instead of commas,
+       so a comma split returns 1–5 tokens for a 700-character INCI and every
+       ingredient lands in the top slots
+   Use this instead of splitting inline. */
+function _inciList(p) {
+  let s = (p && p.ingredients) || '';
+  if (!s) return [];
+  s = s.replace(/(\d),(\d)/g, '$1 $2');            // shield numeric commas
+  return s.split(/[,;|●•·]+\s*|\.\s+/)
+          .map(t => t.replace(/ /g, ',').trim())
+          .filter(t => t && !/^[\d\s%().-]+$/.test(t));  // drop bare numbers
+}
+
+/* Strong (conflict-carrying) vitamin C = L-ascorbic acid at an ACTIVE dose.
+   ─────────────────────────────────────────────────────────────────────────────
+   2026-07-25 rewrite. The old version returned true on an `activeIngredients`
+   tag of 'vitamin c' OR any mention of "ascorbic acid" anywhere in the INCI.
+   Measured against the live DB that flagged 38 products, of which only 5 are
+   actually LAA formulas:
+     · 11 hits were 3-O-Ethyl Ascorbic Acid — a gentle derivative with no conflicts
+     · 16 more were plain ascorbate at INCI slot 12–56, i.e. trace antioxidant
+     · results included Niacinamide 20% Treatment (ascorbate = LAST ingredient),
+       Retinal 0.2% Emulsion, Lip Sleeping Mask Berry, Birch Moisturizing Cream
+   This matters well beyond the Conflict Checker: 10 call sites read this, so the
+   routine engine was applying day penalties, scoring deductions and emergency-
+   routine "harsh" flags to plain moisturizers. Fixing it moved the barrier-safe
+   pool 183 → 210 and can-conflict 82 → 55.
+
+   Why INCI position is the right signal: INCI is ordered by descending
+   concentration down to 1%. A03 puts active LAA at 10–20%, which lands in the
+   first few slots — the live data agrees (real vitamin C serums sit at slot 2–5;
+   trace uses start at slot 12 with a clean gap between). Below 1% the order is
+   arbitrary, so a tail-end ascorbate says nothing about dose.
+
+   Deliberately NOT fixed by editing activeIngredients tags on the ~20 mislabelled
+   products: new products are added daily, so a hand-corrected tag would re-break,
+   while a rule reading the INCI maintains itself. */
 function hasStrongVitaminC(p) {
   if (!p) return false;
-  const ing = (p.ingredients || '').toLowerCase();
-  const ai = (p.activeIngredients || []).map(a => a.toLowerCase());
-  return ai.includes('vitamin c') ||
-    /\bl-ascorbic acid\b/.test(ing) ||
-    /\bascorbic acid\b/.test(ing);
+  const list = _inciList(p);
+  const slot = list.findIndex(s => /\bascorbic acid\b/i.test(s) && !_VITC_DERIVATIVE.test(s));
+  if (slot === -1) return false;          // derivative-only or no vitamin C at all
+  if (slot < 8) return true;              // top of the INCI = treatment dose
+  // Long multi-form INCIs can bury LAA even in a product genuinely sold as a
+  // vitamin C treatment (e.g. capsule creams). Trust the name in that case only.
+  return /vitamin\s*c\b|vita\s*c\b|ascorbic/.test((p.name || '').toLowerCase());
 }
 
 // Combined: any "strong active" that requires cautious layering
@@ -1715,7 +1774,15 @@ const ACTIVE_LABELS = {
   'hyaluronic acid':'💧 Hyaluronic Acid','niacinamide':'✨ Niacinamide','ceramides':'🛡 Ceramides',
   'centella':'🌿 Centella','retinol':'🕰 Retinol','vitamin c':'🍊 Vitamin C',
   'peptides':'💪 Peptides','pdrn':'🧬 PDRN','azelaic acid':'🎯 Azelaic Acid',
-  'bha':'🔬 BHA','aha':'🔬 AHA','arbutin':'🌓 Arbutin','tranexamic acid':'🎨 Tranexamic Acid','retinal':'🕰 Retinal','panthenol':'💦 Panthenol'
+  'bha':'🔬 BHA','aha':'🔬 AHA','pha':'🔬 PHA','arbutin':'🌓 Arbutin','tranexamic acid':'🎨 Tranexamic Acid','retinal':'🕰 Retinal','panthenol':'💦 Panthenol',
+  'bakuchiol':'🌱 Bakuchiol','collagen':'🧵 Collagen','beta-glucan':'🌾 Beta-Glucan','glutathione':'🤍 Glutathione',
+  'galactomyces':'🍶 Galactomyces','ectoin':'🌊 Ectoin','green tea':'🍵 Green Tea','tea tree':'🌿 Tea Tree',
+  'licorice':'🍯 Licorice','kojic acid':'🟡 Kojic Acid','squalane':'🫧 Squalane','oat extract':'🌰 Oat',
+  'houttuynia':'🍃 Heartleaf','coenzyme q10':'⚡ Coenzyme Q10','vitamin e':'🥜 Vitamin E','turmeric':'🟠 Turmeric',
+  'guaiazulene':'🔵 Azulene','calamine':'🌸 Calamine',
+  'rice':'🍚 Rice','honey':'🐝 Honey','cucumber':'🥒 Cucumber','soy':'🫘 Soy','aloe':'🌵 Aloe',
+  'papaya':'🍈 Papaya','astragalus':'🪴 Astragalus','sea water':'🧂 Sea Water','zinc':'🩹 Zinc',
+  'petrolatum':'🧴 Petrolatum','glycerin':'💧 Glycerin','octisalate':'☀️ UV Filter','octinoxate':'☀️ UV Filter'
 };
 function prodActiveTags(p){
   return (p.activeIngredients||[]).filter(a=>ACTIVE_LABELS[a]).map(a=>ACTIVE_LABELS[a]);
@@ -1800,7 +1867,54 @@ function renderLibrary(){
     content._delegated=true;
   }
 }
-function toggleBrand(h){h.classList.toggle('open');}
+function toggleBrand(h){
+  h.classList.toggle('open');
+  h.setAttribute('aria-expanded', String(h.classList.contains('open')));
+}
+
+/* ── Keyboard access for clickable non-button elements (2026-07-25) ───────────
+   Audit found three groups of `<div onclick>` that a keyboard user could never
+   reach: 6 `.feat-card` on Home, 56 `.brand-header` accordions in the Product
+   Library, and the My Routine check-in card.
+
+   Rather than rewriting each render site, one delegated pass upgrades them:
+   adds role + tabindex so they're focusable and announced, and a single
+   document-level keydown maps Enter/Space onto the existing click handler.
+   Runs after every page show, and is idempotent (skips anything already done),
+   so re-rendered lists get picked up too.
+
+   NOT applied to `.prod-pick-card` — the Conflict Checker grid uses a roving
+   tabindex (one tab stop, arrows to move), which this would break by making all
+   332 cards individual tab stops. */
+const KB_UPGRADE_SEL = '.feat-card[onclick], .brand-header[onclick], .gp-checkin-card[onclick]';
+function _kbUpgradeClickables(root){
+  (root||document).querySelectorAll(KB_UPGRADE_SEL).forEach(el=>{
+    if(el.dataset.kb)return;                     // already upgraded
+    el.dataset.kb='1';
+    if(!el.hasAttribute('role'))el.setAttribute('role','button');
+    if(!el.hasAttribute('tabindex'))el.tabIndex=0;
+    if(el.classList.contains('brand-header'))
+      el.setAttribute('aria-expanded', String(el.classList.contains('open')));
+  });
+}
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' '&&e.key!=='Spacebar')return;
+  const el=e.target.closest&&e.target.closest(KB_UPGRADE_SEL);
+  if(!el||!el.dataset.kb)return;
+  e.preventDefault();
+  el.click();
+});
+/* Calling the upgrade from showPage() alone isn't enough — the My Routine
+   check-in card is rendered after that call returns, so it stayed unreachable.
+   An observer catches anything injected later, including re-renders, which
+   removes this whole class of bug rather than chasing individual render sites.
+   Cheap: it only runs the selector when nodes are actually added. */
+let _kbObsT=null;
+new MutationObserver(muts=>{
+  if(!muts.some(m=>m.addedNodes.length))return;
+  clearTimeout(_kbObsT);
+  _kbObsT=setTimeout(()=>_kbUpgradeClickables(document),60);
+}).observe(document.body,{childList:true,subtree:true});
 
 /* ═══ FORMULA SCORE CARD — Knowledge Hub Phase 1C (2026-07-14) ═══
    scoreProductSafety(p) looks up each ingredient in p.ingredients against
@@ -5323,6 +5437,26 @@ function makeStep(type,num,emoji,brand,name,note){
 }
 
 /* ═══ ANALYSIS + CONFLICT ═══ */
+
+/* Can this product actually be MOVED around the week? (2026-07-20)
+   Only used for fix advice — never for detection, which stays as-is.
+
+   Found while testing Stage 3: the fix lines were naming products that can't be
+   rescheduled, producing instructions that were confidently wrong —
+     · "use Dr. Althea Aqua Marine Watery Cream in your morning routine"
+       …it's a MOISTURIZER that happens to list vitamin C. You use moisturiser
+       twice a day; you can't move it to AM.
+     · "use CeraVe Renewing SA Cleanser and your retinal on alternate evenings"
+       …it's a rinse-off CLEANSER. You cleanse every night, and rinse-off BHA has
+       minimal contact time anyway.
+   The conflicts themselves are still worth flagging — a BHA cleanser alongside
+   retinal is real information. It's only the "move this to Tuesday" instruction
+   that doesn't apply. So detection is untouched and only the advice is filtered. */
+function _confSchedulable(p){
+  const c=normalizedCategory ? (normalizedCategory(p)||p.category||'') : (p.category||'');
+  // Rinse-off (no meaningful dwell time) or fixed-slot (used every AM and/or PM).
+  return !/cleanser|sunscreen|moisturizer|mist/i.test(c);
+}
 function detectConflicts(selected){
   const withAI=(ai)=>selected.filter(p=>(p.activeIngredients||[]).includes(ai));
   const dedupe=(...arrs)=>[...new Set(arrs.flat())];
@@ -5349,26 +5483,46 @@ function detectConflicts(selected){
   // `reasonKey` are unchanged so the My Routine Safety-tab consumer (which
   // reads only those two fields) keeps working without modification.
   const prodNames=(arr)=>{const seen=new Set();const out=[];arr.forEach(p=>{const n=`${p.brand} ${p.name}`;if(!seen.has(n)){seen.add(n);out.push(n);}});return out;};
-  const push=(combo,reasonKey,type,prods)=>conflicts.push({combo,reasonKey,type,products:prodNames(prods)});
+  /* `fix` (2026-07-20) — every rule now declares HOW to resolve itself, not just
+     that it's a problem. Six of the twelve reason strings previously said only
+     "never same night" with no positive instruction.
+
+     Shapes and their grounding in Research/SKINCARE_RESEARCH.md §"What can share a
+     night vs. must alternate":
+       alternate — exfoliating acid + retinal, azelaic + BHA → separate evenings
+       ampm      — vitamin C + acids, vitamin C + retinoid → pH clash, so AM vs PM
+                   (order matters: vit C AM, acid/retinoid PM)
+       pickone   — two of the same class; conservative "use one", no schedule invented
+       reduce    — too many actives in one night
+       swap      — fragrance / essential oils: not a scheduling problem at all
+     Product names are resolved here, where each side of the conflict is still
+     known separately — by the time results render, that pairing is lost. */
+  /* Names for fix advice only — filtered to products that can actually be moved
+     (see _confSchedulable). Returns [] if none qualify, which makes _confFixLine
+     fall back to generic wording rather than naming an unmovable product. */
+  const fixNames=(arr)=>prodNames((arr||[]).filter(_confSchedulable));
+  const push=(combo,reasonKey,type,prods,fix)=>conflicts.push({combo,reasonKey,type,products:prodNames(prods),fix:fix||null});
 
   // Original rules
-  if(retinalPs.length&&glycolicPs.length)push('Retinal + Glycolic Acid','conf_reason_retinal_aha','danger',dedupe(retinalPs,glycolicPs));
-  if(retinalPs.length&&bhaPs.length)push('Retinal + Salicylic Acid (BHA)','conf_reason_retinal_bha','danger',dedupe(retinalPs,bhaPs));
-  if(retinalPs.length&&peelPs.length)push('Retinal + Physical Peeling Gel','conf_reason_retinal_peel','danger',dedupe(retinalPs,peelPs));
-  if(glycolicPs.length&&peelPs.length)push('AHA + Peeling Gel','conf_reason_aha_peel','danger',dedupe(glycolicPs,peelPs));
-  if(glycolicPs.length&&bhaPs.length)push('AHA + BHA','conf_reason_aha_bha','warn',dedupe(glycolicPs,bhaPs));
+  if(retinalPs.length&&glycolicPs.length)push('Retinal + Glycolic Acid','conf_reason_retinal_aha','danger',dedupe(retinalPs,glycolicPs),{shape:'alternate',a:fixNames(retinalPs),b:fixNames(glycolicPs)});
+  if(retinalPs.length&&bhaPs.length)push('Retinal + Salicylic Acid (BHA)','conf_reason_retinal_bha','danger',dedupe(retinalPs,bhaPs),{shape:'alternate',a:fixNames(retinalPs),b:fixNames(bhaPs)});
+  if(retinalPs.length&&peelPs.length)push('Retinal + Physical Peeling Gel','conf_reason_retinal_peel','danger',dedupe(retinalPs,peelPs),{shape:'alternate',a:fixNames(retinalPs),b:fixNames(peelPs)});
+  if(glycolicPs.length&&peelPs.length)push('AHA + Peeling Gel','conf_reason_aha_peel','danger',dedupe(glycolicPs,peelPs),{shape:'alternate',a:fixNames(glycolicPs),b:fixNames(peelPs)});
+  if(glycolicPs.length&&bhaPs.length)push('AHA + BHA','conf_reason_aha_bha','warn',dedupe(glycolicPs,bhaPs),{shape:'alternate',a:fixNames(glycolicPs),b:fixNames(bhaPs)});
   // Extended rules
-  if(retinolPs.length&&anyAcidPs.length&&!retinalPs.length)push('Retinol + Exfoliating Acid','conf_reason_retinol_acid','danger',dedupe(retinolPs,anyAcidPs));
-  if(bpPs.length&&anyRetinoidPs.length)push('Benzoyl Peroxide + Retinoid','conf_reason_bp_retinoid','danger',dedupe(bpPs,anyRetinoidPs));
-  if(bpPs.length&&strongVCPs.length)push('Benzoyl Peroxide + Vitamin C (L-Ascorbic Acid)','conf_reason_bp_vitc','warn',dedupe(bpPs,strongVCPs));
-  if(retinoidCountPs.length>1)push('Multiple Retinoids','conf_reason_multi_retinoid','danger',retinoidCountPs);
-  if(exfoliantCountPs.length>1)push('Multiple Exfoliating Acids','conf_reason_multi_acid','danger',exfoliantCountPs);
-  if(strongVCPs.length&&anyAcidPs.length)push('Strong Vitamin C + Exfoliating Acid','conf_reason_vitc_acid','warn',dedupe(strongVCPs,anyAcidPs));
+  if(retinolPs.length&&anyAcidPs.length&&!retinalPs.length)push('Retinol + Exfoliating Acid','conf_reason_retinol_acid','danger',dedupe(retinolPs,anyAcidPs),{shape:'alternate',a:fixNames(retinolPs),b:fixNames(anyAcidPs)});
+  if(bpPs.length&&anyRetinoidPs.length)push('Benzoyl Peroxide + Retinoid','conf_reason_bp_retinoid','danger',dedupe(bpPs,anyRetinoidPs),{shape:'alternate',a:fixNames(bpPs),b:fixNames(anyRetinoidPs)});
+  // AM/PM shapes: order is meaningful — vitamin C goes in the morning, the thing
+  // that clashes with its pH goes at night (research §"Keep in separate routines").
+  if(bpPs.length&&strongVCPs.length)push('Benzoyl Peroxide + Vitamin C (L-Ascorbic Acid)','conf_reason_bp_vitc','warn',dedupe(bpPs,strongVCPs),{shape:'ampm',am:fixNames(strongVCPs),pm:fixNames(bpPs)});
+  if(retinoidCountPs.length>1)push('Multiple Retinoids','conf_reason_multi_retinoid','danger',retinoidCountPs,{shape:'pickone',a:fixNames(retinoidCountPs)});
+  if(exfoliantCountPs.length>1)push('Multiple Exfoliating Acids','conf_reason_multi_acid','danger',exfoliantCountPs,{shape:'pickone',a:fixNames(exfoliantCountPs)});
+  if(strongVCPs.length&&anyAcidPs.length)push('Strong Vitamin C + Exfoliating Acid','conf_reason_vitc_acid','warn',dedupe(strongVCPs,anyAcidPs),{shape:'ampm',am:fixNames(strongVCPs),pm:fixNames(anyAcidPs)});
   // NEW (2026-07-20) — grounded in Research/Ingredients/A03-Vitamin-C.md's L-Ascorbic
   // Acid card: "if reactive, don't stack same-time with retinoids... space them out."
   // A conditional caution (warn), not a hard block like retinal+AHA — matches the
   // actual evidence strength rather than inventing a stricter rule than it supports.
-  if(strongVCPs.length&&anyRetinoidPs.length)push('Strong Vitamin C + Retinoid','conf_reason_vitc_retinoid','warn',dedupe(strongVCPs,anyRetinoidPs));
+  if(strongVCPs.length&&anyRetinoidPs.length)push('Strong Vitamin C + Retinoid','conf_reason_vitc_retinoid','warn',dedupe(strongVCPs,anyRetinoidPs),{shape:'ampm',am:fixNames(strongVCPs),pm:fixNames(anyRetinoidPs)});
 
   return conflicts;
 }
@@ -5400,101 +5554,602 @@ function analyzeRoutine(selected,answers){
 }
 
 /* ═══ CONFLICT CHECKER ═══ */
+/* ── Picker filters (2026-07-20) ──────────────────────────────────────────
+   265 products in a 380px tray is ~13 screens of scrolling, and search was the
+   only way to narrow it. These filters are deliberately NOT generic categories
+   (serum/moisturizer/cleanser) — on a conflict checker those are noise. What
+   matters is "which products can actually conflict", which is 82 of 265.
+
+   Critically, each predicate reuses the SAME helper the conflict engine uses
+   (hasRetinoid / hasExfoliantAcid / hasStrongVitaminC / isStrongActive) rather
+   than its own keyword match. If the filter and the detector disagreed, someone
+   could filter to "can conflict", pick everything shown, and still miss a real
+   conflict — the filter would be actively hiding risk. Shared predicates make
+   that impossible by construction. */
+var conflictFilter='all';
+function _confCanConflict(p){
+  return hasRetinoid(p)||hasExfoliantAcid(p)||hasStrongVitaminC(p)||hasBenzoylPeroxide(p)||isStrongActive(p);
+}
+function _confFilterFn(key){
+  switch(key){
+    case 'conflictable': return _confCanConflict;
+    case 'retinoid':     return hasRetinoid;
+    case 'acid':         return hasExfoliantAcid;
+    case 'vitc':         return hasStrongVitaminC;
+    default:             return function(){return true;};
+  }
+}
+function setConflictFilter(key){
+  conflictFilter=key;
+  const s=document.getElementById('conflict-search');
+  renderConflictGrid();
+  if(s)s.focus({preventScroll:true});
+}
+function _confRenderFilterChips(){
+  const wrap=document.getElementById('conf-filters');
+  if(!wrap)return;
+  const defs=[
+    {k:'all',          label:t('conf_f_all')},
+    {k:'conflictable', label:t('conf_f_conflictable')},
+    {k:'retinoid',     label:t('conf_f_retinoid')},
+    {k:'acid',         label:t('conf_f_acid')},
+    {k:'vitc',         label:t('conf_f_vitc')}
+  ];
+  wrap.innerHTML=defs.map(d=>{
+    const n=PRODUCT_DB.filter(_confFilterFn(d.k)).length;
+    const on=conflictFilter===d.k?' active':'';
+    return `<button class="conf-fchip${on}" onclick="setConflictFilter('${d.k}')">${d.label} <span class="conf-fchip-n">${n}</span></button>`;
+  }).join('');
+}
+
 function renderConflictGrid(){
   const g=document.getElementById('conflict-grid');if(!g)return;
   const q=(document.getElementById('conflict-search')||{}).value||'';
-  const ql=q.toLowerCase();
-  const filtered=ql?PRODUCT_DB.filter(p=>{
+  const ql=q.trim().toLowerCase();
+  // Filter first, then search within it — the two compose rather than override.
+  let filtered=PRODUCT_DB.filter(_confFilterFn(conflictFilter));
+  if(ql)filtered=filtered.filter(p=>{
     const s=[p.brand,p.name,...(p.activeIngredients||[])].join(' ').toLowerCase();
     return s.includes(ql)||(p.ingredients&&p.ingredients.toLowerCase().includes(ql));
-  }):PRODUCT_DB;
-  g.innerHTML=filtered.map(p=>`<div class="prod-pick-card ${conflictSelected.includes(p.id)?'selected':''}" id="ck-${p.id}" onclick="toggleConflict(${p.id},this)"><div class="prod-pick-emoji">${prodEmoji(p)}</div><div class="prod-pick-info"><div class="prod-pick-brand">${p.brand}</div><div class="prod-pick-name">${p.name}</div></div><div class="prod-pick-check">✓</div></div>`).join('');
+  });
+  _confRenderFilterChips();
+  if(!filtered.length){
+    /* Empty state. Previously the grid just rendered nothing at all — a blank
+       box with no message, which reads as broken rather than as "no matches".
+       Tells you which constraint is responsible and offers the matching escape. */
+    const hasFilter=conflictFilter!=='all';
+    g.innerHTML=`<div class="conf-noresult">
+      <div class="conf-noresult-mark">✦</div>
+      <div class="conf-noresult-text">${ql?tFmt('conf_no_match',{q:q.trim()}):t('conf_no_match_filter')}</div>
+      <div class="conf-noresult-acts">
+        ${ql?`<button class="conf-noresult-btn" onclick="_confClearSearch()">${t('conf_clear_search')}</button>`:''}
+        ${hasFilter?`<button class="conf-noresult-btn" onclick="setConflictFilter('all')">${t('conf_show_all')}</button>`:''}
+      </div></div>`;
+    _confRenderPickerSummary(); _confSyncRoutineBtn(); _confSyncCheckBtn();
+    return;
+  }
+  /* Keyboard access (2026-07-25). These were plain <div onclick> with tabIndex -1,
+     so all 265 cards — the page's core interaction — were unreachable without a
+     mouse. Now a listbox: role=option + aria-selected carries the state to screen
+     readers, and a ROVING tabindex means the grid is a single tab stop with arrow
+     keys moving between cards. 265 individual tab stops would be technically
+     accessible but miserable; roving tabindex is the WAI-ARIA pattern for exactly
+     this. Enter/Space toggles (see _confGridKey). */
+  g.setAttribute('role','listbox');
+  g.setAttribute('aria-multiselectable','true');
+  g.setAttribute('aria-label',t('conf_grid_label'));
+  g.innerHTML=filtered.map((p,i)=>{
+    const sel=conflictSelected.includes(p.id);
+    return `<div class="prod-pick-card ${sel?'selected':''}" id="ck-${p.id}" role="option" aria-selected="${sel}" tabindex="${i===0?0:-1}" onclick="toggleConflict(${p.id},this)" onkeydown="_confGridKey(event,${p.id},this)"><div class="prod-pick-emoji" aria-hidden="true">${prodEmoji(p)}</div><div class="prod-pick-info"><div class="prod-pick-brand">${p.brand}</div><div class="prod-pick-name">${p.name}</div></div><div class="prod-pick-check" aria-hidden="true">✓</div></div>`;
+  }).join('');
   _confRenderPickerSummary();
-  _confUpdateHero();
+  // Both buttons are state-dependent, and this runs on every page show and every
+  // search keystroke — the one reliable place to keep them in sync.
+  _confSyncRoutineBtn();
+  _confSyncCheckBtn();
+  _confSyncLayout();   // placeholder text for the empty results column (+ language)
+}
+function _confClearSearch(){
+  const s=document.getElementById('conflict-search');
+  if(s){s.value='';s.focus({preventScroll:true});}
+  renderConflictGrid();
+  _confSyncSearchClear();
+}
+/* Show the in-field ✕ only when there's something to clear. */
+function _confSyncSearchClear(){
+  const s=document.getElementById('conflict-search'),x=document.getElementById('conf-search-x');
+  if(!s||!x)return;
+  x.style.display=s.value.trim()?'flex':'none';
+}
+/* Any change to the selection invalidates a displayed verdict.
+   ─────────────────────────────────────────────────────────────────────────────
+   2026-07-25. Previously the results area was only cleared by clearConflict();
+   adding or removing a product left the old card sitting there, so you could
+   remove the exact product causing a conflict and still be staring at the
+   warning. In a safety tool that's the worst kind of stale state — the user
+   can't tell whether they fixed it.
+
+   Clearing to an empty gap would read as "the page broke", so instead we swap in
+   a neutral prompt telling them to re-run. No-op when nothing is displayed. */
+function _confInvalidateResults(){
+  const r=document.getElementById('conflict-results');
+  if(!r||!r.innerHTML.trim())return;
+  if(conflictSelected.length<2){r.innerHTML='';_confSyncLayout();return;}
+  r.innerHTML=`<div class="conf-stale">${t('conf_stale_notice')}</div>`;
+  _confSyncLayout();
+}
+/* Roving-tabindex keyboard handling for the picker grid.
+   Arrows move focus (grid-aware: ±1 for left/right, ±column-count for up/down),
+   Home/End jump to the ends, Enter/Space toggle selection. Only the focused card
+   carries tabindex 0, so Tab enters and leaves the grid in one step. */
+function _confGridKey(e,id,el){
+  const K=e.key;
+  if(K===' '||K==='Enter'||K==='Spacebar'){e.preventDefault();toggleConflict(id,el);return;}
+  const nav={ArrowRight:1,ArrowLeft:-1,ArrowDown:0,ArrowUp:0,Home:0,End:0};
+  if(!(K in nav))return;
+  const cards=[...el.parentElement.querySelectorAll('.prod-pick-card')];
+  const here=cards.indexOf(el);
+  if(here===-1)return;
+  // Column count from the rendered layout, so it follows the responsive grid.
+  const cols=Math.max(1,(getComputedStyle(el.parentElement).gridTemplateColumns||'').split(' ').filter(Boolean).length);
+  let next=here;
+  if(K==='ArrowRight')next=here+1;
+  else if(K==='ArrowLeft')next=here-1;
+  else if(K==='ArrowDown')next=here+cols;
+  else if(K==='ArrowUp')next=here-cols;
+  else if(K==='Home')next=0;
+  else if(K==='End')next=cards.length-1;
+  if(next<0||next>=cards.length)return;
+  e.preventDefault();
+  el.tabIndex=-1;
+  cards[next].tabIndex=0;
+  cards[next].focus();
 }
 function toggleConflict(id,el){
   const i=conflictSelected.indexOf(id);
   if(i===-1){conflictSelected.push(id);el.classList.add('selected');}
   else{conflictSelected.splice(i,1);el.classList.remove('selected');}
+  el.setAttribute('aria-selected',String(i===-1));
   _confRenderPickerSummary();
-  _confUpdateHero();
-  _confResetResultStats();
+  _confInvalidateResults();
+  _confSyncCheckBtn();
 }
 function clearConflict(){
   conflictSelected=[];
-  document.querySelectorAll('[id^="ck-"]').forEach(el=>el.classList.remove('selected'));
+  _confSummaryExpanded=false;
+  _confExpandPicker();
+  document.querySelectorAll('[id^="ck-"]').forEach(el=>{el.classList.remove('selected');el.setAttribute('aria-selected','false');});
   document.getElementById('conflict-results').innerHTML='';
+  _confSyncLayout();
   _confRenderPickerSummary();
-  _confUpdateHero();
-  _confResetResultStats();
+  _confSyncCheckBtn();
+}
+
+/* ── "Check my routine" (2026-07-20) ──────────────────────────────────────
+   The likeliest reason anyone opens this page is "is MY routine safe?" — but
+   until now that meant hand-picking your own products out of 265 cards. The
+   saved routine already stores exactly what's needed: `selectedIds`, an array
+   of PRODUCT_DB ids (verified 24/24 resolvable on Bow's routine).
+
+   Loads the routine's products into the picker and runs the check immediately,
+   so the primary use case becomes one tap. Ids that no longer resolve (a
+   product removed from the DB since the routine was saved) are dropped rather
+   than left as ghosts — otherwise the picker would show a selection count that
+   doesn't match the visible chips. */
+function _confRoutineIds(){
+  const r=(typeof getSavedRoutines==='function') ? getSavedRoutines()[0] : null;
+  if(!r||!Array.isArray(r.selectedIds))return[];
+  return r.selectedIds.filter(id=>PRODUCT_DB.some(p=>p.id===id));
+}
+/* ── Schedule-aware routine check (rewritten 2026-07-20) ──────────────────
+   The first version of this ran detectConflicts() across all 24 products the user
+   OWNS, as if they were applied in one sitting — and reported 9 conflicts on a
+   routine that has none. Bow caught it: "but the routine engine should know this
+   already tho." She was right.
+
+   The engine builds a *schedule*. DAY_PLANS declares which active classes fire on
+   which night, and `_dayConflictPenalty()` penalises co-selecting conflicting
+   products within a day — so same-night conflicts are prevented by construction.
+   Verified: all 7 nights of every phase plan (p1, p2, p3_renew/clarity/tone,
+   p4_aging/barrier/glow) contain zero co-scheduled clashes.
+
+   So the honest question isn't "do these products conflict?" (they do, in the
+   abstract) but "does my routine ever put them on the same night?". That's what
+   this now answers. Reporting a correct routine as dangerous was worse than
+   useless — it would push someone to "fix" something that isn't broken and
+   undermine trust in the engine that got it right. */
+function _confRoutineSchedule(){
+  const r=(typeof getSavedRoutines==='function')?getSavedRoutines()[0]:null;
+  if(!r||typeof DAY_PLANS==='undefined')return null;
+  const pid=r.activePhase||'p1';
+  const focus=pid==='p4'?(r.p4Focus||'aging'):(pid==='p3'?(r.p3Focus||'renew'):'');
+  const plan=DAY_PLANS[focus?pid+'_'+focus:pid]||DAY_PLANS[pid]||DAY_PLANS.p1;
+  const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const FLAGS=['retinal','aha','bha','peel'];
+  // Same pairings detectConflicts treats as must-not-share-a-night.
+  const CLASH=[['retinal','aha'],['retinal','bha'],['retinal','peel'],['aha','peel'],['aha','bha']];
+  const nights=[],clashes=[];
+  DAYS.forEach(d=>{
+    const dp=plan[d]||{};
+    const on=FLAGS.filter(f=>dp[f]);
+    if(on.length)nights.push({day:d,actives:on});
+    CLASH.forEach(([x,y])=>{if(dp[x]&&dp[y])clashes.push({day:d,a:x,b:y});});
+  });
+  return {pid,plan,nights,clashes,total:DAYS.length};
+}
+function loadRoutineIntoConflict(){
+  const ids=_confRoutineIds();
+  if(!ids.length)return;
+  // Products still load into the picker — seeing what you own is useful, and it
+  // leaves the manual check available for "what if I used these together?".
+  conflictSelected=ids.slice();
+  renderConflictGrid();
+  _confRenderPickerSummary();
+  _confSyncCheckBtn();
+
+  const s=_confRoutineSchedule();
+  const r=document.getElementById('conflict-results');
+  if(!s){runConflictCheck();return;}
+
+  const ACTIVE_LABEL={retinal:t('conf_sch_retinal'),aha:t('conf_sch_aha'),bha:t('conf_sch_bha'),peel:t('conf_sch_peel')};
+  const nightsLine=s.nights.length
+    ? `<div class="conf-sch-nights">${s.nights.map(n=>`<span class="conf-sch-night"><b>${n.day}</b> ${n.actives.map(a=>ACTIVE_LABEL[a]||a).join(' + ')}</span>`).join('')}</div>`
+    : `<div class="conf-body-products">${t('conf_sch_no_actives')}</div>`;
+
+  if(!s.clashes.length){
+    r.innerHTML=`<div class="conflict-result ok">
+      <div class="conflict-head ok">${tFmt('conf_sch_clear_head',{n:s.total})}</div>
+      <div class="conflict-body">${t('conf_sch_clear_body')}${nightsLine}
+        <div class="conf-fix"><span class="conf-fix-label">${t('conf_sch_note_label')}</span> ${t('conf_sch_note')}</div>
+      </div></div>`;
+  }else{
+    r.innerHTML=s.clashes.map(c=>`<div class="conflict-result danger">
+      <div class="conflict-head danger">🚨 ${tFmt('conf_sch_clash_head',{day:c.day})}</div>
+      <div class="conflict-body">${tFmt('conf_sch_clash_body',{a:ACTIVE_LABEL[c.a]||c.a,b:ACTIVE_LABEL[c.b]||c.b,day:c.day})}</div>
+    </div>`).join('');
+  }
+  _confCollapsePicker();
+  _confScrollToResults();
+}
+/* Hide the button entirely when there's no saved routine to pull from —
+   a button that can't do anything is worse than no button. Called on page
+   show as well as after a routine is saved elsewhere in the app. */
+function _confSyncRoutineBtn(){
+  const b=document.getElementById('conf-load-routine');
+  if(!b)return;
+  const n=_confRoutineIds().length;
+  b.style.display = n ? '' : 'none';
+  if(n) b.textContent = tFmt('conf_load_routine',{n:n});
+}
+
+/* Check button reflects how close you are to being able to run it. Previously
+   it looked fully active at 0 or 1 selections and only revealed the 2-product
+   minimum *after* you clicked — the requirement was enforced but never taught.
+   The min-2 guard inside runConflictCheck() stays as a backstop. */
+function _confSyncCheckBtn(){
+  const b=document.getElementById('conf-check-btn');
+  if(!b)return;
+  const n=conflictSelected.length;
+  const ready=n>=2;
+  b.disabled=!ready;
+  b.classList.toggle('is-disabled',!ready);
+  b.textContent = ready ? tFmt('conf_check_n',{n:n}) : t('conf_check_need2');
 }
 // ── §A-0 redesign helpers: hero stat strip + removable-chip picker summary ──
-function _confUpdateHero(){
-  const selEl=document.getElementById('conf-hero-selected');
-  if(selEl)selEl.textContent=conflictSelected.length;
-}
-function _confResetResultStats(){
-  // Selection changed since the last check ran — the old found/severity
-  // numbers no longer describe the current picks, so blank them out rather
-  // than leave a stale result on screen.
-  const foundEl=document.getElementById('conf-hero-found'),sevEl=document.getElementById('conf-hero-severity');
-  if(foundEl)foundEl.textContent='—';
-  if(sevEl){sevEl.textContent='—';sevEl.className='conf-stat-n conf-stat-n-sm';}
-}
 function _confRenderPickerSummary(){
   const bar=document.getElementById('conf-picker-summary');if(!bar)return;
-  if(!conflictSelected.length){bar.innerHTML=`<span class="conf-picker-empty">${t('conf_picker_empty')}</span>`;return;}
-  bar.innerHTML=conflictSelected.map(id=>{
+  // ✦ brand mark added 2026-07-20 so the empty state reads as an intentional panel
+  // rather than a stray italic line. Copy itself is untouched (still `conf_picker_empty`),
+  // so EN/TH both keep working without new translation strings.
+  if(!conflictSelected.length){bar.innerHTML=`<span class="conf-picker-empty"><span class="conf-empty-mark">✦</span>${t('conf_picker_empty')}</span>`;_confSummaryExpanded=false;return;}
+  /* Collapse past _confChipPeek(). "Check my routine" loads 24 chips, which stacked
+     to a 300px wall and pushed the product grid off-screen. Show a couple of rows,
+     then a "+N more" toggle. Clear moved in here too — it used to sit BELOW the
+     380px scrolling grid, far from the chips it removes. */
+  const ids=conflictSelected;
+  const shown=_confSummaryExpanded?ids:ids.slice(0,_confChipPeek());
+  const hidden=ids.length-shown.length;
+  const chips=shown.map(id=>{
     const p=PRODUCT_DB.find(pr=>pr.id===id);if(!p)return '';
-    return `<span class="conf-chip">${p.brand} ${p.name}<span class="conf-chip-x" onclick="_confRemoveSelected(${id})">✕</span></span>`;
+    // The ✕ was a <span> — not focusable, not operable by Enter. Real button now.
+    return `<span class="conf-chip">${p.brand} ${p.name}<button type="button" class="conf-chip-x" aria-label="${tFmt('conf_remove_product',{name:p.brand+' '+p.name})}" onclick="_confRemoveSelected(${id})">✕</button></span>`;
   }).join('');
+  const more=hidden>0
+    ? `<button class="conf-chip-more" onclick="_confToggleSummary()">${tFmt('conf_chip_more',{n:hidden})}</button>`
+    : (_confSummaryExpanded&&ids.length>_confChipPeek()
+        ? `<button class="conf-chip-more" onclick="_confToggleSummary()">${t('conf_chip_less')}</button>` : '');
+  const clear=`<button class="conf-chip-clear" onclick="clearConflict()">${t('conf_clear_all')}</button>`;
+  bar.innerHTML=chips+more+clear;
 }
+let _confSummaryExpanded=false;
+/* Product names are long, so on a phone each chip takes its own row — 8 chips
+   measured 339px there vs 124px on desktop, i.e. the wall the collapse was meant
+   to remove. Peek scales with the width available. */
+function _confChipPeek(){return window.innerWidth<560?4:8;}
+function _confToggleSummary(){_confSummaryExpanded=!_confSummaryExpanded;_confRenderPickerSummary();}
 function _confRemoveSelected(id){
   const i=conflictSelected.indexOf(id);if(i===-1)return;
   conflictSelected.splice(i,1);
-  const card=document.getElementById('ck-'+id);if(card)card.classList.remove('selected');
+  const card=document.getElementById('ck-'+id);
+  if(card){card.classList.remove('selected');card.setAttribute('aria-selected','false');}
   _confRenderPickerSummary();
-  _confUpdateHero();
-  _confResetResultStats();
+  _confInvalidateResults();
+  _confSyncCheckBtn();
 }
 function runConflictCheck(){
   const sel=PRODUCT_DB.filter(p=>conflictSelected.includes(p.id)),r=document.getElementById('conflict-results');
-  if(sel.length<2){r.innerHTML=`<div class="notice">${t('conflict_min_select')}</div>`;_confResetResultStats();return;}
+  if(sel.length<2){r.innerHTML=`<div class="notice">${t('conflict_min_select')}</div>`;return;}
   const conflicts=detectConflicts(sel),extras=[];
   const prodNames=(arr)=>{const seen=new Set();const out=[];arr.forEach(p=>{const n=`${p.brand} ${p.name}`;if(!seen.has(n)){seen.add(n);out.push(n);}});return out;};
+  // Same schedulable-only filter detectConflicts uses for its fix advice. Declared
+  // again here because extras are assembled in this scope, not that one — the first
+  // version referenced detectConflicts' local `fixNames` from here and threw
+  // "fixNames is not defined", taking the whole results render down.
+  const fixNames=(arr)=>prodNames((arr||[]).filter(_confSchedulable));
+  // Extras carry fixes too. Note fragrance/EO get shape 'swap', not a schedule —
+  // spacing them out doesn't help, the irritant is present either way.
   const fragPs=sel.filter(p=>!p.fragranceFree);
-  if(fragPs.length)extras.push({type:'danger',title:t('conflict_frag_title'),body:t('conflict_frag_body'),products:prodNames(fragPs)});
+  if(fragPs.length)extras.push({type:'danger',title:t('conflict_frag_title'),body:t('conflict_frag_body'),products:prodNames(fragPs),fix:{shape:'swap'}});
   const eoPs=sel.filter(p=>!p.eoFree);
-  if(eoPs.length)extras.push({type:'warn',title:t('conflict_eo_title'),body:t('conflict_eo_body'),products:prodNames(eoPs)});
+  if(eoPs.length)extras.push({type:'warn',title:t('conflict_eo_title'),body:t('conflict_eo_body'),products:prodNames(eoPs),fix:{shape:'swap'}});
   const acPs=sel.filter(p=>isStrongActive(p));
-  if(acPs.length>2)extras.push({type:'danger',title:t('conflict_too_many_title'),body:tFmt('conflict_too_many_body',{count:acPs.length}),products:prodNames(acPs)});
+  if(acPs.length>2)extras.push({type:'danger',title:t('conflict_too_many_title'),body:tFmt('conflict_too_many_body',{count:acPs.length}),products:prodNames(acPs),fix:{shape:'reduce',a:fixNames(acPs)}});
   // Icon now matches severity (warn=caution, danger=hard-block) instead of a
   // blanket 🚫 on rule-based conflicts and no icon at all on the "extras"
   // checks (fragrance/EO/too-many-actives) — audit fix, 2026-07-20.
   const sevIcon=(type)=>type==='warn'?'⚠️':'🚨';
   const all=[
-    ...conflicts.map(c=>({type:c.type||'danger',title:`${sevIcon(c.type||'danger')} ${c.combo}`,body:t(c.reasonKey),products:c.products})),
+    ...conflicts.map(c=>({type:c.type||'danger',title:`${sevIcon(c.type||'danger')} ${c.combo}`,body:t(c.reasonKey),products:c.products,fix:c.fix})),
     ...extras.map(e=>({...e,title:`${sevIcon(e.type)} ${e.title}`}))
   ];
-  // Hero stat strip — result count + severity summary (§A-0 redesign)
-  const foundEl=document.getElementById('conf-hero-found'),sevEl=document.getElementById('conf-hero-severity');
-  if(foundEl)foundEl.textContent=all.length;
-  if(sevEl){
-    const dangerN=all.filter(i=>i.type==='danger').length,warnN=all.filter(i=>i.type==='warn').length;
-    let label,cls;
-    if(dangerN){label=t('conf_severity_high');cls='severity-danger';}
-    else if(warnN){label=t('conf_severity_caution');cls='severity-warn';}
-    else{label=t('conf_severity_none');cls='';}
-    sevEl.textContent=label;
-    sevEl.className='conf-stat-n conf-stat-n-sm'+(cls?' '+cls:'');
-  }
-  if(!all.length){r.innerHTML=`<div class="conflict-result"><div class="conflict-head ok">${tFmt('conflict_none_head',{n:sel.length})}</div><div class="conflict-body">${t('conflict_none_body')}</div></div>`;}
+  // Severity class now goes on .conflict-result as well as the inner .conflict-head —
+  // the outer card needs it to colour its left accent rail (style.css, 2026-07-20).
+  if(!all.length){r.innerHTML=`<div class="conflict-result ok"><div class="conflict-head ok">${tFmt('conflict_none_head',{n:sel.length})}</div><div class="conflict-body">${t('conflict_none_body')}</div></div>`;}
   else{
-    r.innerHTML=all.map(i=>{
+    /* Results used to render as a flat stack of fully-expanded cards: measured
+       1317px against a 689px viewport — two screens of scrolling before you knew
+       how bad things were. Worse, the 7 cards named only 6 distinct products
+       (one appeared in 5 of them) and repeated near-identical fix wording, so the
+       scrolling bought almost no new information.
+
+       Now: sort hardest-first, lead with a verdict panel that answers "how bad,
+       and which product is the problem" in one glance, and collapse the detail
+       behind the headline. Most-severe card starts open so the page never looks
+       like a row of inert bars. 2026-07-25. */
+    const rank={danger:0,warn:1,ok:2};
+    all.sort((a,b)=>(rank[a.type]??9)-(rank[b.type]??9));
+    const dangerN=all.filter(i=>i.type==='danger').length;
+    const warnN=all.filter(i=>i.type==='warn').length;
+    // Which product shows up in the most issues — the single most useful thing to know.
+    const freq={};
+    all.forEach(i=>(i.products||[]).forEach(p=>freq[p]=(freq[p]||0)+1));
+    const ranked=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+    const worst=ranked[0];
+    const others=ranked.length-1;                       // "plus 1 other products" was wrong
+    const involved=worst
+      ? (others>1  ? tFmt('conf_verdict_involved_more',{name:worst[0],n:others})
+       : others===1 ? tFmt('conf_verdict_involved_one',{name:worst[0]})
+       : tFmt('conf_verdict_involved',{name:worst[0]}))
+      : '';
+    const pills=[
+      dangerN?`<span class="cv-pill danger">${tFmt('conf_verdict_serious',{n:dangerN})}</span>`:'',
+      warnN?`<span class="cv-pill warn">${tFmt('conf_verdict_caution',{n:warnN})}</span>`:''
+    ].join('');
+    const verdict=`<div class="conf-verdict ${dangerN?'danger':'warn'}">
+      <div class="conf-verdict-top">
+        <span class="conf-verdict-n">${all.length}</span>
+        <span class="conf-verdict-lbl">${all.length===1?t('conf_verdict_issue_one'):t('conf_verdict_issues')}</span>
+        <span class="conf-verdict-pills">${pills}</span>
+      </div>
+      ${involved?`<div class="conf-verdict-sub">${involved}</div>`:''}
+      <div class="conf-verdict-hint">${t('conf_expand_hint')}</div>
+    </div>`;
+    /* Group issues that call for the SAME action (2026-07-25).
+       Bow's routine produced 7 cards, 5 of which were `alternate` — the same
+       instruction restated five times. The shapes map onto SKINCARE_RESEARCH.md's
+       own taxonomy ("alternate nights / AM-PM split / layer freely"), so grouping
+       by shape groups by what the research actually prescribes.
+
+       Critically this does NOT merge the guidance: each pair keeps its own reason
+       string verbatim ("major barrier disruption" vs "over-exfoliation and PIH
+       risk" are different claims and both survive), its own product list and its
+       own fix line — they just live inside one collapsible card instead of five.
+       A shape with only one issue stays a normal standalone card. */
+    const GROUPABLE={alternate:'conf_group_alternate',ampm:'conf_group_ampm',pickone:'conf_group_pickone',reduce:'conf_group_reduce',swap:'conf_group_swap'};
+    const buckets=new Map();
+    all.forEach(i=>{
+      const shape=i.fix&&i.fix.shape;
+      const key=(shape&&GROUPABLE[shape])?shape:('_solo'+buckets.size);
+      if(!buckets.has(key))buckets.set(key,[]);
+      buckets.get(key).push(i);
+    });
+    const blocks=[];
+    buckets.forEach((items,key)=>{
+      if(items.length<2){blocks.push({solo:items[0],type:items[0].type});return;}
+      // A group is as severe as its worst member; the milder ones keep their own
+      // icon on their row, so a ⚠️ inside a 🚨 group is still legible as milder.
+      const type=items.some(i=>i.type==='danger')?'danger':'warn';
+      blocks.push({group:items,type,titleKey:GROUPABLE[key]});
+    });
+    blocks.sort((a,b)=>(rank[a.type]??9)-(rank[b.type]??9));
+    const detail=i=>{
       const prodLine=(i.products&&i.products.length)?`<div class="conf-body-products"><b>${t('conf_found_in')}</b> ${i.products.join(', ')}</div>`:'';
-      return `<div class="conflict-result"><div class="conflict-head ${i.type}">${i.title}</div><div class="conflict-body">${i.body}${prodLine}</div></div>`;
+      return i.body+prodLine+_confFixLine(i.fix);
+    };
+    /* Which block starts open. Opening a GROUP expands all its members at once —
+       measured 1009px, which throws away the collapse. A solo card is one issue,
+       so opening it is cheap and stops a single-issue page reading as inert.
+       When the top block is a group, its own headline already states the story
+       ("These can't share the same night · 5") and the verdict panel carries the
+       rest, so everything staying shut is informative, not empty. */
+    const openIdx=blocks[0]&&blocks[0].solo?0:-1;
+    r.innerHTML=verdict+blocks.map((b,idx)=>{
+      const isOpen=idx===openIdx;
+      const open=isOpen?' open':'';
+      const icon=b.type==='warn'?'⚠️':'🚨';
+      const title=b.solo?b.solo.title:`${icon} ${t(b.titleKey)} <span class="conf-group-n">${b.group.length}</span>`;
+      const body=b.solo
+        ? detail(b.solo)
+        : b.group.map(i=>`<div class="conf-sub"><div class="conf-sub-head">${i.title}</div><div class="conf-sub-body">${detail(i)}</div></div>`).join('');
+      return `<div class="conflict-result ${b.type}${open}">`
+        +`<button type="button" class="conflict-head ${b.type}" aria-expanded="${isOpen}" onclick="_confToggleCard(this)">`
+        +`<span class="conflict-head-txt">${title}</span><span class="conflict-head-caret" aria-hidden="true"></span></button>`
+        +`<div class="conflict-body">${body}</div></div>`;
     }).join('');
   }
+  _confCollapsePicker();
+  _confScrollToResults();
+}
+/* Picker collapse (2026-07-25).
+   ─────────────────────────────────────────────────────────────────────────────
+   Measured: the picker card is 813px, so results began at y=1108 against a 689px
+   viewport — you scrolled 1.6 screens past the product grid to reach your answer,
+   every single check. Folding the picker once a verdict exists moves results to
+   ~y=373, which is the single biggest saving available on this page (735px).
+
+   Matches the real flow: you pick once, then read. Editing is one tap away, and
+   any path that changes the selection (Edit, Clear, load-routine) re-expands, so
+   the grid is never hidden while the selection is in flux. */
+/* Two-column mode is on when the viewport is wide enough AND results exist.
+   Must match the 1100px breakpoint in style.css. */
+const CONF_TWOCOL_MIN=1100;
+function _confTwoCol(){return window.innerWidth>=CONF_TWOCOL_MIN;}
+/* Drives the CSS grid. Called wherever results appear or disappear. */
+/* The grid no longer depends on results existing — the columns hold their shape
+   from first paint so nothing reflows when you check (see style.css). All this
+   does now is keep the empty-column placeholder text current for the language. */
+function _confSyncLayout(){
+  const r=document.getElementById('conflict-results');
+  if(!r)return;
+  r.setAttribute('data-empty',t('conf_results_placeholder'));
+}
+/* RETIRED 2026-07-25 (Bow: "i want the left side to be under the selecting panel").
+   Collapsing was introduced to stop the 813px picker pushing results off-screen on
+   a stacked layout. Two things made it unnecessary: two-column mode disabled it on
+   desktop anyway, and on mobile Bow would rather keep the selection visible and let
+   the auto-scroll do the reaching — so you can still see what you picked while
+   reading the verdict. No longer called from anywhere; kept (with _confExpandPicker)
+   so the collapsed-bar markup stays inert rather than orphaned. */
+function _confCollapsePicker(){
+  const card=document.querySelector('#page-conflict .builder-card');
+  const bar=document.getElementById('conf-collapsed-bar');
+  const body=document.getElementById('conf-picker-body');
+  const txt=document.getElementById('conf-collapsed-txt');
+  const edit=document.getElementById('conf-edit-btn');
+  if(!card||!bar||!body)return;
+  _confSyncLayout();
+  return _confExpandPicker();   // never collapse
+  card.classList.add('is-collapsed');
+  body.style.display='none';
+  bar.style.display='flex';
+  if(txt)txt.textContent=tFmt('conf_collapsed_count',{n:conflictSelected.length});
+  if(edit)edit.textContent=t('conf_edit_selection');
+}
+function _confExpandPicker(){
+  const card=document.querySelector('#page-conflict .builder-card');
+  const bar=document.getElementById('conf-collapsed-bar');
+  const body=document.getElementById('conf-picker-body');
+  if(!card||!bar||!body)return;
+  card.classList.remove('is-collapsed');
+  body.style.display='';
+  bar.style.display='none';
+  _confSyncLayout();
+}
+/* Crossing the breakpoint by resizing has to re-decide the collapse, or you get
+   a collapsed strip sitting in a two-column grid (or an 813px picker shoved above
+   the results after shrinking). Debounced — resize fires continuously. */
+let _confResizeT=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(_confResizeT);
+  _confResizeT=setTimeout(()=>{
+    const page=document.getElementById('page-conflict');
+    if(!page||page.style.display==='none')return;
+    const r=document.getElementById('conflict-results');
+    if(!r||!r.innerHTML.trim())return;
+    _confSyncLayout();
+    _confExpandPicker();          // picker is always expanded now
+    _confRenderPickerSummary();   // chip peek is width-dependent too
+  },160);
+});
+
+/* Accordion toggle for a result card. Keeps aria-expanded in sync so the
+   headline stays a real button rather than a clickable div. */
+function _confToggleCard(btn){
+  const card=btn.closest('.conflict-result');if(!card)return;
+  const nowOpen=!card.classList.contains('open');
+  card.classList.toggle('open',nowOpen);
+  btn.setAttribute('aria-expanded',String(nowOpen));
+}
+
+/* Turns a rule's `fix` descriptor into the "→ How to fix" line under each result.
+   Names the user's OWN products rather than the ingredient class, so the instruction
+   is directly actionable ("put X and Y on alternate evenings", not "alternate your
+   acids and retinoids"). Long lists are truncated to two names + a count so the line
+   stays readable when a rule catches five products at once.
+   Returns '' for anything without a fix — never fabricates guidance. */
+function _confFixNames(arr){
+  if(!arr||!arr.length)return '';
+  if(arr.length<=2)return arr.join(` ${t('conf_and')} `);
+  return `${arr[0]}, ${arr[1]} ${tFmt('conf_and_more',{n:arr.length-2})}`;
+}
+function _confFixLine(fix){
+  if(!fix||!fix.shape)return '';
+  let txt='';
+  switch(fix.shape){
+    case 'alternate':
+      // Name products only when BOTH sides have something movable; otherwise the
+      // sentence would instruct the user to reschedule a cleanser or moisturiser.
+      txt=(fix.a&&fix.a.length&&fix.b&&fix.b.length)
+        ? tFmt('conf_fix_alternate',{a:_confFixNames(fix.a),b:_confFixNames(fix.b)})
+        : t('conf_fix_alternate_generic');
+      break;
+    case 'ampm':
+      txt=(fix.am&&fix.am.length&&fix.pm&&fix.pm.length)
+        ? tFmt('conf_fix_ampm',{am:_confFixNames(fix.am),pm:_confFixNames(fix.pm)})
+        : t('conf_fix_ampm_generic');
+      break;
+    case 'pickone':
+      // Singular/plural matters here: "keep the other" is wrong for 3+ products.
+      txt=(fix.a&&fix.a.length)
+        ? tFmt(fix.a.length>2?'conf_fix_pickone_many':'conf_fix_pickone',{a:_confFixNames(fix.a)})
+        : t('conf_fix_pickone_generic');
+      break;
+    case 'reduce':    txt=t('conf_fix_reduce'); break;
+    case 'swap':      txt=t('conf_fix_swap'); break;
+    default: return '';
+  }
+  return `<div class="conf-fix"><span class="conf-fix-label">${t('conf_fix_label')}</span> ${txt}</div>`;
+}
+
+/* Results render below the picker, which on a tall grid (and on every phone)
+   is off-screen — so clicking "Check Conflicts" looked like it did nothing.
+   Scrolls the results into view after render. `block:'start'` with a small
+   offset rather than 'center' so the first result's severity band is the thing
+   that lands under the sticky navbar. Honours prefers-reduced-motion. */
+function _confScrollToResults(){
+  const r=document.getElementById('conflict-results');
+  if(!r||!r.firstChild)return;
+  // In two-column mode the results already sit beside the picker at the top of
+  // the page — scrolling to them would just jog the view for nothing.
+  if(typeof _confTwoCol==='function'&&_confTwoCol()&&r.querySelector('.conflict-result'))return;
+  // Deferred one macrotask: the results were only just written to innerHTML, and
+  // when this is reached via loadRoutineIntoConflict() the 265-card grid has been
+  // re-rendered in the same tick too, so we yield before measuring.
+  // setTimeout rather than requestAnimationFrame on purpose — rAF is suspended
+  // entirely while a tab is backgrounded, so an rAF version would silently never
+  // fire for anyone who kicked off a check and switched tabs. A one-shot scroll
+  // doesn't need frame-accurate timing.
+  setTimeout(()=>{
+    const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* Clear the fixed navbar rather than assuming 90px — it's 88px on desktop but
+       the mobile bar is a different height, and landing the verdict underneath it
+       is exactly the "still have to scroll" complaint. Measured live, + a little
+       breathing room. */
+    const nav=document.querySelector('.site-nav');
+    const navH=nav?Math.round(nav.getBoundingClientRect().height):88;
+    const y=Math.max(0, r.getBoundingClientRect().top+window.scrollY-navH-12);
+    window.scrollTo({top:y,behavior:reduce?'auto':'smooth'});
+  },0);
 }
 
 /* ═══ EMERGENCY ═══ */
@@ -5919,7 +6574,10 @@ function _mrrWscCard(rd){
   var sen=_mrrWscMetric(last.q2,['Low','Mild','High']);
   var brk=_mrrWscMetric(last.q3,['Clear','A few','Active']);
   function trend(cur,key){if(cur.rank===null)return '';if(!prev)return '<div class="wsc-d neu">· baseline</div>';var pm=_mrrWscMetric(prev[key],['','','']);if(pm.rank===null)return '<div class="wsc-d neu">· baseline</div>';var d=cur.rank-pm.rank;return d>0?'<div class="wsc-d up">↑ improving</div>':d<0?'<div class="wsc-d bad">↓ watch</div>':'<div class="wsc-d neu">→ steady</div>';}
-  function colorOf(c){return c==='up'?'#0E9F6E':c==='warn'?'#C2680E':c==='bad'?'#C0556B':'var(--ink3)';}
+  // Status colours come from the canonical CSS family (--st-*-ink) rather than the
+  // hardcoded #0E9F6E/#C2680E/#C0556B triad this used to carry — that was the third
+  // of three parallel status systems, consolidated 2026-07-20. See design doc §2c.
+  function colorOf(c){return c==='up'?'var(--st-ok-ink)':c==='warn'?'var(--st-warn-ink)':c==='bad'?'var(--st-bad-ink)':'var(--ink3)';}
   // Numeric value maps (rank 2=best,1=mid,0=low) — preview-style numbers derived from the check-in answer.
   var _HYD={2:'88',1:'64',0:'40'},_BRK={2:'1',1:'4',0:'7'};
   function numCell(metric,label,key,map,unit){var v=(metric.rank===null)?null:map[metric.rank];var n=(v==null)?'<div class="wsc-n sm">—</div>':'<div class="wsc-n">'+v+'<span>'+unit+'</span></div>';return '<div class="wsc-stat">'+n+'<div class="wsc-l">'+label+'</div>'+trend(metric,key)+'</div>';}
@@ -6800,6 +7458,8 @@ function showPage(id,triggerBtn){
   if(id==='myroutine')renderMyRoutines();
   if(id==='conflict')renderConflictGrid();
   if(id==='home')renderHomePhaseWidget();
+  // After the page's own render, so freshly-built lists get upgraded too.
+  if(typeof _kbUpgradeClickables==='function')_kbUpgradeClickables(page||document);
 }
 
 /* ═══ INIT ═══ */

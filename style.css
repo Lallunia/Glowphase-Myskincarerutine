@@ -38,6 +38,30 @@
   --grad-ice-btn:  linear-gradient(135deg, #8EC8DB 0%, #A8E4F5 30%, #C6F0FF 55%, #9FD5E8 80%, #7EC4D5 100%);
   /* Lavender-metallic — main button design site-wide (Bow, 2026-07-19); was previously scoped to commit-CTAs only, see §7a */
   --grad-lavender-metal: linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%);
+
+  /* ── ROUND INDICATOR "BEAD" — checkmarks, step numbers, accordion arrows ──
+     Design doc §7b. Replaces a skeuomorphic 3D-sphere recipe that was copy-pasted
+     into 7 places: `radial-gradient(circle at 30% 25%, white → aqua → dark)`, i.e. a
+     glossy highlight at top-left with a dark underside. That's Web 2.0 "aqua button"
+     styling — the exact opposite of Aurora's flat, crisp, chrome-hairline glass —
+     and it read as a puffy bubble (Bow, 2026-07-20: "i do not like how this button
+     look... make sure this type of button dont look like this anymore").
+
+     The replacement is a FLAT disc using the same metallic gradient as every button
+     on the site, so beads and buttons finally speak one language. The metallic reflex
+     is baked into the linear gradient (§7's rule) rather than faked with a radial
+     shine. Never reintroduce a radial highlight or a dark underside on a round
+     indicator.
+
+     Glyph colour must be --bead-ink (dark navy), not white: white on this light
+     gradient was also a real contrast failure in the old bead. */
+  --grad-bead: var(--grad-lavender-metal);
+  --bead-ink: #1B3C4D;
+  --bead-rim: 1px solid rgba(255,255,255,0.85);
+  --bead-shadow:
+    0 2px 6px rgba(150,180,205,0.30),
+    0 0 10px rgba(199,180,255,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.75);
   /* Glow (box-shadow) tokens shifted ice→lavender (2026-07-19) — Bow:
      "many glow are still blue and not lavender as we talk about before.
      look up all glow that is not lavender and change it to lavender."
@@ -75,13 +99,40 @@
   --border2:       rgba(174,239,255,0.4);
   --border-chrome: rgba(217,217,222,0.9);
 
-  /* Status */
-  --red:           #B84040;
-  --red-lt:        #FDF0F0;
-  --amber:         #A87830;
-  --amber-lt:      #FDF5E8;
-  --green:         #4A7A5A;
-  --green-lt:      #EBF4EE;
+  /* ── STATUS — one canonical family, three weights (consolidated 2026-07-20) ──
+     Design doc §2c. Until now the same safe/caution/danger idea was expressed by
+     THREE unrelated systems at once: these legacy --green/--amber/--red (~30 uses),
+     the DS-v2 --ds-sage/honey/coral trio (~12), and a hardcoded set inside the
+     Weekly Skin Check (#0E9F6E/#C2680E/#C0556B). Now there is one hue family —
+     sage / honey / coral — available at three weights, and the legacy names below
+     are kept purely as aliases so ~30 existing call sites keep working untouched.
+
+     Weights: `-tint` for surfaces, `-ink` for text on those surfaces, and the
+     mid-tone --ds-sage/honey/coral (further down) for borders, dots and pill fills
+     where text contrast doesn't apply.
+
+     The ink shades are deliberately DARKER than the raw DS-v2 mid-tones: sage/honey/
+     coral as text sit at only 3.3–4.2:1 on their own tints, under WCAG AA. Since
+     danger here is what stops someone layering retinal over an AHA, readability wins
+     over swatch purity — these land 4.6–5.5:1 while keeping the dusty character.
+
+     These stay WARM on purpose. Green/amber/red is one of the few near-universal
+     colour conventions and this app's danger state has real consequences. An iced
+     version was mocked and rejected. Do not convert. */
+  --st-ok-tint:    #F2F6F3;   --st-ok-ink:    #477356;   /* 4.99:1 */
+  --st-warn-tint:  #F8F5EE;   --st-warn-ink:  #8A6A20;   /* 4.63:1 */
+  --st-bad-tint:   #F9F2F2;   --st-bad-ink:   #9E464D;   /* 5.53:1 */
+
+  /* Legacy aliases — repointed at the canonical family above. Names kept so the
+     ~30 existing `var(--green)` / `var(--amber-lt)` etc. call sites need no edit.
+     Note --green also carries "recovery night" identity and --amber "retinal night"
+     + load-level-2, so those pick up the refined family too — intended. */
+  --red:           var(--st-bad-ink);
+  --red-lt:        var(--st-bad-tint);
+  --amber:         var(--st-warn-ink);
+  --amber-lt:      var(--st-warn-tint);
+  --green:         var(--st-ok-ink);
+  --green-lt:      var(--st-ok-tint);
   --blue:          #4A6888;
   --blue-lt:       #EBF1F8;
   --purple:        #6858A0;
@@ -162,12 +213,17 @@
      still aqua and still correct where they're used) got repointed to ice
      values but never renamed. This one drove 3 all-caps micro-labels
      (.home-section-eyebrow, .label-xs, .selected-products-title) at only
-     ~1.6:1 contrast — effectively unreadable. Deepened to #1E5A6B (reusing
-     the teal already established for .section-title em's gradient stop)
-     for ~6.8:1, and renamed to match what it actually is. --gp-rose is a
-     separate token, untouched, still aqua, still correct for its
-     .btn-hero-outline hover-border use. */
-  --ds-teal:         #1E5A6B;
+     ~1.6:1 contrast — effectively unreadable. --gp-rose is a separate
+     token, untouched, still aqua, still correct for its .btn-hero-outline
+     hover-border use.
+     Value set to #2F6B7D (~5.8:1 contrast) 2026-07-20 to match
+     GLOWPHASE_DESIGN_SYSTEM.md §2's own documented "Deep Teal" row and
+     the pre-existing live usage of that exact hex on the Home page's
+     Journey-tag labels (.gp-journey-tag etc.) — an initial pass here had
+     used #1E5A6B (reused from .section-title em's gradient stop), which
+     also passed contrast but introduced a 3rd divergent teal for the same
+     "muted label" role instead of matching the one the doc already named. */
+  --ds-teal:         #2F6B7D;
   --ds-mauve:        #6E94A6;
 
   /* Cool support (ice direction) */
@@ -220,7 +276,36 @@
   --shadow-recess:
     inset 0 1px 0 rgba(255,255,255,0.5);
 
-  /* Page glow — soft directional Petal Glow for interior pages */
+  /* ── AURORA PAGE BACKGROUND (canonical, every page) ──────────────────
+     "Aurora Ice Princess Y2K" signature surface — see GLOWPHASE_DESIGN_SYSTEM.md §2b.
+     Four corner blooms + a centre pearl wash over an ice→pearl→mint diagonal base.
+     Every colour is already in the §2 palette; the aurora is the palette arranged
+     spatially, not new paint.
+
+     Balance is the "V3 pearl-forward" variant Bow picked from aurora-balance-preview.html
+     (2026-07-20): pearl/aqua/mint raised and lavender pulled down to 0.20 from the
+     original 0.38, plus the centre pearl wash — that wash is the lever that lifts the
+     middle of the page toward white so the corner blooms read as light catching ice
+     rather than four colour patches. Lavender stays the LOWEST-alpha bloom on purpose;
+     raising it is what made earlier passes read purple/cheap.
+
+     Delivered via `body::before` (fixed, inset:0, z-index:-1) so it's always exactly
+     100vw x 100vh — immune to page height and scroll position. Do NOT paint it on a
+     .page element: `background-attachment:scroll` anchors the radial %-positions to the
+     element box (so it squashes when a filtered list changes page height), and `fixed`
+     anchors correctly but gets fully covered by content on tall card-dense pages. Both
+     failure modes were hit and documented before this token existed. */
+  --aurora-bg:
+    radial-gradient(circle at 12% 16%, rgba(174,239,255,0.58), transparent 41%),   /* Aqua Glow   #AEEFFF — top-left     */
+    radial-gradient(circle at 86% 18%, rgba(250,252,255,0.62), transparent 46%),   /* Pearl White #FAFCFF — top-right    */
+    radial-gradient(circle at 75% 82%, rgba(223,255,239,0.66), transparent 48%),   /* Mint Frost  #DFFFEF — bottom-right */
+    radial-gradient(circle at 22% 80%, rgba(199,180,255,0.20), transparent 38%),   /* Lavender    #C7B4FF — bottom-left  */
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(250,252,255,0.34), transparent 70%), /* pearl centre wash        */
+    linear-gradient(160deg, #EDF8FF, #FAFCFF 45%, #E4FFF2);                        /* ice → pearl → mint base           */
+
+  /* Pre-aurora page glow — RETIRED 2026-07-20, kept only so any stray reference
+     still resolves. If you find this in use, that rule hasn't been migrated to
+     --aurora-bg yet (see design doc §13.7). Do not use in new code. */
   --page-glow:
     radial-gradient(ellipse 60% 50% at 92% 14%, rgba(174,239,255,0.32) 0%, rgba(174,239,255,0) 60%),
     radial-gradient(ellipse 50% 45% at 8% 88%, rgba(232,238,242,0.40) 0%, rgba(232,238,242,0) 65%);
@@ -378,8 +463,11 @@ img { display: block; max-width: 100%; }
   font-weight: 500;
   font-size: clamp(0.95rem, 1.35vw, 1.15rem);
   letter-spacing: 0.4px;
-  /* Mauve-rose — clearly visible against light glass, still soft */
-  color: #A36F7E;
+  /* Deep teal — clearly visible against light glass, still soft.
+     Was #A36F7E, a mauve-rose (the old comment said so outright): off-palette pink
+     on the hero tagline, found in the 2026-07-20 sweep. Now --ds-teal, the palette's
+     documented label/link colour (§2). */
+  color: var(--ds-teal);
   text-shadow:
     0 1px 0 rgba(255,255,255,0.95),
     0 0 1px rgba(255,255,255,0.85),
@@ -559,15 +647,12 @@ img { display: block; max-width: 100%; }
 ════════════════════════════════════════════════ */
 .page { display: none; animation: pageIn 0.38s var(--ease) both; }
 .page.active { display: block; }
-/* Directional Petal/Glacier glow on interior pages — pure background, no layout impact */
-.page#page-library.active,
-.page#page-builder.active,
-.page#page-myroutine.active,
-.page#page-device.active,
-.page#page-conflict.active {
-  background: var(--page-glow);
-  background-attachment: fixed;
-}
+/* Page backgrounds are intentionally EMPTY — the aurora (--aurora-bg) is painted once
+   on `body::before` so all six pages share one identical surface (design doc §2b).
+   This replaced a 5-page `background:var(--page-glow)` rule (2-bloom aqua+grey, no
+   lavender or mint) that was the reason Builder/Device/Conflict read flatter than
+   My Routine. Don't reintroduce per-page backgrounds — see §2b for why the single
+   fixed layer is the correct delivery. */
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -733,7 +818,9 @@ img { display: block; max-width: 100%; }
   position: relative;
   z-index: 11;
   /* Layered transparency: cool ice highlight at top, near-transparent middle,
-     a faint pink wash at the bottom — reads like a sheet of frosted glass */
+     a faint ice wash at the bottom — reads like a sheet of frosted glass.
+     (Comment said "pink wash" until 2026-07-20; the values below were already
+     migrated to white/ice at the rebrand — the wording was just stale.) */
   background:
     linear-gradient(180deg,
       rgba(232,238,242,0.38) 0%,
@@ -947,16 +1034,14 @@ img { display: block; max-width: 100%; }
 .scroll-dot {
   width: 5px; height: 5px;
   border-radius: 50%;
-  /* Chrome bead — bright top, dark bottom, pink glow */
-  background:
-    radial-gradient(circle at 30% 25%,
-      rgba(255,255,255,0.98) 0%,
-      rgba(174,239,255,0.85) 35%,
-      rgba(120,100,110,0.85) 100%);
+  /* Flat aqua dot (§7b). Was the radial 3D-sphere with a muddy rgba(120,100,110)
+     underside. At 5px the metallic gradient can't read, so this one gets a plain
+     on-palette fill rather than --grad-bead — the rule that matters here is "no
+     fake sphere shading", not "must be metal". */
+  background: rgba(174,239,255,0.95);
   box-shadow:
     0 0 6px rgba(174,239,255,0.55),
-    0 0 12px rgba(221,244,255,0.40),
-    inset 0 1px 0 rgba(255,255,255,0.8);
+    0 0 12px rgba(199,180,255,0.40);
   animation: scrollPulse 2s ease-in-out infinite;
 }
 @keyframes scrollPulse {
@@ -1715,18 +1800,13 @@ img { display: block; max-width: 100%; }
 }
 .brand-header.open .brand-arrow {
   transform: rotate(180deg);
-  /* Pink jewel when open */
-  color: white;
-  border-color: rgba(174,239,255,0.65);
-  background:
-    radial-gradient(circle at 30% 25%,
-      rgba(255,255,255,0.92) 0%,
-      rgba(174,239,255,0.85) 35%,
-      rgba(110,160,178,0.92) 100%);
-  box-shadow:
-    0 2px 8px rgba(174,239,255,0.45),
-    0 1px 3px rgba(110,160,178,0.30),
-    inset 0 1px 0 rgba(255,255,255,0.60);
+  /* Flat metal bead (§7b) — was the radial 3D-sphere "pink jewel". Note a later
+     block near the end of this file overrides .brand-arrow again; both were on the
+     same retired recipe and both were converted together 2026-07-20. */
+  color: var(--bead-ink);
+  border-color: rgba(255,255,255,0.85);
+  background: var(--grad-bead);
+  box-shadow: var(--bead-shadow);
 }
 .brand-products { display: none; }
 .brand-header.open + .brand-products {
@@ -1827,13 +1907,17 @@ img { display: block; max-width: 100%; }
   width: 46px;
   height: 46px;
   border-radius: 14px;
-  /* Chrome jewel: ice highlight top, pearl middle, pink underbelly */
+  /* Chrome jewel: ice highlight top, pearl middle, deep-ice underbelly.
+     The end stop was #EFC4CE — a genuine pink (the old comment even called it a
+     "pink underbelly"), one of four pink survivors found 2026-07-20. Swapped to
+     #B2E3FF, the palette's own documented "Deep ice (gradient end)" (§2), which is
+     exactly what that slot is for. */
   background:
     linear-gradient(180deg,
       rgba(255,255,255,0.85) 0%,
       rgba(232,238,242,0.45) 35%,
       rgba(255,255,255,0) 60%),
-    linear-gradient(135deg, var(--pink-lt) 0%, var(--pink-mid) 65%, #EFC4CE 100%);
+    linear-gradient(135deg, var(--pink-lt) 0%, var(--pink-mid) 65%, #B2E3FF 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1953,17 +2037,18 @@ img { display: block; max-width: 100%; }
      suitability/status pills — the old value matched none of the
      app's three documented status-color triads. */
   background: rgba(92,141,111,0.14);
-  color: var(--ds-sage);
+  /* ink weight, not the --ds-sage mid-tone: small pill text needs AA (2026-07-20, §2c) */
+  color: var(--st-ok-ink);
   border-color: rgba(92,141,111,0.30);
 }
 .prod-flag.warn {
   background: linear-gradient(180deg, rgba(253,245,232,0.95) 0%, rgba(248,234,205,0.85) 100%);
-  color: var(--ds-honey);
+  color: var(--st-warn-ink);
   border-color: rgba(167,129,48,0.22);
 }
 .prod-flag.danger {
   background: linear-gradient(180deg, rgba(253,240,240,0.95) 0%, rgba(248,222,222,0.85) 100%);
-  color: var(--ds-coral);
+  color: var(--st-bad-ink);
   border-color: rgba(181,87,94,0.22);
 }
 /* Device-mode pills (Medicube Derma Shot/Booster/MC Mode/Air Shot) — split
@@ -2121,14 +2206,14 @@ img { display: block; max-width: 100%; }
   animation:gpStarBreathe 4.5s ease-in-out infinite; }
 @keyframes gpStarBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.09); } }
 .gp-journey-title{ font-family:'Playfair Display',serif; font-weight:600; font-size:17px; color:#243142; }
-.gp-journey-tag{ font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#2F6B7D;
+.gp-journey-tag{ font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ds-teal);
   background:rgba(174,239,255,0.25); border:1px solid rgba(174,239,255,0.5); padding:3px 9px; border-radius:999px; font-weight:600; }
 .gp-journey-tiles{ display:flex; gap:11px; margin-bottom:13px; }
 .gp-jtile{ flex:1; border-radius:13px; padding:11px 14px; background:rgba(255,255,255,0.55);
   border:1px solid rgba(255,255,255,0.7); box-shadow:inset 0 1px 0 rgba(255,255,255,0.9); }
-.gp-jtile-k{ font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#2F6B7D; font-weight:600; margin-bottom:3px; }
+.gp-jtile-k{ font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ds-teal); font-weight:600; margin-bottom:3px; }
 .gp-jtile-v{ font-size:13.5px; font-weight:600; color:#243142; }
-.gp-journey-goinglbl{ font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#2F6B7D; font-weight:600; margin-bottom:6px; }
+.gp-journey-goinglbl{ font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ds-teal); font-weight:600; margin-bottom:6px; }
 .gp-seg-track{ display:flex; align-items:center; gap:2px; margin-bottom:6px; }
 .gp-seg{ flex:1; height:9px; background:rgba(226,232,244,0.9); box-shadow:inset 0 1px 2px rgba(120,140,175,0.25); }
 .gp-seg:first-child{ border-radius:999px 0 0 999px; }
@@ -2138,7 +2223,7 @@ img { display: block; max-width: 100%; }
 .gp-seg-labels{ display:flex; }
 .gp-seg-label{ flex:1; text-align:center; font-size:9px; color:#9BB0BA; }
 .gp-seg-label.active{ color:#1F5568; font-weight:700; }
-.gp-journey-note{ font-size:11px; color:#2F6B7D; font-weight:500; margin-top:12px; }
+.gp-journey-note{ font-size:11px; color:var(--ds-teal); font-weight:500; margin-top:12px; }
 /* optional decorative layers on the host .wsc card */
 .gp-journey-depth{ position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:inherit;
   background:radial-gradient(120% 80% at 18% -10%,rgba(255,255,255,0.45),transparent 55%),
@@ -2174,7 +2259,7 @@ img { display: block; max-width: 100%; }
   background:rgba(238,237,242,.8); border:1px solid rgba(217,217,222,.6); color:#9B96A0; font-weight:600; }
 .p4focus-desc.gp2a-method{ font-size:12px; color:#5D6E7E; font-weight:400; line-height:1.5; margin:11px 0 3px; }
 .p4focus-desc.gp2a-method b{ font-weight:600; color:#3E4F60; }
-.gp2a-unlock-hint{ font-size:11px; color:#2F6B7D; margin:11px 0 2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.gp2a-unlock-hint{ font-size:11px; color:var(--ds-teal); margin:11px 0 2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .gp2a-unlock-btn{ border:1px solid rgba(174,239,255,.55); background:rgba(255,255,255,.65); border-radius:999px; padding:5px 12px; font:500 10.5px 'DM Sans',sans-serif; color:#243142; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,.9); }
 .gp2a-tab.gp2a-flash{ animation:gp2aFlash 1.4s ease; }
 @keyframes gp2aFlash{ 0%,100%{ box-shadow:0 4px 14px rgba(160,180,205,.16), inset 0 1px 0 rgba(255,255,255,.85); } 35%,65%{ box-shadow:0 0 0 3px rgba(174,239,255,.55), 0 6px 20px rgba(174,239,255,.5), inset 0 1px 0 rgba(255,255,255,.9); opacity:1; } }
@@ -2234,7 +2319,7 @@ img { display: block; max-width: 100%; }
 .gpg-actpill small{ color:#5E7A86; font-weight:500; }
 .gpg-why{ font-size:.75rem; color:#6A7590; line-height:1.4; margin-top:9px; font-style:italic; }
 .gpg-setup{ margin-top:11px; width:100%; padding:10px; border-radius:12px; font:700 .82rem 'DM Sans',sans-serif; color:#243142; cursor:pointer; border:none; background:linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%); box-shadow:0 2px 8px rgba(174,239,255,.45),inset 0 1px 0 rgba(255,255,255,.7); }
-.gpg-spf{ text-align:center; font-size:.72rem; color:#2F6B7D; background:rgba(200,240,255,.45); border-radius:10px; padding:8px; margin:6px 0 14px; }
+.gpg-spf{ text-align:center; font-size:.72rem; color:var(--ds-teal); background:rgba(200,240,255,.45); border-radius:10px; padding:8px; margin:6px 0 14px; }
 .gpg-done{ width:100%; padding:12px; border-radius:13px; font:700 .84rem 'DM Sans',sans-serif; color:#243142; cursor:pointer; border:none; background:linear-gradient(135deg,#B49CF0 0%,#EFEAFF 20%,#CFC0FF 38%,#AEBFE6 52%,#EAF9FF 70%,#BFEFFF 88%,#93D8EC 100%); box-shadow:0 2px 8px rgba(174,239,255,.45),inset 0 1px 0 rgba(255,255,255,.7); }
 .gp2a-actions{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:2px; }
 .gpg-plan-btn{ display:inline-flex; align-items:center; gap:6px; margin:0 0 0 auto; padding:7px 14px; border-radius:999px; font:700 11px 'DM Sans',sans-serif; letter-spacing:.02em; color:#243142; cursor:pointer; border:1px solid rgba(185,174,224,.5); background:linear-gradient(135deg,rgba(199,180,255,.35),rgba(200,240,255,.4)); box-shadow:inset 0 1px 0 rgba(255,255,255,.8); }
@@ -2687,7 +2772,12 @@ img { display: block; max-width: 100%; }
   border: 1px solid var(--border);
   box-shadow: var(--shadow-recess);
 }
-.full-ing .hi { background: #ffd4cc; color: #8b2020; border-radius: 3px; padding: 0 4px; font-weight: 600; }
+/* Ingredient search-match highlight. Was `background:#ffd4cc; color:#8b2020` — a
+   peach-pink chip with brick-red text, off-palette on both counts and the last of the
+   four pink survivors found 2026-07-20. Re-pointed at the same lavender→aqua treatment
+   `.modal-inci-active` (directly below) already uses for the same job, so the two
+   highlight styles finally match. */
+.full-ing .hi { background: linear-gradient(135deg, rgba(199,180,255,0.30), rgba(174,239,255,0.22)); color: #6B4FA0; border-radius: 3px; padding: 0 4px; font-weight: 600; }
 /* Full INCI list — key-active highlight + truncation expander (2026-07-15) */
 .modal-inci-active { color: #6B4FA0; font-weight: 700; background: linear-gradient(135deg, rgba(199,180,255,0.3), rgba(174,239,255,0.22)); border-radius: 4px; padding: 0 3px; }
 .modal-inci-tail { display: none; }
@@ -2754,13 +2844,15 @@ img { display: block; max-width: 100%; }
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  /* Pearl jewel: bright top-left, blush mid, deeper rose underside */
-  background:
-    radial-gradient(circle at 32% 28%,
-      rgba(255,255,255,0.95) 0%,
-      rgba(255,255,255,0) 38%),
-    linear-gradient(155deg, #C6F0FF 0%, #A8E4F5 40%, #8EC8DB 75%, #5E8B9C 100%);
-  color: white;
+  /* Was a "pearl jewel" — radial shine at 32%/28% over an ice gradient with a dark
+     #5E8B9C underside, i.e. the 3D-sphere look retired app-wide 2026-07-20 (§7b).
+     Uses --grad-ice-btn rather than --grad-bead deliberately: §7a keeps aqua for
+     small non-clickable indicator badges like this one, and a later .step-badge
+     block near the end of this file (the one that actually wins the cascade) is
+     already on that token — matching it here keeps the two from contradicting. */
+  background: var(--grad-ice-btn);
+  border: var(--bead-rim);
+  color: var(--bead-ink);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3001,9 +3093,11 @@ img { display: block; max-width: 100%; }
   border-radius: 50%;
   font-size: 0.55rem;
   font-weight: 700;
-  color: white;
-  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.92) 0%, rgba(174,239,255,0.85) 35%, rgba(110,160,178,0.85) 100%);
-  box-shadow: 0 1px 3px rgba(110,160,178,0.45), inset 0 1px 0 rgba(255,255,255,0.55);
+  /* Flat metal bead (§7b) — was the radial 3D-sphere recipe */
+  color: var(--bead-ink);
+  background: var(--grad-bead);
+  border: var(--bead-rim);
+  box-shadow: var(--bead-shadow);
 }
 
 .selected-products-panel {
@@ -3181,63 +3275,16 @@ img { display: block; max-width: 100%; }
 /* ════════════════════════════════════════════════
    DAY NAV & CARDS — FIXED INTERACTIONS
 ════════════════════════════════════════════════ */
-/* ── Week focus strip ── */
-.week-focus-strip {
-  margin: 0 0 14px;
-  padding: 10px 14px 12px;
-  background: rgba(255,255,255,0.45);
-  border: 1px solid rgba(174,239,255,0.18);
-  border-radius: 14px;
-  backdrop-filter: blur(8px);
-}
-.wfs-title {
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 9px;
-}
-.wfs-days {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-.wfs-days::-webkit-scrollbar { display: none; }
-.wfs-day {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 9px 6px;
-  border-radius: 10px;
-  border: 1px solid rgba(174,239,255,0.15);
-  background: rgba(255,255,255,0.5);
-  min-width: 52px;
-  flex-shrink: 0;
-}
-.wfs-icon  { font-size: .9rem; line-height: 1; }
-.wfs-name  { font-size: .62rem; font-weight: 700; color: var(--muted); letter-spacing: .03em; text-transform: uppercase; }
-.wfs-type  { font-size: .6rem; font-weight: 600; line-height: 1.2; text-align: center; }
-/* Type-specific accent colours */
-.wfs-recovery { background: rgba(235,244,238,0.7);  border-color: rgba(74,122,90,0.2);   }
-.wfs-recovery  .wfs-type { color: var(--green); }
-.wfs-retinal  { background: rgba(240,235,248,0.7);  border-color: rgba(104,88,160,0.2);  }
-.wfs-retinal   .wfs-type { color: var(--purple); }
-.wfs-aha      { background: rgba(248,235,245,0.7);  border-color: rgba(174,239,255,0.3); }
-.wfs-aha       .wfs-type { color: #a0527a; }
-.wfs-bha      { background: rgba(255,244,235,0.7);  border-color: rgba(200,130,60,0.2);  }
-.wfs-bha       .wfs-type { color: #b06020; }
-.wfs-peel     { background: rgba(235,248,248,0.7);  border-color: rgba(60,140,140,0.2);  }
-.wfs-peel      .wfs-type { color: #3a8a8a; }
-.wfs-device   { background: rgba(235,241,248,0.7);  border-color: rgba(74,104,136,0.2);  }
-.wfs-device    .wfs-type { color: var(--blue); }
-.wfs-barrier  { background: rgba(235,243,255,0.7);  border-color: rgba(60,100,180,0.2);  }
-.wfs-barrier   .wfs-type { color: #3a60b0; }
-.wfs-normal   { background: rgba(248,248,250,0.6);  border-color: rgba(180,170,180,0.15); }
-.wfs-normal    .wfs-type { color: var(--muted); }
+/* ── Week focus strip — DELETED 2026-07-20 (dead CSS, 31 lines) ──
+   A designed-but-never-built horizontal "week at a glance" strip: one tile per day
+   tagged with that night's type (Recovery / Retinal / AHA / BHA / Peel / Device /
+   Barrier / Normal), each type with its own accent colour. Fully styled, but
+   `.week-focus-strip` / `.wfs-*` had ZERO references in index.html and zero in every
+   .js file — verified before removal, so nothing rendered and nothing broke.
+   Removed rather than recoloured because its palette was pre-Aurora (pink `#a0527a`
+   AHA, orange `#b06020` BHA, warm greys) and would have needed a full redesign to
+   ship anyway. Bow's call, 2026-07-20 — the feature idea is still a good one; if it
+   gets built, design it against §2b/§2c fresh instead of reviving this. */
 
 .day-nav-wrap { margin-bottom: 16px; }
 .day-nav { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
@@ -3384,16 +3431,18 @@ img { display: block; max-width: 100%; }
 .rs-swap-btn:hover {
   background: rgba(174,239,255,0.25);
   border-color: rgba(174,239,255,0.6);
-  color: #a06070;
+  /* was #a06070 (rose) — off-palette; teal matches the aqua hover bg/border (2026-07-20) */
+  color: var(--ds-teal);
   transform: rotate(180deg);
 }
 .rs-swap-btn:active { transform: rotate(360deg); }
 
-.mode-tag { display: inline-block; font-size: 0.54rem; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); margin-left: 6px; }
-.mode-tag.booster { background: #ddeef8; color: #3a6888; }
-.mode-tag.mc { background: #e8e0f8; color: #6050a0; }
-.mode-tag.derma { background: #ffe8e0; color: #a84820; }
-.mode-tag.air { background: var(--green-lt); color: var(--green); }
+/* ── .mode-tag — DELETED 2026-07-20 (dead CSS, 5 lines) ──
+   A small device-mode badge that duplicated `.device-mode-name` (the live one, see
+   §2c). Zero references in index.html and zero across all .js files. Its colours were
+   the same wrong-hue set the live component had before the hardware-mapping fix
+   (booster slate-blue, mc violet, derma rust, air forest green), so keeping it would
+   have meant maintaining a second, incorrect copy of the device palette. */
 
 .avoid-box {
   background: var(--red-lt);
@@ -3684,11 +3733,38 @@ img { display: block; max-width: 100%; }
   transform: translateY(-4px);
   border-color: rgba(174,239,255,0.45);
 }
-.device-mode-name { font-size: 0.67rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
-.device-mode-name.booster { color: #3a6888; }
-.device-mode-name.mc { color: #6050a0; }
-.device-mode-name.derma { color: #a84820; }
-.device-mode-name.air { color: var(--green); }
+/* ── DEVICE MODE IDENTITY — hardware-mapped colour, a deliberate palette exception ──
+   These four hues are NOT an aesthetic choice: they mirror the Medicube Booster Pro's
+   own LED colours so a user can map app → handset at a glance (Bow, who owns the
+   device, 2026-07-20: "the booster mode is orange when i use, the mc mode is green,
+   the derma shot is red and the airshot is light blue"). Getting these "on palette"
+   would make them misinformation — same reasoning as keeping red for danger. Do not
+   convert these to ice/lavender. See design doc §2c.
+
+   Before this fix three of the four were simply WRONG: booster showed slate blue,
+   mc showed violet, air showed forest green — booster and air were effectively
+   swapped relative to the device.
+
+   Structure: a `::before` dot carries the *true* vivid device hue (recognisable at a
+   glance) with a deeper rim so the shape still reads against pale glass, while the
+   LABEL text uses a deepened version of the same hue. That split is what makes this
+   work — "light blue" as text has to darken to ~#2E6E85 before it passes WCAG AA, at
+   which point it reads teal, so the vivid identity lives in the dot instead. All four
+   labels land 5.2–6.2:1 on the card surface. The old emoji (💧🟣🔴💨) are gone — three
+   of them were the wrong hue anyway, and a real dot reads more premium. */
+.device-mode-name { font-size: 0.67rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 7px; }
+.device-mode-name::before { content: ""; flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); }
+
+.device-mode-name.booster { color: #8F5A1C; }                                        /* orange  · 5.3:1 */
+.device-mode-name.booster::before { background: #E8963A; border: 1px solid #B0702A; }
+.device-mode-name.mc      { color: #3B6B4E; }                                        /* green   · 5.7:1 */
+.device-mode-name.mc::before      { background: #57B877; border: 1px solid #3F8C5C; }
+.device-mode-name.derma   { color: #94414A; }                                        /* red     · 6.2:1 */
+.device-mode-name.derma::before   { background: #E05C64; border: 1px solid #B0454E; }
+.device-mode-name.air     { color: #2E6E85; }                                        /* lt blue · 5.2:1 */
+.device-mode-name.air::before     { background: #6FCBEA; border: 1px solid #3A86A0; }
 .device-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.65; margin-bottom: 10px; }
 .device-pairs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
 .device-pair-chip {
@@ -3704,7 +3780,8 @@ img { display: block; max-width: 100%; }
 
 /* ════════════════════════════════════════════════
    CONFLICT CHECKER — picker card, same glass recipe as
-   .conf-hero/.conflict-result (Bow, 2026-07-20: wants
+   .conflict-result (originally shared with .conf-hero,
+   which was removed 2026-07-20) (Bow, 2026-07-20: wants
    one consistent card design across the whole page).
    Scoped to #page-conflict so the shared .builder-card
    class elsewhere on the site is untouched.
@@ -3714,9 +3791,14 @@ img { display: block; max-width: 100%; }
 ════════════════════════════════════════════════ */
 #page-conflict .builder-card {
   background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
-  border: 1px solid rgba(174,239,255,0.5);
+  /* Outermost frame — border shifted aqua → lavender to match the tray and cards
+     inside it (2026-07-20). Fill is untouched: this is the v177 lavender-tinted card
+     Bow settled on after several rounds, and only the framing was in scope. */
+  border: 1px solid rgba(199,180,255,0.48);
   border-radius: 18px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 0 26px rgba(199,180,255,0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -3745,37 +3827,163 @@ img { display: block; max-width: 100%; }
    family as Product Library's .lib-hero (§A-1) — reuse
    the recipe, don't invent a new one.
 ════════════════════════════════════════════════ */
-.conf-hero {
-  position: relative;
-  margin-bottom: var(--sp-6);
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
-  border: 1px solid rgba(174,239,255,0.5);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.conf-stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
-.conf-stat {
-  flex: 1;
-  min-width: 120px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(174,239,255,0.4);
-  border-radius: 13px;
-  padding: 10px 12px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-}
-.conf-stat-n { font-family: 'Playfair Display', serif; font-size: 1.45rem; font-weight: 700; color: var(--gp-midnight); line-height: 1; }
-.conf-stat-n-sm { font-size: 1.05rem; }
-.conf-stat-n.severity-warn { color: var(--ds-honey); }
-.conf-stat-n.severity-danger { color: var(--ds-coral); }
-.conf-stat-l { font-size: 0.68rem; color: var(--ink2); margin-top: 4px; font-weight: 600; }
-
 /* Picker summary bar — replaces the "flat wall of cards" feeling with a
    running list of what's actually selected + one-tap removal, without
    restructuring the proven picker-grid interaction (Bow, 2026-07-20:
    summary bar only, not a brand-group rebuild). */
+/* ── "Check my routine" shortcut (2026-07-20) ──
+   Sits directly under the section label, above the search field, because it's the
+   fast path *past* searching — putting it below the grid would mean scrolling the
+   265 cards it exists to help you skip. Deliberately not a .btn: it's a shortcut,
+   not the page's primary CTA (that's "Check Conflicts"), so it reads as a quiet
+   lavender-glass pill rather than competing with the metal button. §6a applies —
+   lavender surface, so the glow is ice. */
+.conf-routine-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  padding: 9px 16px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #1B3C4D;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(199,180,255,0.26), rgba(174,239,255,0.24));
+  border: 1px solid rgba(199,180,255,0.55);
+  box-shadow:
+    0 2px 10px rgba(110,160,178,0.20),
+    0 0 14px rgba(174,239,255,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.75);
+  transition: all 0.22s var(--ease);
+}
+.conf-routine-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(199,180,255,0.75);
+  box-shadow:
+    0 4px 14px rgba(110,160,178,0.26),
+    0 0 18px rgba(174,239,255,0.52),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+}
+
+/* Check button, not-yet-ready state. Kept legible rather than ghosted to ~40%:
+   the label is doing the teaching ("Select 2+ to check"), so it has to be
+   readable — a disabled control the user can't read tells them nothing. */
+#conf-check-btn.is-disabled {
+  cursor: not-allowed;
+  filter: saturate(0.45);
+  opacity: 0.72;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+#conf-check-btn.is-disabled:hover { transform: none; }
+
+/* ── Picker filter chips (2026-07-20) ──
+   Idle chips follow §2's "lavender is a state" rule — ice at rest, lavender only
+   when active. Scrolls horizontally on narrow screens rather than wrapping to two
+   rows, which would push the grid further down on exactly the devices with least
+   vertical room. */
+.conf-filters {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.conf-filters::-webkit-scrollbar { display: none; }
+.conf-fchip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  white-space: nowrap;
+  /* Adopts .chip[data-filter="category"] — these do the same job as the Products
+     page category pills, so they get the same pill. Idle / hover / active are the
+     three steps of that family's 0.18 → 0.30 → 0.45 lavender-ice ramp. */
+  color: #26324A;
+  background: linear-gradient(135deg, rgba(199,180,255,0.18), rgba(174,239,255,0.18));
+  border: 1.5px solid rgba(199,180,255,0.4);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow:
+    0 1px 4px rgba(75,67,72,0.06),
+    0 1px 6px rgba(220,232,240,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    inset 0 -1px 0 rgba(194,189,198,0.28);
+  transition: all 0.26s var(--ease);
+}
+.conf-fchip:hover {
+  background: linear-gradient(135deg, rgba(199,180,255,0.3), rgba(174,239,255,0.3));
+  border-color: rgba(199,180,255,0.55);
+  transform: translateY(-1px);
+}
+.conf-fchip.active {
+  color: #26324A;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(199,180,255,0.45), rgba(174,239,255,0.45));
+  border-color: rgba(199,180,255,0.7);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 8px 22px rgba(199,180,255,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.conf-fchip-n {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.62);
+  color: var(--ds-teal);
+}
+.conf-fchip.active .conf-fchip-n { background: rgba(255,255,255,0.85); color: #26324A; }
+
+/* Empty search/filter result. Was a completely blank grid — no message, no way
+   out — which reads as a broken page rather than "nothing matched". */
+.conf-noresult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 34px 20px;
+  text-align: center;
+}
+.conf-noresult-mark {
+  font-size: 1.4rem;
+  line-height: 1;
+  background: linear-gradient(135deg, #7E63DE, #2F9FD0, #6FCBEA);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(199,180,255,0.5));
+}
+.conf-noresult-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  color: var(--ink2);
+}
+.conf-noresult-acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.conf-noresult-btn {
+  padding: 8px 15px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #1B3C4D;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(199,180,255,0.26), rgba(174,239,255,0.24));
+  border: 1px solid rgba(199,180,255,0.55);
+  box-shadow: 0 2px 10px rgba(110,160,178,0.20), inset 0 1px 0 rgba(255,255,255,0.75);
+  transition: all 0.2s var(--ease);
+}
+.conf-noresult-btn:hover { transform: translateY(-1px); border-color: rgba(199,180,255,0.75); }
+
 .conf-picker-summary {
   display: flex;
   flex-wrap: wrap;
@@ -3784,35 +3992,165 @@ img { display: block; max-width: 100%; }
   min-height: 20px;
   margin-bottom: var(--sp-3);
 }
-.conf-picker-empty { font-size: 0.76rem; color: var(--ink3); font-style: italic; font-family: 'Playfair Display', serif; opacity: 0.75; }
+
+/* "+N more" / "Show less" and inline "Clear all" (2026-07-25).
+   Both are text-weight actions that sit in the chip row, so they deliberately
+   do NOT wear the category-pill treatment — a row of identical pills with two
+   of them being commands would be ambiguous. Ghost outline, same pill radius. */
+.conf-chip-more,
+.conf-chip-clear {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  border: 1px dashed rgba(199,180,255,0.7);
+  color: var(--ds-teal);
+  transition: all 0.2s var(--ease);
+}
+.conf-chip-more:hover,
+.conf-chip-clear:hover {
+  background: rgba(199,180,255,0.14);
+  border-style: solid;
+  border-color: rgba(199,180,255,0.9);
+}
+.conf-chip-clear { color: #7A6A80; border-color: rgba(180,175,190,0.6); }
+.conf-chip-clear:hover { color: var(--st-bad-ink); border-color: rgba(180,120,130,0.55); background: var(--st-bad-tint); }
+
+/* In-field search clear. The wrap is flex, so anchor to it. */
+.search-wrap { position: relative; }
+.conf-search-x {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: #6E6A72;
+  background: rgba(199,180,255,0.18);
+  transition: all 0.2s var(--ease);
+}
+.conf-search-x:hover { background: var(--st-bad-tint); color: var(--st-bad-ink); }
+/* 22px is fine for a mouse, too small for a thumb. */
+@media (max-width: 640px) {
+  .conf-search-x { width: 30px; height: 30px; right: 10px; font-size: 0.8rem; }
+}
+
+/* Stale-verdict notice — shown when the selection changes after a check.
+   Neutral on purpose: it is not a result, so it must not borrow ok/warn/danger. */
+.conf-stale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ds-teal);
+  background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.14));
+  border: 1px dashed rgba(199,180,255,0.55);
+}
+.conf-stale::before { content: '↻'; font-size: 0.95rem; opacity: 0.75; }
+/* Empty state (2026-07-20) — was a single low-opacity italic line floating on its own,
+   the first thing you see on the page before a wall of 265 tiles. Now a soft aurora
+   glass panel with the ✦ brand mark, so the moment before you've picked anything reads
+   as intentional rather than unfinished. Copy is unchanged (`conf_picker_empty`), so
+   both EN and TH keep working — the improvement is entirely presentational. */
+.conf-picker-empty {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 0.78rem;
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+  color: var(--ink3);
+  background: linear-gradient(135deg, rgba(199,180,255,0.10), rgba(174,239,255,0.13));
+  border: 1px solid rgba(174,239,255,0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.conf-empty-mark {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-style: normal;
+  line-height: 1;
+  background: linear-gradient(135deg, #7E63DE, #2F9FD0, #6FCBEA);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 5px rgba(199,180,255,0.5));
+}
 .conf-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 8px 5px 12px;
+  padding: 8px 10px 8px 16px;
   border-radius: var(--r-pill);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--gp-midnight);
-  background: linear-gradient(135deg, rgba(255,255,255,0.75), rgba(174,239,255,0.25));
-  border: 1px solid rgba(174,239,255,0.5);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  /* ── Five passes. The answer was a component that already existed. ─────────
+     P1 forced a #6B4FA0 rim chasing WCAG 1.4.11's 3:1 → "too bad and dark".
+     (The rule didn't apply: 3:1 governs boundaries ESSENTIAL to identifying a
+     component, and this chip is identified by its product name.)
+     P2 flattened to a lavender tint → "doesn't belong to the web".
+     P3 read that as "use the chrome nav pill" → wrong, it's not metallic.
+     P4 rebuilt a white pill from Bow's screenshot → still a bespoke invention.
+     P5 stops guessing and adopts .chip[data-filter="category"] verbatim — the
+     Products page category pill, which Bow named as the target. Same fill, same
+     border, same ink, same padding, same blur and inset rim from base .chip.
+
+     Lesson: before deriving values from a screenshot, find the component the
+     screenshot IS. Four passes of pixel-matching lost to one grep. */
+  color: #26324A;
+  background: linear-gradient(135deg, rgba(199,180,255,0.18), rgba(174,239,255,0.18));
+  border: 1.5px solid rgba(199,180,255,0.4);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow:
+    0 1px 4px rgba(75,67,72,0.06),
+    0 1px 6px rgba(220,232,240,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    inset 0 -1px 0 rgba(194,189,198,0.28);
 }
 .conf-chip-x {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 0.62rem;
+  font-size: 0.66rem;
   line-height: 1;
-  color: var(--ds-chrome-deep);
-  background: rgba(255,255,255,0.65);
+  /* Was --ds-chrome-deep (#8A858E) = 3.18:1 on this fill — the remove affordance
+     was the least visible thing on a chip whose whole job is being removable.
+     #6E6A72 is 4.67:1: passes AA, and stays a quiet neutral so it recedes behind
+     the product name instead of competing with it. */
+  color: #6E6A72;
+  /* A white disc reads as the lightest point of the lavender-ice fill without
+     adding a second colour to the pill. */
+  background: rgba(255,255,255,0.72);
   transition: all 0.2s var(--ease);
 }
-.conf-chip-x:hover { background: rgba(255,255,255,0.95); color: var(--ds-coral); }
+/* Hover goes to the status danger ink — removing is a destructive action, and §2c
+   keeps that family warm on purpose. */
+.conf-chip-x:hover { background: var(--st-bad-tint); color: var(--st-bad-ink); }
 
 /* ════════════════════════════════════════════════
    CONFLICT CHECKER — results
@@ -3839,6 +4177,24 @@ img { display: block; max-width: 100%; }
   0%   { opacity: 0; transform: translateY(10px) scale(0.97); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* Severity accent rail (2026-07-20) — a thin coloured rail down the left edge, so
+   severity is carried by structure as well as by the band tint + icon. Reuses the
+   pattern already established by .mrr-stepwrap's phase accent bar rather than
+   inventing a new device. Fades downward so it reads as an accent, not a block.
+   Requires the severity class on .conflict-result itself (added in runConflictCheck,
+   script.js) — the class used to live only on the inner .conflict-head. */
+.conflict-result::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(155,150,160,0.55), rgba(155,150,160,0.14));
+}
+.conflict-result.ok::after     { background: linear-gradient(180deg, rgba(71,115,86,0.85),  rgba(71,115,86,0.20)); }
+.conflict-result.warn::after   { background: linear-gradient(180deg, rgba(138,106,32,0.85), rgba(138,106,32,0.20)); }
+.conflict-result.danger::after { background: linear-gradient(180deg, rgba(158,70,77,0.85),  rgba(158,70,77,0.20)); }
 /* Chrome hairline along the top edge */
 .conflict-result::before {
   content: '';
@@ -3864,25 +4220,346 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: var(--sp-2);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+  /* Now a <button> (accordion, 2026-07-25) — reset the UA chrome and stretch it,
+     but keep every visual property above so the severity bands look unchanged. */
+  width: 100%;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
 }
+.conflict-head-txt { flex: 1; }
+/* Count badge on a grouped headline — "These can't share the same night · 5". */
+.conf-group-n {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.72);
+  font-size: 0.66rem;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+/* One member inside a grouped card. Each keeps its OWN reason, products and fix —
+   the group only merges presentation, never the guidance. */
+.conf-sub { padding: 12px 0; border-top: 1px dashed rgba(150,170,200,0.28); }
+.conf-sub:first-child { padding-top: 2px; border-top: none; }
+.conf-sub-head {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--gp-midnight);
+  margin-bottom: 4px;
+}
+.conf-sub-body { font-size: 0.78rem; }
+/* CSS-drawn chevron, not a glyph. The first pass used "⌄" (U+2304), which DM Sans
+   doesn't carry — it fell back to a font that rendered it as a faint 8px mark that
+   looked identical open or closed, so the rotation was invisible. Borders are
+   font-independent and crisp at any size. */
+.conflict-head-caret {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-right: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  border-radius: 1px;
+  opacity: 0.5;
+  transform: rotate(45deg) translate(-2px,-2px);
+  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+}
+.conflict-head:hover .conflict-head-caret { opacity: 0.85; }
+.conflict-result.open .conflict-head-caret { transform: rotate(225deg) translate(-2px,-2px); }
+/* Collapsed by default; the first (most severe) card is rendered with .open. */
+.conflict-result .conflict-body { display: none; }
+.conflict-result.open .conflict-body { display: block; }
+
+/* Verdict panel — the whole point is that "how bad is it, and which product is
+   the culprit" fits above the fold, so this stays compact. Severity colour comes
+   from the status family (§2c); the panel itself is aurora glass. */
+/* Focus rings for the site-wide keyboard upgrade (_kbUpgradeClickables).
+   Same treatment as the Conflict Checker grid so keyboard focus looks
+   consistent wherever it lands. :focus-visible keeps it off mouse users. */
+.feat-card:focus-visible,
+.brand-header:focus-visible,
+.gp-checkin-card:focus-visible {
+  outline: 2px solid var(--ds-teal);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Focus-visible ring for the Conflict Checker's keyboard path (2026-07-25).
+   Keyboard access is worthless without a visible focus position. :focus-visible
+   so mouse users never see it. Ice ring on the lavender-tinted cards, per §6a. */
+#page-conflict .prod-pick-card:focus-visible,
+#page-conflict .conf-chip-x:focus-visible,
+#page-conflict .conf-fchip:focus-visible,
+#page-conflict .conf-chip-more:focus-visible,
+#page-conflict .conf-chip-clear:focus-visible,
+#page-conflict .conf-edit-btn:focus-visible,
+#page-conflict .conf-search-x:focus-visible,
+#page-conflict .conflict-head:focus-visible {
+  outline: 2px solid var(--ds-teal);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+#page-conflict .prod-pick-card:focus-visible { box-shadow: 0 0 0 4px rgba(174,239,255,0.5); }
+/* The ✕ is a <button> now — strip the UA chrome, keep the disc look. */
+.conf-chip-x { border: none; padding: 0; font-family: inherit; }
+/* Audit 2026-07-25: the chip ✕ measured 17×17 on a 540px phone — below WCAG
+   2.5.8's 24×24 minimum, and it's destructive (removes a product), so a mis-tap
+   costs the user their selection.
+   MUST live after the base `.conf-chip-x` rule: media queries add no specificity,
+   so an identical single-class selector earlier in the file simply loses. The
+   first attempt sat 80 lines too high and silently did nothing. */
+@media (max-width: 640px) {
+  .conf-chip-x { width: 26px; height: 26px; font-size: 0.74rem; }
+  .conf-chip { padding: 7px 7px 7px 16px; }
+}
+
+/* ── Two-column desktop layout (2026-07-25) ──────────────────────────────────
+   There were 211px of unused width to the right of the 1052px card. Once a
+   verdict exists, the page splits: picker left, results right and pinned, so the
+   verdict updates in place as you edit the selection instead of check → scroll →
+   read → scroll back.
+
+   The grid is ALWAYS on above 1100px, not gated on results existing (Bow: "why
+   making it big first then making it small?"). Gating it meant the picker started
+   at 1052px and snapped to 612px the moment you checked — a full reflow at the
+   exact moment you want to read the answer. Holding the shape from the start
+   costs an empty right column before the first check, which the placeholder
+   below turns into an explanation of what that column is for.
+   Below 1100px everything stacks, so the mobile path is untouched. */
+.conf-layout { display: block; }
+@media (min-width: 1100px) {
+  /* ONE panel, two columns (Bow: "it look like they dont belong to each other").
+     The glass chrome moves from the inner .builder-card up to this wrapper — the
+     exact `#page-conflict .builder-card` recipe, values copied rather than
+     re-picked — so picker and verdict read as two halves of a single card
+     instead of two floating groups. The inner card then sheds its own chrome. */
+  /* `.section` caps at 1100px site-wide, which left the picker at 522px and the
+     product grid at only 2 columns. Widened HERE ONLY — this is the one page with
+     a genuine two-pane layout, so the cap is raised on #page-conflict rather than
+     globally. 1320 measured best: picker 522 → 802px and the product grid goes
+     2 → 3 columns with cards getting WIDER too (238 → 249px). 1400px would give
+     4 columns but squeezes cards to 200px, truncating more product names. */
+  #page-conflict .section { max-width: 1320px; }
+  .conf-layout {
+    display: grid;
+    /* 60/40 (Bow's call, 2026-07-25). The previous 68/32 left the picker at 826px
+       against a 380px results column — the filter-chip row only reached about half
+       the left column's width, leaving a visible empty band, while the results
+       cards stayed narrow above a large void. A `fr` ratio rather than fixed
+       maximums so both halves grow together on wider screens. At 1320: 724 / 482,
+       still 3 product columns, verdict row doesn't wrap. */
+    grid-template-columns: minmax(0,1.5fr) minmax(420px, 1fr);
+    gap: 0;   /* the two halves supply their own padding around the divider */
+    align-items: start;          /* NOT stretch — a stretched grid item fills the
+                                    row and then has no room to stick. */
+    position: relative;
+    padding: var(--sp-8);
+    border-radius: var(--r-editor);
+    margin-bottom: var(--sp-4);
+    background: linear-gradient(135deg, rgba(199,180,255,0.14), rgba(174,239,255,0.16));
+    border: 1px solid rgba(199,180,255,0.48);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.6),
+      0 0 26px rgba(199,180,255,0.16);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* Deliberately NO overflow:hidden (which .builder-card carries): it would
+       create a scroll container and silently kill the sticky results column. The
+       accent bar below is inset 10% either side, so nothing needs clipping. */
+  }
+  /* Lavender-metal accent bar, moved up from .builder-card::after. */
+  .conf-layout::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--grad-lavender-metal);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  /* Inner card becomes a plain column — the wrapper is the card now.
+     Needs the #page-conflict id to outrank `#page-conflict .builder-card`
+     (id+class beats three classes). */
+  #page-conflict .conf-layout .builder-card {
+    background: none;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    /* Divider lives on the LEFT column, not the results column. The results are
+       only ~330px tall against an ~790px card, so a border on them stopped a
+       third of the way down and made the right half look unfinished (Bow: "why
+       do the panel look so uneven"). The picker column is the full-height one,
+       so its right edge draws a divider that spans the whole card — no hardcoded
+       offsets needed. */
+    padding: 0 var(--sp-6) 0 0;
+    margin: 0;
+    border-radius: 0;
+    border-right: 1px solid rgba(199,180,255,0.32);
+  }
+  #page-conflict .conf-layout .builder-card::after { display: none; }
+  /* Hairline between the two halves, so one panel still reads as two zones. */
+  .conf-layout > #conflict-results {
+    position: sticky;
+    top: 96px;
+    padding-left: var(--sp-6);
+  }
+  .conf-layout .conf-verdict { position: static; top: auto; }
+  /* Placeholder while the column is empty — an unexplained blank half reads as a
+     rendering fault. Text comes from data-empty so it stays translatable. */
+  .conf-layout > #conflict-results:empty {
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .conf-layout > #conflict-results:empty::before {
+    content: attr(data-empty);
+    display: block;
+    max-width: 240px;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.76rem;
+    line-height: 1.7;
+    color: var(--ds-teal);
+    opacity: 0.7;
+  }
+}
+
+/* Stacked layout only: guarantee the auto-scroll can actually bring the results
+   to the top of the screen. A browser clamps scrolling at (pageHeight − viewport),
+   so if the results are the last thing on the page there's nothing to scroll them
+   up against — measured on a 560px phone: page 1672px, viewport 683px → max scroll
+   989px against a 1203px target, leaving the verdict ~300px down instead of at the
+   top. Reserving a viewport's worth of height under the results fixes it for any
+   number of issues. dvh where supported, since mobile browser chrome changes vh. */
+@media (max-width: 1099px) {
+  #conflict-results:not(:empty) { min-height: calc(100vh - 80px); }
+  @supports (height: 100dvh) {
+    #conflict-results:not(:empty) { min-height: calc(100dvh - 80px); }
+  }
+}
+
+/* Collapsed picker bar — replaces the 813px card once a verdict exists. */
+.conf-collapsed-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+.conf-collapsed-txt {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gp-midnight);
+}
+.conf-edit-btn {
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  color: #26324A;
+  background: linear-gradient(135deg, rgba(199,180,255,0.18), rgba(174,239,255,0.18));
+  border: 1.5px solid rgba(199,180,255,0.4);
+  transition: all 0.26s var(--ease);
+}
+.conf-edit-btn:hover {
+  background: linear-gradient(135deg, rgba(199,180,255,0.3), rgba(174,239,255,0.3));
+  border-color: rgba(199,180,255,0.55);
+  transform: translateY(-1px);
+}
+/* Collapsed card sheds the tall-panel padding so the bar reads as a strip. */
+#page-conflict .builder-card.is-collapsed { padding-top: var(--sp-4); padding-bottom: var(--sp-4); margin-bottom: var(--sp-4); }
+
+.conf-verdict {
+  /* Sticky (2026-07-25): the answer stays on screen while the issue list scrolls,
+     so "6 serious · most involved X" is never more than a glance away. 88px clears
+     the fixed .site-nav. z-index sits under the nav's 400. */
+  position: sticky;
+  top: 96px;
+  z-index: 5;
+  padding: 16px 20px;
+  margin-bottom: var(--sp-4);
+  border-radius: 18px;
+  /* A pearl base UNDER the aurora tint. At the original 0.16 alpha the panel was
+     see-through once it went sticky — result cards scrolled visibly through the
+     text. backdrop-filter alone doesn't solve that; a sticky element needs real
+     opacity. The tint layer keeps the aurora hue on top. */
+  background:
+    linear-gradient(135deg, rgba(199,180,255,0.22), rgba(174,239,255,0.22)),
+    rgba(249,251,255,0.94);
+  border: 1px solid rgba(199,180,255,0.45);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 6px 18px rgba(150,180,205,0.16);
+}
+.conf-verdict-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.conf-verdict-n {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gp-midnight);
+}
+.conf-verdict-lbl { font-size: 0.8rem; font-weight: 600; color: var(--ink2); }
+.conf-verdict-pills { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.cv-pill {
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.cv-pill.danger { background: var(--st-bad-tint); color: var(--st-bad-ink); }
+.cv-pill.warn   { background: var(--st-warn-tint); color: var(--st-warn-ink); }
+.conf-verdict-sub { margin-top: 9px; font-size: 0.76rem; color: var(--ink2); }
+.conf-verdict-sub b { color: var(--gp-midnight); }
+.conf-verdict-hint { margin-top: 6px; font-size: 0.68rem; color: var(--ds-teal); opacity: 0.85; }
+/* Severity headers use the status family's INK weight, not the mid-tone. These are the
+   most consequential labels in the app — "Retinal + Glycolic Acid" is what stops a
+   chemical burn — and the mid-tones (--ds-sage/honey/coral) only reach ~4.2:1 on these
+   tinted bands, under WCAG AA. Ink weights land 5.0–5.5:1. (2026-07-20, §2c) */
+/* Bands moved onto the canonical --st-*-tint values (2026-07-20). They were still
+   carrying their own hardcoded warm washes from before the status consolidation —
+   butter-yellow `rgba(253,245,232)` for warn, pink-cream `rgba(253,240,240)` for
+   danger — which is a lot of warm, saturated surface spread full-card-width across
+   an ice page. The three-weight system exists precisely so the INK carries the
+   signal and the surface stays quiet (§2c). Held at 0.78 alpha rather than the flat
+   opaque tint so the card's lavender-aqua glass still reads through the band. */
 .conflict-head.ok {
-  background: linear-gradient(180deg, rgba(235,244,238,0.85) 0%, rgba(218,236,224,0.65) 100%);
-  color: var(--ds-sage);
+  background: linear-gradient(180deg, rgba(242,246,243,0.78) 0%, rgba(92,141,111,0.10) 100%);
+  color: var(--st-ok-ink);
   border-bottom: 1px solid rgba(92,141,111,0.20);
 }
 .conflict-head.warn {
-  background: linear-gradient(180deg, rgba(253,245,232,0.85) 0%, rgba(248,234,205,0.65) 100%);
-  color: var(--ds-honey);
+  background: linear-gradient(180deg, rgba(248,245,238,0.78) 0%, rgba(167,129,48,0.10) 100%);
+  color: var(--st-warn-ink);
   border-bottom: 1px solid rgba(167,129,48,0.20);
 }
 .conflict-head.danger {
-  background: linear-gradient(180deg, rgba(253,240,240,0.85) 0%, rgba(248,222,222,0.65) 100%);
-  color: var(--ds-coral);
+  background: linear-gradient(180deg, rgba(249,242,242,0.78) 0%, rgba(181,87,94,0.10) 100%);
+  color: var(--st-bad-ink);
   border-bottom: 1px solid rgba(181,87,94,0.22);
 }
 .conflict-body {
   padding: var(--sp-4) var(--sp-6);
-  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(252,250,251,0.85) 100%);
+  /* Real glass (2026-07-20). Was rgba(255,255,255,.92)→(252,250,251,.85) — near-opaque
+     white, so the aurora and the card's own lavender tint were completely blocked and
+     results read flat next to My Routine's glass. Dropped to ~0.5 alpha; the parent
+     .conflict-result already supplies blur(12px), so no second backdrop-filter needed. */
+  background: linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.34) 100%);
   font-size: 0.8rem;
   line-height: 1.75;
   color: var(--ink2);
@@ -3897,6 +4574,45 @@ img { display: block; max-width: 100%; }
   font-style: italic;
 }
 .conf-body-products b { font-style: normal; font-weight: 600; color: var(--ink2); }
+
+/* "How to fix" line (2026-07-20). Visually separated from the diagnosis above it —
+   the body says what's wrong, this says what to do, and they shouldn't blur into one
+   paragraph. Uses the ok/go ink from the status family (§2c) rather than the card's
+   own severity colour: the problem is red, the way out is green, and that contrast
+   is the point. Left rail echoes the card's own severity rail at smaller scale. */
+.conf-fix {
+  margin-top: 10px;
+  padding: 9px 12px 9px 11px;
+  border-left: 3px solid rgba(71,115,86,0.55);
+  border-radius: 0 10px 10px 0;
+  background: linear-gradient(90deg, rgba(242,246,243,0.85), rgba(255,255,255,0.35));
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+/* Per-night active summary on the routine-check result (2026-07-20) — shows which
+   evenings carry which active, so "your routine is clear" is evidenced rather than
+   asserted. Ice chips: this sits inside an ok/green card, and §6a's opposing logic
+   applies to glows, not to informational chips. */
+.conf-sch-nights { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.conf-sch-night {
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(221,244,255,0.55);
+  border: 1px solid rgba(142,200,219,0.45);
+  color: var(--ink2);
+}
+.conf-sch-night b { color: var(--ds-teal); font-weight: 700; margin-right: 3px; }
+
+.conf-fix-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--st-ok-ink);
+  margin-right: 6px;
+}
 .prod-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -3912,20 +4628,28 @@ img { display: block; max-width: 100%; }
    instead of getting sliced off (Bow, 2026-07-20: "i want a frame
    around this so it doesnt look cut off"). */
 #conflict-grid {
-  border: 1px solid var(--ds-chrome-silver);
+  /* Tray frame — was neutral chrome-silver (--ds-chrome-silver #D9D9DE), the last
+     grey line on the page after the card borders went lavender (2026-07-20). Now a
+     lavender hairline with a matching lavender-tinted inner bottom edge and a soft
+     outer bloom, so the tray reads as part of the aurora rather than a grey box the
+     cards happen to sit in. Its own base stays pearl/ice — this is framing, not fill. */
+  border: 1px solid rgba(199,180,255,0.45);
   border-radius: var(--r-editor);
+  /* Translucent tray (2026-07-20) — was white 0.85 → 0.95, i.e. effectively opaque,
+     which is why the whole picker read flat. Kept a touch lighter than the cards
+     sitting in it so they still separate from their own container. */
   background: linear-gradient(180deg,
-    rgba(232,238,242,0.32) 0%,
-    rgba(255,255,255,0.85) 30%,
-    rgba(255,255,255,0.95) 70%,
-    rgba(221,244,255,0.10) 100%);
+    rgba(255,255,255,0.30) 0%,
+    rgba(255,255,255,0.18) 40%,
+    rgba(199,180,255,0.13) 100%);
   padding: var(--sp-4);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
   box-shadow:
     inset 0 1px 2px rgba(75,67,72,0.05),
     inset 0 1px 0 rgba(255,255,255,0.85),
-    inset 0 -1px 0 rgba(194,189,198,0.22);
+    inset 0 -1px 0 rgba(199,180,255,0.28),
+    0 0 18px rgba(199,180,255,0.14);
 }
 #conflict-grid::-webkit-scrollbar { width: 4px; }
 #conflict-grid::-webkit-scrollbar-track { background: transparent; }
@@ -4113,7 +4837,14 @@ img { display: block; max-width: 100%; }
 /* Product card refinements for search layout — icy chrome coin */
 .prod-pick-card {
   position: relative;
-  border: 1.5px solid rgba(217,217,222,0.85);
+  /* Ice hairline — deliberately NOT lavender. History: neutral-grey
+     rgba(217,217,222,.85) → ice → lavender → back to ice (2026-07-20), once Bow
+     confirmed lavender should be a state rather than a resting colour. Keeping the
+     idle border ice is what gives the hover/selected lavender borders somewhere to
+     travel *from*; when idle was also lavender the escalation had nothing to read
+     against. Deepened from the earlier ice value so the card edge holds up against
+     the now-stronger aqua fill. */
+  border: 1.5px solid rgba(142,200,219,0.52);
   border-radius: var(--r-editor);
   padding: var(--sp-3) var(--sp-4);
   display: flex;
@@ -4121,19 +4852,35 @@ img { display: block; max-width: 100%; }
   gap: var(--sp-3);
   cursor: pointer;
   transition: all 0.28s var(--ease);
-  /* Icy crystal pane */
+  /* Translucent crystal pane (2026-07-20). Was near-opaque — white at 0.78 → 0.92
+     through the middle — so the aurora behind it was completely blocked and 265 cards
+     read as a wall of flat white boxes (Bow: "it seem too plain like this"). The
+     saturate() is raised alongside the alpha drop, which matters more than the alpha
+     itself: without it, low-opacity glass over a pale backdrop goes grey rather than
+     tinted. The top white sheen still gives a crisp lit edge at low alpha.
+
+     LAVENDER REMOVED FROM THE IDLE CARD 2026-07-20 — Bow: "its too lavender in the
+     product cards... i only want it lavender as accent, when hover over it or when
+     selected." So the resting card is pure ice/aqua, and lavender now appears ONLY as
+     a state change (:hover and .selected below). This is the cleanest reading of §2's
+     "lavender = emphasis" rule: emphasis can't mean anything if it's also the resting
+     colour of 265 cards at once.
+
+     Ice is also pushed deeper than the previous pass (aqua foot 0.28 → 0.38) for the
+     colour contrast Bow asked for — the cards now sit as distinctly blue objects
+     inside a lavender-framed tray, instead of everything being one pale wash. */
   background: linear-gradient(180deg,
-    rgba(232,238,242,0.42) 0%,
-    rgba(255,255,255,0.78) 35%,
-    rgba(255,255,255,0.92) 70%,
-    rgba(221,244,255,0.18) 100%);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
+    rgba(255,255,255,0.50) 0%,
+    rgba(221,244,255,0.42) 42%,
+    rgba(174,239,255,0.38) 100%);
+  backdrop-filter: blur(12px) saturate(185%);
+  -webkit-backdrop-filter: blur(12px) saturate(185%);
+  /* OPPOSING GLOW (§6a): this card's surface is ice, so its glow is lavender. */
   box-shadow:
-    0 2px 8px rgba(75,67,72,0.06),
-    0 1px 3px rgba(174,239,255,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    inset 0 -1px 0 rgba(194,189,198,0.22);
+    0 2px 8px rgba(75,67,72,0.05),
+    0 2px 10px rgba(199,180,255,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.88),
+    inset 0 -1px 0 rgba(142,200,219,0.24);
   flex: 0 1 calc(50% - 4px);
   min-width: 150px;
   overflow: hidden;
@@ -4159,35 +4906,95 @@ img { display: block; max-width: 100%; }
     flex: 1 1 100%;
   }
 }
+/* ── HOVER (2026-07-20) — lift + lavender warm-up + a chrome sweep ──
+   Was aqua-only: a lift, an ice tint and an ice shadow. Now the hover state also
+   introduces lavender, so hovering reads as the first step toward the selected
+   state rather than an unrelated blue flash. Lavender stays inside §2's fill band
+   (here 0.18, well under the 0.38 ceiling) and is blended with aqua throughout.
+   The sweep itself lives on ::after below. */
 .prod-pick-card:hover {
-  border-color: rgba(174,239,255,0.55);
+  border-color: rgba(199,180,255,0.62);
   background: linear-gradient(180deg,
-    rgba(255,255,255,0.62) 0%,
-    rgba(221,244,255,0.42) 60%,
-    rgba(174,239,255,0.22) 100%);
+    rgba(255,255,255,0.66) 0%,
+    rgba(221,244,255,0.40) 55%,
+    rgba(199,180,255,0.18) 100%);
   transform: translateY(-2px);
+  /* OPPOSING GLOW (§6a) — FLIPPED to ice. The fill has just turned lavender, so the
+     glow goes ice. Previously both were lavender, which is exactly why hover felt
+     soft instead of lifting: a lavender halo around a lavender card has nothing to
+     read against. */
   box-shadow:
-    0 8px 22px rgba(174,239,255,0.22),
-    0 2px 6px rgba(174,239,255,0.12),
+    0 10px 26px rgba(126,196,213,0.32),
+    0 3px 8px rgba(174,239,255,0.26),
     inset 0 1px 0 rgba(255,255,255,0.95);
 }
 .prod-pick-card:hover::before { opacity: 1; }
+
+/* Chrome sweep — a narrow diagonal band of light that travels across the card once
+   on hover. Same "shimmer" motif the Journey panel already uses (§Motion), reused
+   rather than invented. Sits above the fill but below content (z-index 1 vs the
+   card's `> *` z-index) and is clipped by the card's existing overflow:hidden. */
+.prod-pick-card::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -60%;
+  width: 45%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  background: linear-gradient(105deg,
+    transparent 0%,
+    rgba(255,255,255,0.55) 42%,
+    rgba(199,180,255,0.42) 58%,
+    transparent 100%);
+  transform: skewX(-14deg);
+}
+.prod-pick-card:hover::after {
+  animation: prod-pick-sweep 0.72s var(--ease) forwards;
+}
+@keyframes prod-pick-sweep {
+  0%   { opacity: 0;   left: -60%; }
+  22%  { opacity: 1; }
+  100% { opacity: 0;   left: 115%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prod-pick-card:hover::after { animation: none; }
+  .prod-pick-card:hover { transform: none; }
+}
+/* Lift the card's real content above the sweep. Without this the ::after (a later
+   sibling in paint order) washes over the brand/product text mid-animation, which
+   hurts legibility — the same "frosted-depth overlay covering text" mistake already
+   recorded in Lessons Baked In, so fixing it up front rather than rediscovering it. */
+.prod-pick-card > * { position: relative; z-index: 2; }
+
 .prod-pick-card.selected {
-  border-color: rgba(174,239,255,0.65);
-  /* Pink chrome jewel */
+  border-color: rgba(199,180,255,0.70);
+  /* Lavender-forward selected fill (2026-07-20). The fill used to be pure aqua
+     (rgba(221,244,255,.78) → rgba(174,239,255,.32)) with lavender only in the outer
+     ring and glow — which is why the selected state didn't read as lavender at all
+     (Bow: "i still want to make the selected cards have more lavender gradient").
+     Lavender now leads the diagonal at 0.34 — top of §2's 0.09–0.38 fill band, which
+     is the right end for an emphasis state — and resolves into aqua at 0.42 so ice
+     still finishes stronger, per §2's "always blended, aqua reads equal or stronger".
+     The white top sheen is unchanged. */
   background:
     linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 50%),
-    linear-gradient(135deg, rgba(221,244,255,0.78) 0%, rgba(174,239,255,0.55) 60%, rgba(174,239,255,0.32) 100%);
+    linear-gradient(135deg, rgba(199,180,255,0.34) 0%, rgba(206,214,255,0.30) 38%, rgba(174,239,255,0.42) 100%);
   /* "Make it pop" pass (Bow, 2026-07-20): layered a lavender accent ring
      + glow on top of the existing aqua jewel look, and a one-shot bounce
      (see @keyframes conf-pick-pop below) so picking a product feels
      tactile, not just a flat border-color swap. */
+  /* OPPOSING GLOW (§6a) — FLIPPED to ice. This is the strongest lavender surface on
+     the page, so its ring and halo go ice/aqua. Before, the ring (lavender 0.30) and
+     the halo (lavender 0.28) sat on a lavender fill and effectively cancelled out —
+     the selected card relied almost entirely on its border to read as selected. */
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.55),
-    0 0 0 3px rgba(199,180,255,0.30),
-    0 10px 24px rgba(199,180,255,0.28),
-    0 8px 22px rgba(174,239,255,0.38),
-    0 2px 6px rgba(174,239,255,0.20),
+    0 0 0 1px rgba(255,255,255,0.60),
+    0 0 0 3px rgba(126,196,213,0.45),
+    0 10px 26px rgba(126,196,213,0.34),
+    0 0 20px rgba(174,239,255,0.48),
+    0 2px 6px rgba(110,160,178,0.20),
     inset 0 1px 0 rgba(255,255,255,0.98),
     inset 0 -1px 0 rgba(110,160,178,0.22);
   animation: conf-pick-pop 0.32s var(--ease);
@@ -4212,8 +5019,16 @@ img { display: block; max-width: 100%; }
   border: 1px solid rgba(174,239,255,0.32);
   font-size: 1.1rem;
   flex-shrink: 0;
+  /* Lavender halo around the product image (2026-07-20). The outer glow was aqua
+     rgba(174,239,255,0.20), which disappeared against the card's own ice fill —
+     nothing separated the thumbnail from the tile behind it. Lavender is the
+     canonical glow colour (§6) and it's the one place lavender still belongs at rest
+     on these cards: it's a glow, not a fill, so it doesn't compete with the
+     hover/selected lavender that now carries state. Rim deliberately stays a crisp
+     ice hairline — §6's "restrained lavender glow + crisp hairlines". */
   box-shadow:
-    0 2px 6px rgba(174,239,255,0.20),
+    0 2px 8px rgba(199,180,255,0.34),
+    0 0 12px rgba(199,180,255,0.22),
     inset 0 1px 0 rgba(255,255,255,0.85),
     inset 0 -1px 0 rgba(174,239,255,0.12);
 }
@@ -4224,7 +5039,12 @@ img { display: block; max-width: 100%; }
 .prod-pick-brand {
   font-size: 0.58rem;
   font-weight: 700;
-  color: var(--ds-chrome-deep);
+  /* Was --ds-chrome-deep (#8A858E) — only 3.37:1 once the card went translucent
+     (it was already marginal on the old near-white fill). Darkened one step to
+     #6E6A72 for 4.95:1. Kept a neutral chrome grey rather than promoting it to
+     --ds-teal: teal is the app's label colour, but 265 teal brand names at once
+     would out-shout the product names they sit above. (2026-07-20) */
+  color: #6E6A72;
   text-transform: uppercase;
   letter-spacing: 2.5px;
 }
@@ -4254,16 +5074,12 @@ img { display: block; max-width: 100%; }
   border-radius: 50%;
   font-size: 0.62rem;
   font-weight: 700;
-  color: white;
-  /* Chrome pink jewel bead */
-  background:
-    radial-gradient(circle at 30% 25%,
-      rgba(255,255,255,0.95) 0%,
-      rgba(174,239,255,0.85) 35%,
-      rgba(110,160,178,0.92) 100%);
-  box-shadow:
-    0 1px 4px rgba(110,160,178,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.55);
+  /* Flat metal bead — see --grad-bead (§7b). Was a radial 3D-sphere with a dark
+     underside and a white glyph that barely read against it. */
+  color: var(--bead-ink);
+  background: var(--grad-bead);
+  border: var(--bead-rim);
+  box-shadow: var(--bead-shadow);
   flex-shrink: 0;
   opacity: 0;
   transform: scale(0.6);
@@ -4272,12 +5088,28 @@ img { display: block; max-width: 100%; }
 .prod-pick-card.selected .prod-pick-check {
   opacity: 1;
   transform: scale(1);
-  /* Small lavender glow on top of the existing chrome bead — the bead
-     "pops" in with a slight overshoot bounce via the cubic-bezier above. */
+  /* OPPOSING GLOW (§6a) — the bead is lavender-metal sitting on a lavender card, so
+     its halo goes ice. Was a lavender 0.55 glow, which vanished into both. */
   box-shadow:
-    0 1px 4px rgba(110,160,178,0.45),
-    0 0 10px rgba(199,180,255,0.55),
-    inset 0 1px 0 rgba(255,255,255,0.55);
+    0 2px 6px rgba(110,160,178,0.34),
+    0 0 14px rgba(174,239,255,0.62),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* ── §6a OPPOSING GLOW, applied to the product thumbnail ──
+   At rest the thumbnail sits on an ice card → lavender halo (see .prod-pick-emoji).
+   On hover and when selected the card underneath turns lavender, so the halo flips
+   to ice/aqua. The halo is always the opposite family to whatever is behind it,
+   which is what keeps the thumbnail readable in every state instead of dissolving
+   into the card once the card picks up colour. */
+.prod-pick-card:hover .prod-pick-emoji,
+.prod-pick-card.selected .prod-pick-emoji {
+  border-color: rgba(199,180,255,0.40);
+  box-shadow:
+    0 2px 8px rgba(110,160,178,0.30),
+    0 0 14px rgba(174,239,255,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(174,239,255,0.14);
 }
 
 /* Empty state — luxurious editorial */
@@ -4728,10 +5560,6 @@ img { display: block; max-width: 100%; }
   .conflict-head { padding: var(--sp-3) var(--sp-4); font-size: 0.78rem; }
   .conflict-body { padding: var(--sp-4); font-size: 0.82rem; }
   .prod-picker-grid { grid-template-columns: 1fr; }
-  .conf-stat-row { gap: 8px; }
-  .conf-stat { min-width: 0; padding: 8px 10px; }
-  .conf-stat-n { font-size: 1.2rem; }
-  .conf-stat-n-sm { font-size: 0.9rem; }
 
   /* ── My routine ── */
   .myr-chip { min-width: 0; flex: 1 1 100%; padding: var(--sp-3) var(--sp-4); }
@@ -4780,17 +5608,11 @@ img { display: block; max-width: 100%; }
     font-size: 0.62rem;
   }
 
-  /* ── Page-glow lighter on phones (less pixel-fill work) ── */
-  .page#page-library.active,
-  .page#page-builder.active,
-  .page#page-myroutine.active,
-  .page#page-device.active,
-  .page#page-conflict.active {
-    background:
-      radial-gradient(ellipse 80% 30% at 90% 8%, rgba(221,244,255,0.22) 0%, rgba(221,244,255,0) 70%),
-      radial-gradient(ellipse 70% 25% at 10% 92%, rgba(232,238,242,0.28) 0%, rgba(232,238,242,0) 70%);
-    background-attachment: scroll;
-  }
+  /* Mobile page-glow override REMOVED 2026-07-20. It replaced the page background with
+     two pale blooms (aqua + grey) — no lavender, no mint — meaning phones never saw the
+     Aurora theme at all, unacceptable on a mobile-first product (Bow's call: full aurora
+     on mobile). Phones now get the same --aurora-bg as desktop via body::before; it's a
+     single static fixed layer, so the paint cost is negligible. */
 
   /* ── Smooth tap highlight (icy pink ripple instead of default gray) ── */
   .nav-btn, .chip, .qopt, .day-btn, .phase-tab,
@@ -5263,7 +6085,8 @@ img { display: block; max-width: 100%; }
 /* Task 6 */
 
 .rs-amount{font-size:.72rem;color:#2E7A8F;font-weight:600;margin-top:4px;}
-.rs-wait-chip{display:flex;font-size:.72rem;color:#b08a94;font-style:italic;padding:4px 12px 4px 48px;margin:-2px 0;}
+/* colour was #b08a94 (dusty rose) — off-palette; --ink3 is the app's muted-text token (2026-07-20) */
+.rs-wait-chip{display:flex;font-size:.72rem;color:var(--ink3);font-style:italic;padding:4px 12px 4px 48px;margin:-2px 0;}
 .gp-checkin-banner{position:sticky;bottom:72px;margin:16px 0 0;padding:14px 16px;background:var(--grad-lavender-metal);border-radius:16px;box-shadow:0 4px 24px rgba(174,239,255,.35),0 8px 20px rgba(150,180,205,.3),inset 0 1px 0 rgba(255,255,255,.6);z-index:50;}
 .gp-checkin-banner--done{background:linear-gradient(135deg,rgba(72,187,120,.9),rgba(56,161,105,.9));display:flex;align-items:center;gap:10px;}
 .gp-checkin-check{font-size:1.3rem;font-weight:900;color:white;}
@@ -5531,7 +6354,8 @@ img { display: block; max-width: 100%; }
 .p4focus-tab:hover{border-color:var(--gp-pink);color:var(--gp-rose);}
 .p4focus-tab.active{background:linear-gradient(180deg,rgba(255,255,255,0.25) 0%,rgba(255,255,255,0) 55%),var(--grad-btn);border-color:transparent;color:white;box-shadow:0 4px 16px rgba(174,239,255,.4);}
 .p4focus-desc{font-size:.8rem;color:#6E8896;line-height:1.5;margin-bottom:4px;}
-.p4focus-note{font-size:.72rem;color:#c0a8b0;font-style:italic;}
+/* colour was #c0a8b0 (dusty rose) — off-palette; --ink3 is the app's muted-text token (2026-07-20) */
+.p4focus-note{font-size:.72rem;color:var(--ink3);font-style:italic;}
 
 /* ═══ PHASE CARD WSC STATUS ═══ */
 .ph-wsc-status{font-size:.72rem;font-weight:600;margin-top:5px;padding:4px 10px;border-radius:20px;display:inline-block;}
@@ -5543,7 +6367,7 @@ img { display: block; max-width: 100%; }
 .js-why-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(174,239,255,0.45);background:transparent;color:#2E7A8F;font-size:.8rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-style:normal;}
 .js-why-btn:hover,.js-why-btn.active{background:rgba(174,239,255,0.2);border-color:#2E7A8F;color:#5E6E76;}
 .js-why-row{font-size:.78rem;color:#5E6E76;line-height:1.55;padding:10px 12px;margin-top:8px;background:rgba(221,244,255,0.18);border-radius:10px;border-left:3px solid rgba(174,239,255,0.4);animation:gradFadeUp .25s var(--ease) both;width:100%;}
-.js-substate-badge{display:inline-block;margin-top:6px;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(174,239,255,0.22);color:#9c6070;border:0.5px solid rgba(174,239,255,0.4);letter-spacing:.01em;}
+.js-substate-badge{display:inline-block;margin-top:6px;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(174,239,255,0.22);color:var(--ds-teal);border:0.5px solid rgba(174,239,255,0.4);letter-spacing:.01em;}
 /* ════════════════════════════════════════════════
    HOME REDESIGN — ice reference look
    Eyebrow · ice-gradient headline · snapshot panel · glass feature cards
@@ -5703,14 +6527,24 @@ img { display: block; max-width: 100%; }
 @media (max-width:430px){ .cp-grid{ grid-template-columns:1fr; } .hero-editorial .hero-logo-wrap{ max-width:180px; } }
 
 /* ════════════════════════════════════════════════
-   AMBIENT AURORA BACKDROP (global) — gives glass something to refract
+   AURORA BACKDROP (global) — the canonical page background for EVERY page.
+   Design doc §2b. Single fixed 100vw x 100vh layer behind all content, so every
+   page gets the identical surface and it can never be squashed by page height or
+   scrolled out of view.
+
+   Two things changed here 2026-07-20:
+   1. Now uses the shared --aurora-bg token (V3 pearl-forward) instead of its own
+      hand-written bloom set, so this and the design doc can't drift apart. This is
+      also what promoted the aurora from "ambient hint behind glass" to the actual
+      page background — the per-page --page-glow / My Routine / Library rules that
+      used to sit on top of it are all gone.
+   2. Its top-right bloom was rgba(251,220,232,0.22) — a pale PINK, violating the
+      palette's one hard rule since the rebrand, and because it sat on `body` it was
+      faintly tinting every page. Replaced by the token's pearl #FAFCFF, which is
+      what My Routine and Product Library already used in that slot.
 ════════════════════════════════════════════════ */
 body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(ellipse 48% 38% at 14% 16%, rgba(174,239,255,0.38) 0%, transparent 60%),
-    radial-gradient(ellipse 42% 36% at 86% 15%, rgba(251,220,232,0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 46% at 80% 84%, rgba(223,255,239,0.42) 0%, transparent 62%),
-    radial-gradient(ellipse 48% 40% at 10% 82%, rgba(199,180,255,0.20) 0%, transparent 60%); }
+  background: var(--aurora-bg); }
 
 /* ════════════════════════════════════════════════
    ROUTINE BUILDER / ROUTINE — LIQUID GLASS
@@ -5722,8 +6556,13 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
   box-shadow:0 22px 60px rgba(120,160,180,0.20), inset 0 1px 1px rgba(255,255,255,0.95), inset 0 -10px 30px rgba(255,255,255,0.12); }
 .builder-card::before{ content:""; position:absolute; inset:0 0 auto 0; height:46%; pointer-events:none;
   background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.06) 55%, rgba(255,255,255,0) 100%); }
+/* Decorative corner bloom. Was rgba(251,220,232,0.26) — a pale PINK, the second of the
+   two pink survivors found 2026-07-20 (the other was body::before's top-right bloom).
+   Swapped to the aurora's own aqua at the same weight: keeps the corner lift, drops the
+   palette violation. Note the Conflict Checker page kills this pseudo-element entirely
+   via a scoped override (§A-0 redesign) — that's deliberate, don't "restore" it there. */
 .builder-card::after{ content:""; position:absolute; top:-28%; right:-12%; width:55%; height:120%; pointer-events:none;
-  background:radial-gradient(ellipse at center, rgba(251,220,232,0.26) 0%, transparent 66%); }
+  background:radial-gradient(ellipse at center, rgba(174,239,255,0.26) 0%, transparent 66%); }
 .builder-card > *{ position:relative; z-index:1; }
 .builder-step-hd{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
 .step-badge{ width:30px; height:30px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -5812,7 +6651,9 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .wsc-n.sm{ font-size:1.1rem; }
 .wsc-l{ font-size:.68rem; color:var(--ink2); margin-top:4px; font-weight:600; }
 .wsc-d{ font-size:.66rem; margin-top:3px; font-weight:600; }
-.wsc-d.up{ color:#0E9F6E; } .wsc-d.warn{ color:#C2680E; } .wsc-d.bad{ color:#C0556B; } .wsc-d.neu{ color:var(--ink3); }
+/* Trend indicators — was the third parallel status triad (#0E9F6E/#C2680E/#C0556B),
+   now on the canonical family (2026-07-20). Keep in sync with colorOf() in script.js. */
+.wsc-d.up{ color:var(--st-ok-ink); } .wsc-d.warn{ color:var(--st-warn-ink); } .wsc-d.bad{ color:var(--st-bad-ink); } .wsc-d.neu{ color:var(--ink3); }
 .wsc-insight{ margin-top:11px; font-size:.74rem; line-height:1.5; color:var(--ink2); background:rgba(255,255,255,0.4); border-radius:11px; padding:9px 12px; }
 .wsc-insight b{ color:#236B7E; }
 /* Missed-days note merged into the WSC card — slim ice pill (B) with amber text (C) */
@@ -6046,16 +6887,15 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 @media(max-width:680px){ #page-myroutine .section-head.mrr-head-flex{ align-items:flex-start; flex-wrap:wrap; } .mrr-head-right .myr-chips,.mrr-head-right .myr-selector-label{ justify-content:flex-start; text-align:left; } }
 /* Match the preview: narrow, centred column (preview .pv = 920px) instead of the app's 1100px */
 #page-myroutine .section{ max-width:920px; }
-/* Page background = the preview's EXACT vivid gradient so colour glows through the glass.
-   MUST use the same specificity as the app's `.page#page-myroutine.active{background:var(--page-glow)}`
-   rule (id + 2 classes) or it gets overridden — that override is what kept this page looking washed. */
-.page#page-myroutine.active{ background:
-    radial-gradient(circle at 12% 16%, rgba(174,239,255,0.5), transparent 38%),
-    radial-gradient(circle at 86% 18%, rgba(250,252,255,0.4), transparent 40%),
-    radial-gradient(circle at 75% 82%, rgba(223,255,239,0.55), transparent 45%),
-    radial-gradient(circle at 22% 80%, rgba(199,180,255,0.38), transparent 42%),
-    linear-gradient(160deg,#EAF6FF,#FAFCFF 45%,#DFFFEF) !important;
-  background-attachment:scroll !important; }
+/* My Routine's own page-background override REMOVED 2026-07-20.
+   This page invented the 4-bloom aurora, and Bow liked it enough to name the theme
+   after it — so it stopped being a page signature and became the site-wide standard
+   (--aurora-bg on body::before, design doc §2b). Keeping a page-level copy here would
+   now just double-paint the same layer and re-introduce the `background-attachment:scroll`
+   height-squash bug this page only avoided by having a stable height.
+   The old in-code warning about needing `id + 2 classes` specificity to beat
+   `.page#page-myroutine.active{background:var(--page-glow)}` is also moot — that
+   --page-glow rule is gone too. */
 /* Haze fix (2026-06-24): pearl base instead of mint-blue + scroll so cards blend like the preview.
    Step A — remove the container sheen pseudo-layers that created the rectangular card-on-card glow. */
 #myroutine-content .builder-card::before,
@@ -6108,7 +6948,7 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 #myroutine-content .mrr-actgrp{ display:flex; gap:8px; flex-wrap:wrap; }
 #myroutine-content .mrr-actbtn{ padding:8px 15px; border-radius:100px; font-size:.76rem; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.6); border:1px solid rgba(201,206,216,0.5); color:var(--ink2); transition:all .2s; }
 #myroutine-content .mrr-actbtn:hover{ border-color:rgba(174,239,255,0.6); color:var(--gp-midnight); }
-#myroutine-content .mrr-actbtn.danger{ color:#C0556B; border-color:rgba(245,170,170,0.5); }
+#myroutine-content .mrr-actbtn.danger{ color:var(--st-bad-ink); border-color:rgba(245,170,170,0.5); }
 
 /* Translucent glass (preview .glass) on the secondary panes (Safety / Suggestions / Emergency)
    so the colourful background glows through — exactly like the preview. */
@@ -6168,40 +7008,14 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
    javascript_tool before being written here.
 ════════════════════════════════════════════════ */
 
-/* Background — same color recipe as My Routine's override, but painted on a
-   dedicated fixed full-viewport backdrop layer instead of the .page element
-   itself. Two things went wrong trying to reuse .page's own box directly:
-   1) `background-attachment:scroll` (My Routine's own setting) positions the
-      radial-gradient %-anchors relative to the ELEMENT's box height. My
-      Routine's height barely changes, so that's safe there; Library's height
-      swings wildly with filtering (246 products vs. e.g. 3), which squished
-      the whole gradient into a tiny box and visibly shifted every color
-      underneath (Bow, 2026-07-19: "background changed when I click the
-      category pill... pills look slightly different").
-   2) Switching to plain `background-attachment:fixed` computes those same
-      %-anchors against the real browser viewport instead — but on a long,
-      densely-carded page (up to 9000+px tall unfiltered) the product rows
-      fill nearly the whole viewport, leaving almost no gutter for that
-      viewport-sized swatch to show through, so it read as washed out /
-      "gone" (Bow, 2026-07-19).
-   Fix: a `position:fixed; inset:0` pseudo-element behind everything (z-index
-   -1) carries the gradient. It's always exactly 100vw×100vh — immune to both
-   Library's page height AND scroll position — same visual richness as My
-   Routine's page-level background, permanently. */
-.page#page-library.active{ background: none !important; }
-.page#page-library.active::before{
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 16%, rgba(174,239,255,0.5), transparent 38%),
-    radial-gradient(circle at 86% 18%, rgba(250,252,255,0.4), transparent 40%),
-    radial-gradient(circle at 75% 82%, rgba(223,255,239,0.55), transparent 45%),
-    radial-gradient(circle at 22% 80%, rgba(199,180,255,0.38), transparent 42%),
-    linear-gradient(160deg,#EAF6FF,#FAFCFF 45%,#DFFFEF);
-}
+/* Background — this page's own aurora backdrop layer REMOVED 2026-07-20, now that the
+   same treatment is global (--aurora-bg on body::before, design doc §2b). Library is
+   where the correct DELIVERY METHOD was worked out, though, so the reasoning is
+   preserved in §2b rather than lost with the code — the two failure modes found here
+   (`background-attachment:scroll` squashing the gradient when filtering changed page
+   height; plain `fixed` reading washed-out because 9000px of product rows left no
+   gutter for it to show through) are exactly why the global layer is a
+   `position:fixed; inset:0` pseudo-element and not a background on .page. */
 
 /* Headline — bold navy-slate base (matches my_routine_redesign_preview.html
    .pv-h2) instead of the site-wide thin Playfair 400 + warm --ink. */
@@ -6271,7 +7085,11 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
 .chip[data-filter="formula"]{
   background: rgba(127,209,176,0.14);
   border-color: rgba(74,122,90,0.32);
-  color: #4A7A5A;
+  /* Borrows the status family's ink weight (2026-07-20) — this is a categorical
+     filter chip, not a status, but it was the last raw copy of the old #4A7A5A
+     green after the triad consolidation, and reusing the canonical shade beats
+     leaving a one-off duplicate hue in the palette. */
+  color: var(--st-ok-ink);
 }
 .chip[data-filter="formula"]:hover{
   background: rgba(127,209,176,0.24);
@@ -6398,39 +7216,30 @@ body::before{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:no
   color: #233 !important;
 }
 
-/* Arrow bead: rebuilt from a flat, solid deep-purple filled circle
-   into a pearl/ice glass bead (same recipe as .brand-count) with a
-   crisp ink glyph for contrast, plus a soft lavender glow halo. */
+/* Arrow bead — on the shared flat bead recipe (§7b) as of 2026-07-20.
+   History: originally a flat solid deep-purple circle, then rebuilt as a pearl/ice
+   glass bead using `radial-gradient(circle at 30% 25%, …)`. That pale version never
+   looked like the puffy bubble the checkmark did — no dark underside — but it was
+   still fake spherical shading on a round indicator, so it was converted with the
+   rest of the family. One bead language, no exceptions. */
 .brand-arrow{
   width:26px !important; height:26px !important;
   display:flex !important; align-items:center !important; justify-content:center !important;
-  border: 1px solid rgba(255,255,255,0.65) !important;
-  background: radial-gradient(circle at 30% 25%,
-    rgba(255,255,255,0.97) 0%,
-    rgba(250,252,255,0.93) 42%,
-    rgba(221,244,255,0.78) 78%,
-    rgba(199,180,255,0.40) 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -2px 3px rgba(174,239,255,0.16),
-    0 0 9px rgba(199,180,255,0.28),
-    0 2px 6px rgba(174,239,255,0.18) !important;
-  color: var(--gp-midnight, #243142) !important;
+  border: var(--bead-rim) !important;
+  background: var(--grad-bead) !important;
+  box-shadow: var(--bead-shadow) !important;
+  color: var(--bead-ink) !important;
   font-size: 0.85rem !important; font-weight: 700 !important; line-height: 1 !important;
   transition: all 0.28s var(--ease, ease) !important;
 }
 .brand-header.open .brand-arrow{
-  background: radial-gradient(circle at 30% 25%,
-    rgba(255,255,255,0.98) 0%,
-    rgba(250,252,255,0.95) 38%,
-    rgba(221,244,255,0.85) 72%,
-    rgba(199,180,255,0.50) 100%) !important;
-  border-color: rgba(174,239,255,0.75) !important;
+  background: var(--grad-bead) !important;
+  border-color: rgba(255,255,255,0.92) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 0 13px rgba(199,180,255,0.38),
-    0 3px 9px rgba(174,239,255,0.28) !important;
-  color: var(--gp-midnight, #243142) !important;
+    0 2px 6px rgba(150,180,205,0.32),
+    0 0 14px rgba(199,180,255,0.50),
+    inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  color: var(--bead-ink) !important;
 }
 .brand-header:hover .brand-arrow{
   box-shadow:
